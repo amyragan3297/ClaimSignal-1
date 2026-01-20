@@ -28,6 +28,8 @@ export default function Home() {
     name: '',
     carrier: '',
     region: '',
+    phone: '',
+    email: '',
     internalNotes: '',
   });
 
@@ -40,7 +42,7 @@ export default function Home() {
         description: `${adjuster.name} has been added to the database.`,
       });
       setIsAddOpen(false);
-      setNewAdjuster({ name: '', carrier: '', region: '', internalNotes: '' });
+      setNewAdjuster({ name: '', carrier: '', region: '', phone: '', email: '', internalNotes: '' });
       setLocation(`/adjuster/${adjuster.id}`);
     },
     onError: () => {
@@ -59,6 +61,8 @@ export default function Home() {
       name: newAdjuster.name,
       carrier: newAdjuster.carrier,
       region: newAdjuster.region || null,
+      phone: newAdjuster.phone || null,
+      email: newAdjuster.email || null,
       internalNotes: newAdjuster.internalNotes || null,
       riskImpression: null,
     });
@@ -151,6 +155,26 @@ export default function Home() {
                         onChange={(e) => setNewAdjuster({...newAdjuster, region: e.target.value})}
                         data-testid="input-adjuster-region"
                       />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Phone</Label>
+                        <Input 
+                          placeholder="(555) 123-4567"
+                          value={newAdjuster.phone}
+                          onChange={(e) => setNewAdjuster({...newAdjuster, phone: e.target.value})}
+                          data-testid="input-adjuster-phone"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Email</Label>
+                        <Input 
+                          placeholder="adjuster@carrier.com"
+                          value={newAdjuster.email}
+                          onChange={(e) => setNewAdjuster({...newAdjuster, email: e.target.value})}
+                          data-testid="input-adjuster-email"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Internal Notes</Label>

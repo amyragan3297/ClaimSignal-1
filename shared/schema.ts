@@ -8,6 +8,8 @@ export const adjusters = pgTable("adjusters", {
   name: text("name").notNull(),
   carrier: text("carrier").notNull(),
   region: text("region"),
+  phone: text("phone"),
+  email: text("email"),
   internalNotes: text("internal_notes"),
   riskImpression: text("risk_impression"),
   whatWorked: text("what_worked"),
@@ -21,6 +23,8 @@ export const claims = pgTable("claims", {
   dateOfLoss: text("date_of_loss").notNull(),
   status: text("status").notNull().default('open'),
   notes: text("notes"),
+  homeownerName: text("homeowner_name"),
+  propertyAddress: text("property_address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -374,6 +374,10 @@ export default function AdjusterProfile() {
           <TabsList>
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
             <TabsTrigger value="interactions" data-testid="tab-interactions">Interaction Log</TabsTrigger>
+            <TabsTrigger value="claims" data-testid="tab-claims">
+              <ClipboardList className="w-4 h-4 mr-1" />
+              Claims
+            </TabsTrigger>
             <TabsTrigger value="documents" data-testid="tab-documents">
               <Paperclip className="w-4 h-4 mr-1" />
               Documents
@@ -381,21 +385,69 @@ export default function AdjusterProfile() {
           </TabsList>
 
           <TabsContent value="overview">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Contact Info Section */}
+            <Card className="bg-card/50 border-border/60 mb-6">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Contact Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-md">
+                      <Phone className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Phone</p>
+                      <p className="text-sm font-medium" data-testid="text-adjuster-phone">
+                        {adjuster.phone || <span className="text-muted-foreground italic">Not set</span>}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-md">
+                      <Mail className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Email</p>
+                      <p className="text-sm font-medium" data-testid="text-adjuster-email">
+                        {adjuster.email || <span className="text-muted-foreground italic">Not set</span>}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               
               {/* First Interaction Date */}
               <Card className="bg-card/50 border-border/60">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    First Interaction
+                    First Contact
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold" data-testid="text-first-interaction">
-                    {firstInteractionDate || 'None yet'}
+                    {firstInteractionDate || 'None'}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Date of first recorded contact</p>
+                </CardContent>
+              </Card>
+
+              {/* Total Interactions */}
+              <Card className="bg-card/50 border-border/60">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    Interactions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold" data-testid="text-total-interactions">
+                    {adjuster.interactions.length}
+                  </div>
                 </CardContent>
               </Card>
               
@@ -404,17 +456,32 @@ export default function AdjusterProfile() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <ClipboardList className="w-4 h-4" />
-                    Claims Dealt With
+                    Claims
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold" data-testid="text-total-claims">{totalClaims}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Total claims involving this adjuster</p>
                 </CardContent>
               </Card>
 
+              {/* Documents */}
+              <Card className="bg-card/50 border-border/60">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Paperclip className="w-4 h-4" />
+                    Documents
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold" data-testid="text-total-documents">{adjuster.documents?.length || 0}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Risk & Strategy Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
               {/* Risk Impression */}
-              <Card className="bg-card/50 border-border/60 md:col-span-2 lg:col-span-1">
+              <Card className="bg-card/50 border-border/60">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <FileText className="w-4 h-4" />
@@ -457,7 +524,7 @@ export default function AdjusterProfile() {
               </Card>
 
               {/* What Worked - Your Playbook */}
-              <Card className="bg-card/50 border-border/60 md:col-span-2 lg:col-span-3">
+              <Card className="bg-card/50 border-border/60">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <FileText className="w-4 h-4" />
@@ -548,6 +615,57 @@ export default function AdjusterProfile() {
                     )}
                   </div>
                 </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="claims">
+            <Card>
+              <CardHeader>
+                <CardTitle>Claims Timeline</CardTitle>
+                <p className="text-sm text-muted-foreground">Claims where this adjuster was involved</p>
+              </CardHeader>
+              <CardContent>
+                {adjuster.claims.length > 0 ? (
+                  <div className="relative">
+                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
+                    <div className="space-y-4 pl-10">
+                      {adjuster.claims.map((claim: any) => (
+                        <div key={claim.id} className="relative" data-testid={`claim-${claim.id}`}>
+                          <div className="absolute -left-[26px] top-3 w-3 h-3 rounded-full bg-primary border-2 border-background" />
+                          <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <span className="font-mono text-sm font-medium" data-testid={`text-claim-id-${claim.id}`}>
+                                  Claim #{claim.maskedId}
+                                </span>
+                                <span className="text-muted-foreground text-sm ml-2">• {claim.carrier}</span>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {claim.status?.replace('_', ' ') || 'open'}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                DOL: {claim.dateOfLoss}
+                              </div>
+                            </div>
+                            {claim.notes && (
+                              <p className="text-sm mt-2 text-muted-foreground">{claim.notes}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <ClipboardList className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    <p>No claims linked to this adjuster yet.</p>
+                    <p className="text-sm mt-1">Claims will appear here when you link them via interactions.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
