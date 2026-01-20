@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BehaviorRadar } from "@/components/ui/behavior-radar";
-import { AlertTriangle, Clock, ThumbsDown, User, Activity, FileText, Plus, Phone, Mail, MapPin } from "lucide-react";
+import { AlertTriangle, Clock, ThumbsDown, User, Activity, FileText, Plus, Phone, Mail, MapPin, File, Download, Search } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 
