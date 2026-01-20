@@ -6,11 +6,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import AdjusterProfile from "@/pages/adjuster";
+import Chat from "@/pages/chat";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/chat" component={Chat} />
       <Route path="/adjuster/:id" component={AdjusterProfile} />
       <Route component={NotFound} />
     </Switch>
