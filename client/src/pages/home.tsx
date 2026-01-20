@@ -1,6 +1,6 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Sparkles } from "lucide-react";
+import { Search, ArrowRight, ShieldAlert, FileSearch, Bot } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
@@ -135,23 +135,19 @@ export default function Home() {
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               <div 
-                className="bg-card/50 backdrop-blur-sm border border-border/50 p-6 rounded-xl hover:bg-card/80 transition-all cursor-pointer group"
-                onClick={() => setLocation('/chat')}
+                className="bg-card/30 border border-border/30 p-6 rounded-xl opacity-60"
                 data-testid="button-tactical-advisor"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="bg-primary/10 p-2.5 rounded-lg">
-                    <Bot className="w-6 h-6 text-primary" />
+                  <div className="bg-muted p-2.5 rounded-lg">
+                    <Bot className="w-6 h-6 text-muted-foreground" />
                   </div>
-                  <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                  <span className="text-[10px] uppercase font-mono bg-muted px-2 py-0.5 rounded text-muted-foreground">Phase 2</span>
                 </div>
-                <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">Tactical Advisor</h3>
+                <h3 className="text-lg font-semibold mb-2 text-muted-foreground">Tactical Advisor</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Get AI-powered strategy recommendations for your current claims.
                 </p>
-                <div className="flex items-center text-sm text-primary font-medium">
-                  Start Session <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </div>
               </div>
 
               <div className="bg-card/30 border border-border/30 p-6 rounded-xl opacity-60">

@@ -32,12 +32,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             Adjuster Search
           </Button>
         </Link>
-        <Link href="/chat">
-          <Button variant={location === "/chat" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
-            <Bot className="w-4 h-4" />
-            Tactical Advisor
-          </Button>
-        </Link>
+        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" disabled>
+          <Bot className="w-4 h-4" />
+          Tactical Advisor (Phase 2)
+        </Button>
         <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" disabled>
           <LayoutDashboard className="w-4 h-4" />
           Analytics (Phase 2)
