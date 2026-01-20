@@ -3,7 +3,7 @@ import { Shield, Search, LayoutDashboard, FileText, Menu } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import logoImage from '@assets/generated_images/modern_abstract_logo_for_claimsignal_app.png';
+import logoImage from '@assets/generated_images/modern_geometric_logo_for_claimsignal.png';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
