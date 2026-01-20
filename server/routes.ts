@@ -60,6 +60,20 @@ export async function registerRoutes(
     }
   });
 
+  // Update adjuster
+  app.patch("/api/adjusters/:id", async (req, res) => {
+    try {
+      const adjuster = await storage.updateAdjuster(req.params.id, req.body);
+      if (!adjuster) {
+        return res.status(404).json({ error: "Adjuster not found" });
+      }
+      res.json(adjuster);
+    } catch (error) {
+      console.error("Error updating adjuster:", error);
+      res.status(500).json({ error: "Failed to update adjuster" });
+    }
+  });
+
   // Create interaction
   app.post("/api/adjusters/:id/interactions", async (req, res) => {
     try {
