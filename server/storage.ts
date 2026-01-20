@@ -17,6 +17,7 @@ export interface IStorage {
   getAllAdjusters(): Promise<Adjuster[]>;
   getAdjuster(id: string): Promise<Adjuster | undefined>;
   createAdjuster(adjuster: InsertAdjuster): Promise<Adjuster>;
+  updateAdjuster(id: string, data: Partial<InsertAdjuster>): Promise<Adjuster | undefined>;
   
   // Claim methods
   getClaimsByAdjuster(adjusterId: string): Promise<Claim[]>;
@@ -40,6 +41,11 @@ export class DBStorage implements IStorage {
 
   async createAdjuster(adjuster: InsertAdjuster): Promise<Adjuster> {
     const result = await db.insert(adjusters).values(adjuster).returning();
+    return result[0];
+  }
+
+  async updateAdjuster(id: string, data: Partial<InsertAdjuster>): Promise<Adjuster | undefined> {
+    const result = await db.update(adjusters).set(data).where(eq(adjusters.id, id)).returning();
     return result[0];
   }
 

@@ -7,18 +7,9 @@ export const adjusters = pgTable("adjusters", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   carrier: text("carrier").notNull(),
-  riskLevel: text("risk_level").notNull(),
-  behaviorScore: integer("behavior_score").notNull(),
-  metrics: jsonb("metrics").notNull().$type<{
-    aggressiveness: number;
-    responsiveness: number;
-    fairness: number;
-    knowledge: number;
-    negotiation: number;
-  }>(),
-  commonDenialStyles: text("common_denial_styles").array().notNull(),
-  responsivenessRating: text("responsiveness_rating").notNull(),
-  narrative: text("narrative").notNull(),
+  region: text("region"),
+  internalNotes: text("internal_notes"),
+  riskImpression: text("risk_impression"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

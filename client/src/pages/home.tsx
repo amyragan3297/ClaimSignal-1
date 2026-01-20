@@ -10,7 +10,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAdjusters, createAdjuster } from "@/lib/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
@@ -28,8 +27,8 @@ export default function Home() {
   const [newAdjuster, setNewAdjuster] = useState({
     name: '',
     carrier: '',
-    riskLevel: 'Medium' as 'Low' | 'Medium' | 'High' | 'Severe',
-    narrative: '',
+    region: '',
+    internalNotes: '',
   });
 
   const createAdjusterMutation = useMutation({
@@ -41,7 +40,7 @@ export default function Home() {
         description: `${adjuster.name} has been added to the database.`,
       });
       setIsAddOpen(false);
-      setNewAdjuster({ name: '', carrier: '', riskLevel: 'Medium', narrative: '' });
+      setNewAdjuster({ name: '', carrier: '', region: '', internalNotes: '' });
       setLocation(`/adjuster/${adjuster.id}`);
     },
     onError: () => {
@@ -56,24 +55,12 @@ export default function Home() {
   const handleAddAdjuster = () => {
     if (!newAdjuster.name || !newAdjuster.carrier) return;
     
-    const riskScores = { Low: 80, Medium: 55, High: 35, Severe: 20 };
-    const baseScore = riskScores[newAdjuster.riskLevel];
-    
     createAdjusterMutation.mutate({
       name: newAdjuster.name,
       carrier: newAdjuster.carrier,
-      riskLevel: newAdjuster.riskLevel,
-      behaviorScore: baseScore,
-      metrics: {
-        aggressiveness: newAdjuster.riskLevel === 'Severe' ? 80 : newAdjuster.riskLevel === 'High' ? 60 : newAdjuster.riskLevel === 'Medium' ? 40 : 20,
-        responsiveness: newAdjuster.riskLevel === 'Severe' ? 20 : newAdjuster.riskLevel === 'High' ? 40 : newAdjuster.riskLevel === 'Medium' ? 60 : 80,
-        fairness: newAdjuster.riskLevel === 'Severe' ? 15 : newAdjuster.riskLevel === 'High' ? 35 : newAdjuster.riskLevel === 'Medium' ? 55 : 75,
-        knowledge: 50,
-        negotiation: 50,
-      },
-      commonDenialStyles: ['Not yet documented'],
-      responsivenessRating: newAdjuster.riskLevel === 'Severe' ? 'Weeks / Unresponsive' : newAdjuster.riskLevel === 'High' ? '5-7 Days' : newAdjuster.riskLevel === 'Medium' ? '3-5 Days' : '24-48 Hours',
-      narrative: newAdjuster.narrative || 'No narrative documented yet.',
+      region: newAdjuster.region || null,
+      internalNotes: newAdjuster.internalNotes || null,
+      riskImpression: null,
     });
   };
 
@@ -157,29 +144,21 @@ export default function Home() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Initial Risk Level</Label>
-                      <Select 
-                        value={newAdjuster.riskLevel} 
-                        onValueChange={(v: 'Low' | 'Medium' | 'High' | 'Severe') => setNewAdjuster({...newAdjuster, riskLevel: v})}
-                      >
-                        <SelectTrigger data-testid="select-risk-level">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Low">Low - Generally reasonable</SelectItem>
-                          <SelectItem value="Medium">Medium - Standard</SelectItem>
-                          <SelectItem value="High">High - Difficult</SelectItem>
-                          <SelectItem value="Severe">Severe - Extremely problematic</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label>Region</Label>
+                      <Input 
+                        placeholder="e.g., Southeast, Texas, National"
+                        value={newAdjuster.region}
+                        onChange={(e) => setNewAdjuster({...newAdjuster, region: e.target.value})}
+                        data-testid="input-adjuster-region"
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label>Initial Notes (Optional)</Label>
+                      <Label>Internal Notes</Label>
                       <Textarea 
                         placeholder="Any initial observations about this adjuster..."
-                        value={newAdjuster.narrative}
-                        onChange={(e) => setNewAdjuster({...newAdjuster, narrative: e.target.value})}
-                        data-testid="input-adjuster-narrative"
+                        value={newAdjuster.internalNotes}
+                        onChange={(e) => setNewAdjuster({...newAdjuster, internalNotes: e.target.value})}
+                        data-testid="input-adjuster-notes"
                       />
                     </div>
                     <Button 
@@ -227,25 +206,19 @@ export default function Home() {
                       data-testid={`card-adjuster-${adj.id}`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-2 h-12 rounded-full ${
-                          adj.riskLevel === 'Severe' ? 'bg-destructive' :
-                          adj.riskLevel === 'High' ? 'bg-orange-500' :
-                          adj.riskLevel === 'Medium' ? 'bg-yellow-500' : 'bg-emerald-500'
-                        }`} />
+                        <div className="w-2 h-12 rounded-full bg-primary/60" />
                         <div>
                           <h3 className="font-semibold text-lg" data-testid={`text-adjuster-name-${adj.id}`}>{adj.name}</h3>
                           <p className="text-sm text-muted-foreground" data-testid={`text-adjuster-carrier-${adj.id}`}>{adj.carrier}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                         <div className="text-right hidden sm:block">
-                            <span className="text-xs uppercase tracking-wider text-muted-foreground block">Risk Level</span>
-                            <span className={`font-mono font-bold ${
-                              adj.riskLevel === 'Severe' ? 'text-destructive' :
-                              adj.riskLevel === 'High' ? 'text-orange-500' :
-                              adj.riskLevel === 'Medium' ? 'text-yellow-500' : 'text-emerald-500'
-                            }`} data-testid={`text-risk-level-${adj.id}`}>{adj.riskLevel.toUpperCase()}</span>
-                         </div>
+                         {adj.region && (
+                           <div className="text-right hidden sm:block">
+                              <span className="text-xs uppercase tracking-wider text-muted-foreground block">Region</span>
+                              <span className="text-sm">{adj.region}</span>
+                           </div>
+                         )}
                          <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>

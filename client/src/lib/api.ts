@@ -61,3 +61,22 @@ export async function createAdjuster(adjuster: InsertAdjuster): Promise<Adjuster
   
   return response.json();
 }
+
+export async function updateAdjuster(
+  adjusterId: string,
+  data: Partial<InsertAdjuster>
+): Promise<Adjuster> {
+  const response = await fetch(`/api/adjusters/${adjusterId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to update adjuster');
+  }
+  
+  return response.json();
+}
