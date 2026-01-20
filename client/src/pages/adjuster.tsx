@@ -23,8 +23,13 @@ export default function AdjusterProfile() {
   const [isLogOpen, setIsLogOpen] = useState(false);
   
   // New interaction state
-  const [newLog, setNewLog] = useState({
-    type: 'Email' as const,
+  const [newLog, setNewLog] = useState<{
+    type: 'Email' | 'Phone' | 'Settlement Offer' | 'Letter';
+    description: string;
+    outcome: string;
+    date: string;
+  }>({
+    type: 'Email',
     description: '',
     outcome: '',
     date: format(new Date(), 'yyyy-MM-dd')
