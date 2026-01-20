@@ -5,12 +5,15 @@ import {
   type InsertClaim,
   type Interaction,
   type InsertInteraction,
+  type Document,
+  type InsertDocument,
   adjusters,
   claims,
-  interactions
+  interactions,
+  documents
 } from "@shared/schema";
 import { db } from "../db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Adjuster methods
@@ -27,6 +30,11 @@ export interface IStorage {
   getInteractionsByAdjuster(adjusterId: string): Promise<Interaction[]>;
   createInteraction(interaction: InsertInteraction): Promise<Interaction>;
   deleteAdjuster(id: string): Promise<void>;
+  
+  // Document methods
+  getDocumentsByAdjuster(adjusterId: string): Promise<Document[]>;
+  createDocument(document: InsertDocument): Promise<Document>;
+  deleteDocument(id: string): Promise<void>;
 }
 
 export class DBStorage implements IStorage {
@@ -72,6 +80,20 @@ export class DBStorage implements IStorage {
 
   async deleteAdjuster(id: string): Promise<void> {
     await db.delete(adjusters).where(eq(adjusters.id, id));
+  }
+
+  // Document methods
+  async getDocumentsByAdjuster(adjusterId: string): Promise<Document[]> {
+    return await db.select().from(documents).where(eq(documents.adjusterId, adjusterId)).orderBy(desc(documents.createdAt));
+  }
+
+  async createDocument(document: InsertDocument): Promise<Document> {
+    const result = await db.insert(documents).values(document).returning();
+    return result[0];
+  }
+
+  async deleteDocument(id: string): Promise<void> {
+    await db.delete(documents).where(eq(documents.id, id));
   }
 }
 

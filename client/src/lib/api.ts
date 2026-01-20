@@ -1,8 +1,9 @@
-import type { Adjuster, Interaction, Claim, InsertAdjuster } from '@shared/schema';
+import type { Adjuster, Interaction, Claim, InsertAdjuster, Document } from '@shared/schema';
 
 export type AdjusterWithRelations = Adjuster & {
   claims: Claim[];
   interactions: Interaction[];
+  documents: Document[];
 };
 
 export async function fetchAdjusters(): Promise<Adjuster[]> {
