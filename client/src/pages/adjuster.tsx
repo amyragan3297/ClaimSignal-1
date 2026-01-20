@@ -1,6 +1,5 @@
 import { Layout } from "@/components/layout";
 import { useParams } from "wouter";
-import { useStore } from "@/lib/store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,12 +14,40 @@ import { BehaviorRadar } from "@/components/ui/behavior-radar";
 import { AlertTriangle, Clock, ThumbsDown, User, Activity, FileText, Plus, Phone, Mail, MapPin, File, Download, Search } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchAdjuster, createInteraction } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdjusterProfile() {
   const { id } = useParams();
-  const adjuster = useStore((state) => state.adjusters.find(a => a.id === id));
-  const addInteraction = useStore((state) => state.addInteraction);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [isLogOpen, setIsLogOpen] = useState(false);
+  
+  const { data: adjuster, isLoading } = useQuery({
+    queryKey: ['adjuster', id],
+    queryFn: () => fetchAdjuster(id!),
+    enabled: !!id,
+  });
+
+  const createInteractionMutation = useMutation({
+    mutationFn: ({ adjusterId, interaction }: { adjusterId: string; interaction: any }) =>
+      createInteraction(adjusterId, interaction),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adjuster', id] });
+      toast({
+        title: "Success",
+        description: "Interaction logged successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to log interaction",
+        variant: "destructive",
+      });
+    },
+  });
   
   // New interaction state
   const [newLog, setNewLog] = useState<{
@@ -37,13 +64,35 @@ export default function AdjusterProfile() {
 
   const handleAddLog = () => {
     if (adjuster && newLog.description) {
-      addInteraction(adjuster.id, newLog);
+      createInteractionMutation.mutate({
+        adjusterId: adjuster.id,
+        interaction: {
+          date: newLog.date,
+          type: newLog.type,
+          description: newLog.description,
+          outcome: newLog.outcome || undefined,
+        }
+      });
       setNewLog({ type: 'Email', description: '', outcome: '', date: format(new Date(), 'yyyy-MM-dd') });
       setIsLogOpen(false);
     }
   };
 
-  if (!adjuster) return <div className="p-8 text-center text-muted-foreground">Adjuster not found</div>;
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="p-8 text-center text-muted-foreground">Loading...</div>
+      </Layout>
+    );
+  }
+
+  if (!adjuster) {
+    return (
+      <Layout>
+        <div className="p-8 text-center text-muted-foreground">Adjuster not found</div>
+      </Layout>
+    );
+  }
 
   const riskColor = 
     adjuster.riskLevel === 'Severe' ? 'bg-destructive/10 text-destructive border-destructive/20' :
