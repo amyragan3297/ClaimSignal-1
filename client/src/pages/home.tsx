@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useStore } from "@/lib/store";
 import { motion } from "framer-motion";
-import bgImage from '@assets/generated_images/subtle_dark_tactical_grid_texture_background.png';
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -33,8 +32,8 @@ export default function Home() {
         <div 
           className="absolute inset-0 z-0 opacity-20 pointer-events-none" 
           style={{ 
-            backgroundImage: `url(${bgImage})`, 
-            backgroundSize: 'cover',
+            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`, 
+            backgroundSize: '30px 30px',
             backgroundPosition: 'center'
           }} 
         />
