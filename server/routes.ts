@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInteractionSchema } from "@shared/schema";
+import { insertInteractionSchema, insertAdjusterSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 
 export async function registerRoutes(
@@ -17,6 +17,24 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching adjusters:", error);
       res.status(500).json({ error: "Failed to fetch adjusters" });
+    }
+  });
+
+  // Create adjuster
+  app.post("/api/adjusters", async (req, res) => {
+    try {
+      const validationResult = insertAdjusterSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        const validationError = fromError(validationResult.error);
+        return res.status(400).json({ error: validationError.toString() });
+      }
+
+      const adjuster = await storage.createAdjuster(validationResult.data);
+      res.status(201).json(adjuster);
+    } catch (error) {
+      console.error("Error creating adjuster:", error);
+      res.status(500).json({ error: "Failed to create adjuster" });
     }
   });
 
