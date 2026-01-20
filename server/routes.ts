@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema } from "@shared/schema";
+import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 
@@ -141,6 +141,77 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting document:", error);
       res.status(500).json({ error: "Failed to delete document" });
+    }
+  });
+
+  // Get all claims
+  app.get("/api/claims", async (_req, res) => {
+    try {
+      const claims = await storage.getAllClaims();
+      res.json(claims);
+    } catch (error) {
+      console.error("Error fetching claims:", error);
+      res.status(500).json({ error: "Failed to fetch claims" });
+    }
+  });
+
+  // Get claim by ID with linked adjusters
+  app.get("/api/claims/:id", async (req, res) => {
+    try {
+      const claim = await storage.getClaim(req.params.id);
+      if (!claim) {
+        return res.status(404).json({ error: "Claim not found" });
+      }
+      const adjusters = await storage.getAdjustersByClaimId(claim.id);
+      res.json({ ...claim, adjusters });
+    } catch (error) {
+      console.error("Error fetching claim:", error);
+      res.status(500).json({ error: "Failed to fetch claim" });
+    }
+  });
+
+  // Create claim
+  app.post("/api/claims", async (req, res) => {
+    try {
+      const validationResult = insertClaimSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        const validationError = fromError(validationResult.error);
+        return res.status(400).json({ error: validationError.toString() });
+      }
+      const claim = await storage.createClaim(validationResult.data);
+      res.status(201).json(claim);
+    } catch (error) {
+      console.error("Error creating claim:", error);
+      res.status(500).json({ error: "Failed to create claim" });
+    }
+  });
+
+  // Update claim
+  app.patch("/api/claims/:id", async (req, res) => {
+    try {
+      const claim = await storage.updateClaim(req.params.id, req.body);
+      if (!claim) {
+        return res.status(404).json({ error: "Claim not found" });
+      }
+      res.json(claim);
+    } catch (error) {
+      console.error("Error updating claim:", error);
+      res.status(500).json({ error: "Failed to update claim" });
+    }
+  });
+
+  // Link adjuster to claim
+  app.post("/api/claims/:id/adjusters", async (req, res) => {
+    try {
+      const { adjusterId } = req.body;
+      if (!adjusterId) {
+        return res.status(400).json({ error: "adjusterId is required" });
+      }
+      const link = await storage.linkAdjusterToClaim(req.params.id, adjusterId);
+      res.status(201).json(link);
+    } catch (error) {
+      console.error("Error linking adjuster to claim:", error);
+      res.status(500).json({ error: "Failed to link adjuster to claim" });
     }
   });
 

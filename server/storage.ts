@@ -7,13 +7,16 @@ import {
   type InsertInteraction,
   type Document,
   type InsertDocument,
+  type ClaimAdjuster,
+  type InsertClaimAdjuster,
   adjusters,
   claims,
+  claimAdjusters,
   interactions,
   documents
 } from "@shared/schema";
 import { db } from "../db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // Adjuster methods
@@ -23,8 +26,13 @@ export interface IStorage {
   updateAdjuster(id: string, data: Partial<InsertAdjuster>): Promise<Adjuster | undefined>;
   
   // Claim methods
+  getAllClaims(): Promise<Claim[]>;
+  getClaim(id: string): Promise<Claim | undefined>;
   getClaimsByAdjuster(adjusterId: string): Promise<Claim[]>;
   createClaim(claim: InsertClaim): Promise<Claim>;
+  updateClaim(id: string, data: Partial<InsertClaim>): Promise<Claim | undefined>;
+  linkAdjusterToClaim(claimId: string, adjusterId: string): Promise<ClaimAdjuster>;
+  getAdjustersByClaimId(claimId: string): Promise<Adjuster[]>;
   
   // Interaction methods
   getInteractionsByAdjuster(adjusterId: string): Promise<Interaction[]>;
@@ -59,13 +67,42 @@ export class DBStorage implements IStorage {
   }
 
   // Claim methods
+  async getAllClaims(): Promise<Claim[]> {
+    return await db.select().from(claims).orderBy(desc(claims.createdAt));
+  }
+
+  async getClaim(id: string): Promise<Claim | undefined> {
+    const result = await db.select().from(claims).where(eq(claims.id, id));
+    return result[0];
+  }
+
   async getClaimsByAdjuster(adjusterId: string): Promise<Claim[]> {
-    return await db.select().from(claims).where(eq(claims.adjusterId, adjusterId));
+    const links = await db.select().from(claimAdjusters).where(eq(claimAdjusters.adjusterId, adjusterId));
+    if (links.length === 0) return [];
+    const claimIds = links.map(l => l.claimId);
+    return await db.select().from(claims).where(inArray(claims.id, claimIds));
   }
 
   async createClaim(claim: InsertClaim): Promise<Claim> {
     const result = await db.insert(claims).values(claim).returning();
     return result[0];
+  }
+
+  async updateClaim(id: string, data: Partial<InsertClaim>): Promise<Claim | undefined> {
+    const result = await db.update(claims).set(data).where(eq(claims.id, id)).returning();
+    return result[0];
+  }
+
+  async linkAdjusterToClaim(claimId: string, adjusterId: string): Promise<ClaimAdjuster> {
+    const result = await db.insert(claimAdjusters).values({ claimId, adjusterId }).returning();
+    return result[0];
+  }
+
+  async getAdjustersByClaimId(claimId: string): Promise<Adjuster[]> {
+    const links = await db.select().from(claimAdjusters).where(eq(claimAdjusters.claimId, claimId));
+    if (links.length === 0) return [];
+    const adjusterIds = links.map(l => l.adjusterId);
+    return await db.select().from(adjusters).where(inArray(adjusters.id, adjusterIds));
   }
 
   // Interaction methods
