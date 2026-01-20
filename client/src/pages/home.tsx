@@ -3,14 +3,19 @@ import { Input } from "@/components/ui/input";
 import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useStore } from "@/lib/store";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAdjusters } from "@/lib/api";
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const [query, setQuery] = useState("");
-  const adjusters = useStore((state) => state.adjusters);
+  
+  const { data: adjusters = [] } = useQuery({
+    queryKey: ['adjusters'],
+    queryFn: fetchAdjusters,
+  });
 
   // Filter adjusters based on search
   const filteredAdjusters = query.length > 1 
@@ -67,6 +72,7 @@ export default function Home() {
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                   autoFocus
+                  data-testid="input-search"
                 />
               </div>
             </div>
@@ -84,6 +90,7 @@ export default function Home() {
                       key={adj.id} 
                       className="p-4 hover:bg-white/5 cursor-pointer flex items-center justify-between group transition-colors"
                       onClick={() => setLocation(`/adjuster/${adj.id}`)}
+                      data-testid={`card-adjuster-${adj.id}`}
                     >
                       <div className="flex items-center gap-4">
                         <div className={`w-2 h-12 rounded-full ${
@@ -92,8 +99,8 @@ export default function Home() {
                           adj.riskLevel === 'Medium' ? 'bg-yellow-500' : 'bg-emerald-500'
                         }`} />
                         <div>
-                          <h3 className="font-semibold text-lg">{adj.name}</h3>
-                          <p className="text-sm text-muted-foreground">{adj.carrier}</p>
+                          <h3 className="font-semibold text-lg" data-testid={`text-adjuster-name-${adj.id}`}>{adj.name}</h3>
+                          <p className="text-sm text-muted-foreground" data-testid={`text-adjuster-carrier-${adj.id}`}>{adj.carrier}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
@@ -103,7 +110,7 @@ export default function Home() {
                               adj.riskLevel === 'Severe' ? 'text-destructive' :
                               adj.riskLevel === 'High' ? 'text-orange-500' :
                               adj.riskLevel === 'Medium' ? 'text-yellow-500' : 'text-emerald-500'
-                            }`}>{adj.riskLevel.toUpperCase()}</span>
+                            }`} data-testid={`text-risk-level-${adj.id}`}>{adj.riskLevel.toUpperCase()}</span>
                          </div>
                          <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-1" />
                       </div>
@@ -130,6 +137,7 @@ export default function Home() {
               <div 
                 className="bg-card/50 backdrop-blur-sm border border-border/50 p-6 rounded-xl hover:bg-card/80 transition-all cursor-pointer group"
                 onClick={() => setLocation('/chat')}
+                data-testid="button-tactical-advisor"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="bg-primary/10 p-2.5 rounded-lg">

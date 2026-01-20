@@ -1,16 +1,67 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { insertInteractionSchema } from "@shared/schema";
+import { fromError } from "zod-validation-error";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
+  
+  // Get all adjusters
+  app.get("/api/adjusters", async (_req, res) => {
+    try {
+      const adjusters = await storage.getAllAdjusters();
+      res.json(adjusters);
+    } catch (error) {
+      console.error("Error fetching adjusters:", error);
+      res.status(500).json({ error: "Failed to fetch adjusters" });
+    }
+  });
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  // Get adjuster by ID with claims and interactions
+  app.get("/api/adjusters/:id", async (req, res) => {
+    try {
+      const adjuster = await storage.getAdjuster(req.params.id);
+      if (!adjuster) {
+        return res.status(404).json({ error: "Adjuster not found" });
+      }
+
+      const claims = await storage.getClaimsByAdjuster(adjuster.id);
+      const interactions = await storage.getInteractionsByAdjuster(adjuster.id);
+
+      res.json({
+        ...adjuster,
+        claims,
+        interactions
+      });
+    } catch (error) {
+      console.error("Error fetching adjuster:", error);
+      res.status(500).json({ error: "Failed to fetch adjuster" });
+    }
+  });
+
+  // Create interaction
+  app.post("/api/adjusters/:id/interactions", async (req, res) => {
+    try {
+      const validationResult = insertInteractionSchema.safeParse({
+        adjusterId: req.params.id,
+        ...req.body
+      });
+
+      if (!validationResult.success) {
+        const validationError = fromError(validationResult.error);
+        return res.status(400).json({ error: validationError.toString() });
+      }
+
+      const interaction = await storage.createInteraction(validationResult.data);
+      res.status(201).json(interaction);
+    } catch (error) {
+      console.error("Error creating interaction:", error);
+      res.status(500).json({ error: "Failed to create interaction" });
+    }
+  });
 
   return httpServer;
 }
