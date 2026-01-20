@@ -51,7 +51,7 @@ interface StoreState {
 const MOCK_ADJUSTERS: Adjuster[] = [
   {
     id: '1',
-    name: 'Adjuster #8821 (Senior)',
+    name: 'Michael Sterling',
     carrier: 'State Farm',
     riskLevel: 'Low',
     behaviorScore: 85,
@@ -94,7 +94,7 @@ const MOCK_ADJUSTERS: Adjuster[] = [
   },
   {
     id: '2',
-    name: 'Adjuster #9912 (Litigation)',
+    name: 'Sarah Jenkins',
     carrier: 'Allstate',
     riskLevel: 'Severe',
     behaviorScore: 22,
@@ -139,7 +139,7 @@ const MOCK_ADJUSTERS: Adjuster[] = [
   },
   {
     id: '3',
-    name: 'Adjuster #4421 (Desk)',
+    name: 'David Thorne',
     carrier: 'Geico',
     riskLevel: 'Medium',
     behaviorScore: 55,
