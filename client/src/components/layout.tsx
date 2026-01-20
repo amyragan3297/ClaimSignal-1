@@ -3,6 +3,7 @@ import { Shield, Search, LayoutDashboard, FileText, Menu } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import logoImage from '@assets/generated_images/modern_abstract_logo_for_claimsignal_app.png';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -13,11 +14,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div className="p-6 border-b border-sidebar-border">
         <Link href="/">
           <div className="flex items-center gap-3 cursor-pointer group">
-            <div className="bg-primary/10 p-2 rounded-md group-hover:bg-primary/20 transition-colors">
-              <Shield className="w-6 h-6 text-primary" />
+            <div className="bg-primary/10 p-1.5 rounded-md group-hover:bg-primary/20 transition-colors">
+              <img src={logoImage} alt="ClaimSignal Logo" className="w-8 h-8 object-contain" />
             </div>
             <div>
-              <h1 className="font-bold text-lg tracking-tight">ADJUSTER<span className="text-primary font-mono">INTEL</span></h1>
+              <h1 className="font-bold text-lg tracking-tight">CLAIM<span className="text-primary font-mono">SIGNAL</span></h1>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Confidential</p>
             </div>
           </div>
@@ -60,8 +61,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 border-b border-border bg-background z-50 flex items-center px-4 justify-between">
          <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-primary" />
-            <span className="font-bold">ADJUSTER INTEL</span>
+            <img src={logoImage} alt="ClaimSignal Logo" className="w-6 h-6 object-contain" />
+            <span className="font-bold">CLAIM SIGNAL</span>
          </div>
          <Sheet open={open} onOpenChange={setOpen}>
            <SheetTrigger asChild>
