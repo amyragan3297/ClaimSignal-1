@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Shield, Search, LayoutDashboard, FileText, Menu } from "lucide-react";
 import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -70,6 +70,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
              </Button>
            </SheetTrigger>
            <SheetContent side="left" className="p-0 bg-sidebar border-r border-sidebar-border w-64">
+             <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+             <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
              <NavContent />
            </SheetContent>
          </Sheet>
