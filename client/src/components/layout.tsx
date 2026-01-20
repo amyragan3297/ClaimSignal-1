@@ -32,15 +32,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
             Adjuster Search
           </Button>
         </Link>
-        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" disabled>
+        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
           <Bot className="w-4 h-4" />
           Tactical Advisor (Phase 2)
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" disabled>
+        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
           <LayoutDashboard className="w-4 h-4" />
           Analytics (Phase 2)
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" disabled>
+        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
           <FileText className="w-4 h-4" />
           Reports (Phase 2)
         </Button>
