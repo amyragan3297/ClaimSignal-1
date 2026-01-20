@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Plus, MapPin, Calendar, FileText, ClipboardList } from "lucide-react";
+import { User, Plus, MapPin, Calendar, FileText, ClipboardList, Phone, Mail, Camera, AlertCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -81,6 +81,33 @@ export default function AdjusterProfile() {
 
   const [editNotes, setEditNotes] = useState('');
   const [editRisk, setEditRisk] = useState('');
+
+  const deleteAdjusterMutation = useMutation({
+    mutationFn: (adjusterId: string) =>
+      fetch(`/api/adjusters/${adjusterId}`, { method: 'DELETE' }).then(res => {
+        if (!res.ok) throw new Error('Failed to delete');
+        return res.json();
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adjusters'] });
+      toast({
+        title: "Deleted",
+        description: "Adjuster profile removed",
+      });
+      setLocation('/');
+    },
+  });
+
+  const getInteractionIcon = (type: string) => {
+    switch (type) {
+      case 'Call': return <Phone className="w-4 h-4" />;
+      case 'Email': return <Mail className="w-4 h-4" />;
+      case 'Inspection':
+      case 'Reinspection': return <Camera className="w-4 h-4" />;
+      case 'Escalation': return <AlertCircle className="w-4 h-4 text-destructive" />;
+      default: return <ClipboardList className="w-4 h-4" />;
+    }
+  };
 
   const handleAddLog = () => {
     if (adjuster && newLog.description) {
@@ -165,6 +192,19 @@ export default function AdjusterProfile() {
           </div>
           
           <div className="flex gap-3">
+             <Button 
+               variant="outline" 
+               size="icon" 
+               className="text-muted-foreground hover:text-destructive transition-colors"
+               onClick={() => {
+                 if (confirm('Are you sure you want to delete this adjuster profile? This cannot be undone.')) {
+                   deleteAdjusterMutation.mutate(adjuster.id);
+                 }
+               }}
+               data-testid="button-delete-adjuster"
+             >
+               <Trash2 className="w-4 h-4" />
+             </Button>
              <Dialog open={isLogOpen} onOpenChange={setIsLogOpen}>
                <DialogTrigger asChild>
                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" data-testid="button-log-interaction">
@@ -370,6 +410,9 @@ export default function AdjusterProfile() {
                           className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg border border-border/50"
                           data-testid={`interaction-${interaction.id}`}
                         >
+                          <div className="bg-primary/10 p-2 rounded-md shrink-0">
+                            {getInteractionIcon(interaction.type)}
+                          </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <Badge variant="secondary" className="text-xs" data-testid={`badge-type-${interaction.id}`}>

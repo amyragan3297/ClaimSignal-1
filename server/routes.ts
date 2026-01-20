@@ -95,5 +95,16 @@ export async function registerRoutes(
     }
   });
 
+  // Delete adjuster
+  app.delete("/api/adjusters/:id", async (req, res) => {
+    try {
+      await storage.deleteAdjuster(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting adjuster:", error);
+      res.status(500).json({ error: "Failed to delete adjuster" });
+    }
+  });
+
   return httpServer;
 }
