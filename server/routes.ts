@@ -1,13 +1,17 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInteractionSchema, insertAdjusterSchema } from "@shared/schema";
+import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
+import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  
+  // Register object storage routes for file uploads
+  registerObjectStorageRoutes(app);
   
   // Get all adjusters
   app.get("/api/adjusters", async (_req, res) => {
@@ -48,11 +52,13 @@ export async function registerRoutes(
 
       const claims = await storage.getClaimsByAdjuster(adjuster.id);
       const interactions = await storage.getInteractionsByAdjuster(adjuster.id);
+      const documents = await storage.getDocumentsByAdjuster(adjuster.id);
 
       res.json({
         ...adjuster,
         claims,
-        interactions
+        interactions,
+        documents
       });
     } catch (error) {
       console.error("Error fetching adjuster:", error);
@@ -103,6 +109,38 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting adjuster:", error);
       res.status(500).json({ error: "Failed to delete adjuster" });
+    }
+  });
+
+  // Create document for adjuster
+  app.post("/api/adjusters/:id/documents", async (req, res) => {
+    try {
+      const validationResult = insertDocumentSchema.safeParse({
+        adjusterId: req.params.id,
+        ...req.body
+      });
+
+      if (!validationResult.success) {
+        const validationError = fromError(validationResult.error);
+        return res.status(400).json({ error: validationError.toString() });
+      }
+
+      const document = await storage.createDocument(validationResult.data);
+      res.status(201).json(document);
+    } catch (error) {
+      console.error("Error creating document:", error);
+      res.status(500).json({ error: "Failed to create document" });
+    }
+  });
+
+  // Delete document
+  app.delete("/api/documents/:id", async (req, res) => {
+    try {
+      await storage.deleteDocument(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      res.status(500).json({ error: "Failed to delete document" });
     }
   });
 

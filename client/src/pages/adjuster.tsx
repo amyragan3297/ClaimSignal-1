@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,15 +10,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Plus, MapPin, Calendar, FileText, ClipboardList, Phone, Mail, Camera, AlertCircle, Trash2 } from "lucide-react";
+import { User, Plus, MapPin, Calendar, FileText, ClipboardList, Phone, Mail, Camera, AlertCircle, Trash2, Paperclip, Upload, File, Image, Mic } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAdjuster, createInteraction, updateAdjuster } from "@/lib/api";
+import { useUpload } from "@/hooks/use-upload";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdjusterProfile() {
   const { id } = useParams();
+  const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isLogOpen, setIsLogOpen] = useState(false);
@@ -97,6 +99,43 @@ export default function AdjusterProfile() {
       setLocation('/');
     },
   });
+
+  const { uploadFile, isUploading } = useUpload({
+    onSuccess: async (response) => {
+      if (adjuster) {
+        await fetch(`/api/adjusters/${adjuster.id}/documents`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: response.metadata.name,
+            objectPath: response.objectPath,
+            contentType: response.metadata.contentType,
+            size: response.metadata.size,
+          }),
+        });
+        queryClient.invalidateQueries({ queryKey: ['adjuster', id] });
+        toast({ title: "Uploaded", description: "Document added successfully" });
+      }
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to upload document", variant: "destructive" });
+    }
+  });
+
+  const deleteDocumentMutation = useMutation({
+    mutationFn: (docId: string) =>
+      fetch(`/api/documents/${docId}`, { method: 'DELETE' }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adjuster', id] });
+      toast({ title: "Deleted", description: "Document removed" });
+    },
+  });
+
+  const getDocumentIcon = (contentType: string) => {
+    if (contentType.startsWith('image/')) return <Image className="w-5 h-5" />;
+    if (contentType.startsWith('audio/')) return <Mic className="w-5 h-5" />;
+    return <File className="w-5 h-5" />;
+  };
 
   const getInteractionIcon = (type: string) => {
     switch (type) {
@@ -311,6 +350,10 @@ export default function AdjusterProfile() {
           <TabsList>
             <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
             <TabsTrigger value="interactions" data-testid="tab-interactions">Interaction Log</TabsTrigger>
+            <TabsTrigger value="documents" data-testid="tab-documents">
+              <Paperclip className="w-4 h-4 mr-1" />
+              Documents
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -433,6 +476,91 @@ export default function AdjusterProfile() {
                         <ClipboardList className="w-12 h-12 mx-auto mb-3 opacity-20" />
                         <p>No interactions logged yet.</p>
                         <p className="text-sm mt-1">Click "Log Interaction" to record your first contact.</p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Documents & Files</CardTitle>
+                <label htmlFor="file-upload">
+                  <Button size="sm" variant="outline" disabled={isUploading} asChild>
+                    <span>
+                      <Upload className="w-4 h-4 mr-2" />
+                      {isUploading ? 'Uploading...' : 'Upload File'}
+                    </span>
+                  </Button>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    className="hidden"
+                    accept="image/*,application/pdf,audio/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) uploadFile(file);
+                      e.target.value = '';
+                    }}
+                    data-testid="input-file-upload"
+                  />
+                </label>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="space-y-3">
+                    {adjuster.documents && adjuster.documents.length > 0 ? (
+                      adjuster.documents.map((doc: any) => (
+                        <div 
+                          key={doc.id} 
+                          className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border border-border/50 group"
+                          data-testid={`document-${doc.id}`}
+                        >
+                          <div className="bg-primary/10 p-2 rounded-md shrink-0">
+                            {getDocumentIcon(doc.contentType)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate" data-testid={`text-doc-name-${doc.id}`}>
+                              {doc.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {doc.size ? `${Math.round(doc.size / 1024)} KB` : ''} 
+                              {doc.createdAt && ` • ${format(new Date(doc.createdAt), 'MMM d, yyyy')}`}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => window.open(doc.objectPath, '_blank')}
+                              data-testid={`button-view-${doc.id}`}
+                            >
+                              View
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => {
+                                if (confirm('Delete this document?')) {
+                                  deleteDocumentMutation.mutate(doc.id);
+                                }
+                              }}
+                              data-testid={`button-delete-doc-${doc.id}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Paperclip className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <p>No documents attached yet.</p>
+                        <p className="text-sm mt-1">Upload PDFs, photos, or voice recordings.</p>
                       </div>
                     )}
                   </div>
