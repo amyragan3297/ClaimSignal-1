@@ -75,14 +75,18 @@ export default function AdjusterProfile() {
     type: 'Call' | 'Email' | 'Inspection' | 'Reinspection' | 'Escalation';
     description: string;
     date: string;
+    claimRef: string;
   }>({
     type: 'Call',
     description: '',
-    date: format(new Date(), 'yyyy-MM-dd')
+    date: format(new Date(), 'yyyy-MM-dd'),
+    claimRef: ''
   });
 
   const [editNotes, setEditNotes] = useState('');
   const [editRisk, setEditRisk] = useState('');
+  const [editWhatWorked, setEditWhatWorked] = useState('');
+  const [isEditingWhatWorked, setIsEditingWhatWorked] = useState(false);
 
   const deleteAdjusterMutation = useMutation({
     mutationFn: (adjusterId: string) =>
@@ -156,9 +160,10 @@ export default function AdjusterProfile() {
           date: newLog.date,
           type: newLog.type,
           description: newLog.description,
+          claimId: newLog.claimRef || undefined,
         }
       });
-      setNewLog({ type: 'Call', description: '', date: format(new Date(), 'yyyy-MM-dd') });
+      setNewLog({ type: 'Call', description: '', date: format(new Date(), 'yyyy-MM-dd'), claimRef: '' });
       setIsLogOpen(false);
     }
   };
@@ -180,6 +185,16 @@ export default function AdjusterProfile() {
         data: { riskImpression: editRisk }
       });
       setIsEditingRisk(false);
+    }
+  };
+
+  const handleSaveWhatWorked = () => {
+    if (adjuster) {
+      updateAdjusterMutation.mutate({
+        adjusterId: adjuster.id,
+        data: { whatWorked: editWhatWorked }
+      });
+      setIsEditingWhatWorked(false);
     }
   };
 
@@ -289,7 +304,16 @@ export default function AdjusterProfile() {
                      </div>
                    </div>
                    <div className="space-y-2">
-                     <Label>Description</Label>
+                     <Label>Claim Reference (optional)</Label>
+                     <Input 
+                      placeholder="e.g., 0000001" 
+                      value={newLog.claimRef}
+                      onChange={(e) => setNewLog({...newLog, claimRef: e.target.value})}
+                      data-testid="input-claim-ref"
+                     />
+                   </div>
+                   <div className="space-y-2">
+                     <Label>Notes</Label>
                      <Textarea 
                       placeholder="What happened?" 
                       value={newLog.description}
@@ -431,6 +455,45 @@ export default function AdjusterProfile() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* What Worked - Your Playbook */}
+              <Card className="bg-card/50 border-border/60 md:col-span-2 lg:col-span-3">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    What Worked (Your Playbook)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isEditingWhatWorked ? (
+                    <div className="space-y-3">
+                      <Textarea 
+                        value={editWhatWorked}
+                        onChange={(e) => setEditWhatWorked(e.target.value)}
+                        placeholder="Arguments that worked, code citations, tone that got results, escalation paths..."
+                        className="min-h-[120px]"
+                        data-testid="input-what-worked"
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSaveWhatWorked} data-testid="button-save-what-worked">Save</Button>
+                        <Button size="sm" variant="outline" onClick={() => setIsEditingWhatWorked(false)}>Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      className="cursor-pointer hover:bg-muted/30 p-2 -m-2 rounded transition-colors min-h-[80px]"
+                      onClick={() => { setEditWhatWorked(adjuster.whatWorked || ''); setIsEditingWhatWorked(true); }}
+                      data-testid="text-what-worked"
+                    >
+                      {adjuster.whatWorked ? (
+                        <p className="text-sm whitespace-pre-wrap">{adjuster.whatWorked}</p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic">Click to add what worked with this adjuster... Arguments, code citations, tone, escalation paths that got results.</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -457,13 +520,18 @@ export default function AdjusterProfile() {
                             {getInteractionIcon(interaction.type)}
                           </div>
                           <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center gap-3 mb-2 flex-wrap">
                               <Badge variant="secondary" className="text-xs" data-testid={`badge-type-${interaction.id}`}>
                                 {interaction.type}
                               </Badge>
                               <span className="text-sm font-mono text-muted-foreground" data-testid={`text-date-${interaction.id}`}>
                                 {interaction.date}
                               </span>
+                              {interaction.claimId && (
+                                <Badge variant="outline" className="text-xs font-mono" data-testid={`badge-claim-${interaction.id}`}>
+                                  Claim #{interaction.claimId}
+                                </Badge>
+                              )}
                             </div>
                             <p className="text-sm" data-testid={`text-description-${interaction.id}`}>
                               {interaction.description}
