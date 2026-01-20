@@ -10,20 +10,24 @@ export const adjusters = pgTable("adjusters", {
   region: text("region"),
   internalNotes: text("internal_notes"),
   riskImpression: text("risk_impression"),
+  whatWorked: text("what_worked"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const claims = pgTable("claims", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  maskedId: text("masked_id").notNull(),
+  carrier: text("carrier").notNull(),
+  dateOfLoss: text("date_of_loss").notNull(),
+  status: text("status").notNull().default('open'),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const claimAdjusters = pgTable("claim_adjusters", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  claimId: varchar("claim_id").notNull().references(() => claims.id, { onDelete: 'cascade' }),
   adjusterId: varchar("adjuster_id").notNull().references(() => adjusters.id, { onDelete: 'cascade' }),
-  publicId: text("public_id").notNull(),
-  privateId: text("private_id").notNull(),
-  status: text("status").notNull(),
-  dateOpened: text("date_opened").notNull(),
-  dateClosed: text("date_closed"),
-  duration: text("duration"),
-  outcome: text("outcome"),
-  whatWorked: text("what_worked"),
 });
 
 export const interactions = pgTable("interactions", {
@@ -55,6 +59,11 @@ export const insertAdjusterSchema = createInsertSchema(adjusters).omit({
 
 export const insertClaimSchema = createInsertSchema(claims).omit({
   id: true,
+  createdAt: true,
+});
+
+export const insertClaimAdjusterSchema = createInsertSchema(claimAdjusters).omit({
+  id: true,
 });
 
 export const insertInteractionSchema = createInsertSchema(interactions).omit({
@@ -73,6 +82,9 @@ export type Adjuster = typeof adjusters.$inferSelect;
 
 export type InsertClaim = z.infer<typeof insertClaimSchema>;
 export type Claim = typeof claims.$inferSelect;
+
+export type InsertClaimAdjuster = z.infer<typeof insertClaimAdjusterSchema>;
+export type ClaimAdjuster = typeof claimAdjusters.$inferSelect;
 
 export type InsertInteraction = z.infer<typeof insertInteractionSchema>;
 export type Interaction = typeof interactions.$inferSelect;
