@@ -72,7 +72,7 @@ export default function AdjusterProfile() {
   });
 
   const [newLog, setNewLog] = useState<{
-    type: 'Call' | 'Email' | 'Inspection' | 'Reinspection' | 'Escalation';
+    type: 'Call' | 'Email' | 'Inspection' | 'Reinspection' | 'Escalation' | 'Other';
     description: string;
     date: string;
     claimRef: string;
@@ -290,6 +290,7 @@ export default function AdjusterProfile() {
                            <SelectItem value="Inspection">Inspection</SelectItem>
                            <SelectItem value="Reinspection">Reinspection</SelectItem>
                            <SelectItem value="Escalation">Escalation</SelectItem>
+                           <SelectItem value="Other">Other</SelectItem>
                          </SelectContent>
                        </Select>
                      </div>
