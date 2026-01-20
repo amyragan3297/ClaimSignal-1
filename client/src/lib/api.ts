@@ -1,4 +1,4 @@
-import type { Adjuster, Interaction, Claim } from '@shared/schema';
+import type { Adjuster, Interaction, Claim, InsertAdjuster } from '@shared/schema';
 
 export type AdjusterWithRelations = Adjuster & {
   claims: Claim[];
@@ -41,6 +41,22 @@ export async function createInteraction(
   
   if (!response.ok) {
     throw new Error('Failed to create interaction');
+  }
+  
+  return response.json();
+}
+
+export async function createAdjuster(adjuster: InsertAdjuster): Promise<Adjuster> {
+  const response = await fetch('/api/adjusters', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(adjuster),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create adjuster');
   }
   
   return response.json();

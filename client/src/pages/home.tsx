@@ -1,21 +1,81 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowRight, ShieldAlert, FileSearch, Bot } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Plus } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { fetchAdjusters } from "@/lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchAdjusters, createAdjuster } from "@/lib/api";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const [query, setQuery] = useState("");
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
     queryFn: fetchAdjusters,
   });
+
+  const [newAdjuster, setNewAdjuster] = useState({
+    name: '',
+    carrier: '',
+    riskLevel: 'Medium' as 'Low' | 'Medium' | 'High' | 'Severe',
+    narrative: '',
+  });
+
+  const createAdjusterMutation = useMutation({
+    mutationFn: createAdjuster,
+    onSuccess: (adjuster) => {
+      queryClient.invalidateQueries({ queryKey: ['adjusters'] });
+      toast({
+        title: "Adjuster Added",
+        description: `${adjuster.name} has been added to the database.`,
+      });
+      setIsAddOpen(false);
+      setNewAdjuster({ name: '', carrier: '', riskLevel: 'Medium', narrative: '' });
+      setLocation(`/adjuster/${adjuster.id}`);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add adjuster. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddAdjuster = () => {
+    if (!newAdjuster.name || !newAdjuster.carrier) return;
+    
+    const riskScores = { Low: 80, Medium: 55, High: 35, Severe: 20 };
+    const baseScore = riskScores[newAdjuster.riskLevel];
+    
+    createAdjusterMutation.mutate({
+      name: newAdjuster.name,
+      carrier: newAdjuster.carrier,
+      riskLevel: newAdjuster.riskLevel,
+      behaviorScore: baseScore,
+      metrics: {
+        aggressiveness: newAdjuster.riskLevel === 'Severe' ? 80 : newAdjuster.riskLevel === 'High' ? 60 : newAdjuster.riskLevel === 'Medium' ? 40 : 20,
+        responsiveness: newAdjuster.riskLevel === 'Severe' ? 20 : newAdjuster.riskLevel === 'High' ? 40 : newAdjuster.riskLevel === 'Medium' ? 60 : 80,
+        fairness: newAdjuster.riskLevel === 'Severe' ? 15 : newAdjuster.riskLevel === 'High' ? 35 : newAdjuster.riskLevel === 'Medium' ? 55 : 75,
+        knowledge: 50,
+        negotiation: 50,
+      },
+      commonDenialStyles: ['Not yet documented'],
+      responsivenessRating: newAdjuster.riskLevel === 'Severe' ? 'Weeks / Unresponsive' : newAdjuster.riskLevel === 'High' ? '5-7 Days' : newAdjuster.riskLevel === 'Medium' ? '3-5 Days' : '24-48 Hours',
+      narrative: newAdjuster.narrative || 'No narrative documented yet.',
+    });
+  };
 
   // Filter adjusters based on search
   const filteredAdjusters = query.length > 1 
@@ -61,6 +121,80 @@ export default function Home() {
           </div>
 
           <div className="space-y-4">
+            {/* Add Adjuster Button */}
+            <div className="flex justify-end">
+              <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="secondary" size="sm" className="gap-2" data-testid="button-add-adjuster">
+                    <Plus className="w-4 h-4" />
+                    Add Adjuster
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Adjuster</DialogTitle>
+                    <DialogDescription>
+                      Enter the adjuster's basic information to start building their intelligence profile.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>Name *</Label>
+                      <Input 
+                        placeholder="e.g., John Smith"
+                        value={newAdjuster.name}
+                        onChange={(e) => setNewAdjuster({...newAdjuster, name: e.target.value})}
+                        data-testid="input-adjuster-name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Carrier *</Label>
+                      <Input 
+                        placeholder="e.g., State Farm"
+                        value={newAdjuster.carrier}
+                        onChange={(e) => setNewAdjuster({...newAdjuster, carrier: e.target.value})}
+                        data-testid="input-adjuster-carrier"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Initial Risk Level</Label>
+                      <Select 
+                        value={newAdjuster.riskLevel} 
+                        onValueChange={(v: 'Low' | 'Medium' | 'High' | 'Severe') => setNewAdjuster({...newAdjuster, riskLevel: v})}
+                      >
+                        <SelectTrigger data-testid="select-risk-level">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Low">Low - Generally reasonable</SelectItem>
+                          <SelectItem value="Medium">Medium - Standard</SelectItem>
+                          <SelectItem value="High">High - Difficult</SelectItem>
+                          <SelectItem value="Severe">Severe - Extremely problematic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Initial Notes (Optional)</Label>
+                      <Textarea 
+                        placeholder="Any initial observations about this adjuster..."
+                        value={newAdjuster.narrative}
+                        onChange={(e) => setNewAdjuster({...newAdjuster, narrative: e.target.value})}
+                        data-testid="input-adjuster-narrative"
+                      />
+                    </div>
+                    <Button 
+                      className="w-full" 
+                      onClick={handleAddAdjuster}
+                      disabled={!newAdjuster.name || !newAdjuster.carrier || createAdjusterMutation.isPending}
+                      data-testid="button-save-adjuster"
+                    >
+                      {createAdjusterMutation.isPending ? 'Adding...' : 'Add Adjuster'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
             <div className="relative group">
               <div className="absolute inset-0 bg-primary/20 blur-xl rounded-lg group-hover:bg-primary/30 transition-all opacity-0 group-hover:opacity-100" />
               <div className="relative flex items-center">
@@ -155,7 +289,7 @@ export default function Home() {
                   <div className="bg-muted p-2.5 rounded-lg">
                     <FileSearch className="w-6 h-6 text-muted-foreground" />
                   </div>
-                  <span className="text-[10px] uppercase font-mono bg-muted px-2 py-0.5 rounded text-muted-foreground">Coming Soon</span>
+                  <span className="text-[10px] uppercase font-mono bg-muted px-2 py-0.5 rounded text-muted-foreground">Phase 2</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-muted-foreground">Pattern Analysis</h3>
                 <p className="text-sm text-muted-foreground mb-4">
