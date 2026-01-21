@@ -245,7 +245,13 @@ export default function AdjusterProfile() {
             <div>
               <h1 className="text-3xl font-bold tracking-tight" data-testid="text-adjuster-name">{adjuster.name}</h1>
               <div className="flex items-center gap-3 mt-1 flex-wrap">
-                <span className="text-lg text-muted-foreground" data-testid="text-adjuster-carrier">{adjuster.carrier}</span>
+                <a 
+                  href={`/carriers/${encodeURIComponent(adjuster.carrier)}`}
+                  className="text-lg text-primary hover:underline cursor-pointer"
+                  data-testid="text-adjuster-carrier"
+                >
+                  {adjuster.carrier}
+                </a>
                 {adjuster.region && (
                   <Badge variant="outline" className="gap-1">
                     <MapPin className="w-3 h-3" />
@@ -689,6 +695,72 @@ export default function AdjusterProfile() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Tactical Advisor - Stage 3 */}
+            {intelligence && (intelligence.totalInteractions >= 3 || intelligence.totalClaims >= 2) && (
+              <Card className="mt-6 bg-card/50 border-border/60 border-l-4 border-l-primary">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Tactical Advisor
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">Based on your history with this adjuster</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {intelligence.patternTags.includes("Escalation-responsive") && (
+                      <p className="text-sm" data-testid="advice-escalation">
+                        • Escalation earlier has worked here
+                      </p>
+                    )}
+                    {intelligence.patternTags.includes("Documentation-sensitive") && (
+                      <p className="text-sm" data-testid="advice-documentation">
+                        • Documentation density correlates with approval
+                      </p>
+                    )}
+                    {intelligence.patternTags.includes("Reinspection-heavy") && (
+                      <p className="text-sm" data-testid="advice-reinspection">
+                        • Expect reinspection cycle
+                      </p>
+                    )}
+                    {intelligence.patternTags.includes("Slow resolution") && (
+                      <p className="text-sm" data-testid="advice-slow">
+                        • Plan for extended timeline
+                      </p>
+                    )}
+                    {intelligence.patternTags.includes("Fast resolution") && (
+                      <p className="text-sm" data-testid="advice-fast">
+                        • Typically resolves quickly with proper documentation
+                      </p>
+                    )}
+                    {intelligence.patternTags.includes("High friction") && (
+                      <p className="text-sm" data-testid="advice-friction">
+                        • Higher friction expected — prepare escalation path early
+                      </p>
+                    )}
+                    {intelligence.patternTags.includes("Low friction") && (
+                      <p className="text-sm" data-testid="advice-low-friction">
+                        • Generally cooperative — standard approach works
+                      </p>
+                    )}
+                    {intelligence.escalationCount > 0 && intelligence.outcomesResolved > intelligence.outcomesStalled && (
+                      <p className="text-sm" data-testid="advice-escalation-effective">
+                        • Escalations have been effective ({intelligence.escalationCount} used, majority resolved)
+                      </p>
+                    )}
+                    {intelligence.avgDaysToResolution !== null && intelligence.avgDaysToResolution > 45 && (
+                      <p className="text-sm" data-testid="advice-timeline">
+                        • Typical resolution: {intelligence.avgDaysToResolution}+ days
+                      </p>
+                    )}
+                    {intelligence.patternTags.length === 0 && intelligence.totalClaims < 3 && (
+                      <p className="text-sm text-muted-foreground italic">
+                        More data needed to generate tactical guidance.
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="interactions">
