@@ -9,11 +9,14 @@ import {
   type InsertDocument,
   type ClaimAdjuster,
   type InsertClaimAdjuster,
+  type Attachment,
+  type InsertAttachment,
   adjusters,
   claims,
   claimAdjusters,
   interactions,
-  documents
+  documents,
+  attachments
 } from "@shared/schema";
 import { db } from "../db";
 import { eq, desc, inArray } from "drizzle-orm";
@@ -44,6 +47,12 @@ export interface IStorage {
   getDocumentsByAdjuster(adjusterId: string): Promise<Document[]>;
   createDocument(document: InsertDocument): Promise<Document>;
   deleteDocument(id: string): Promise<void>;
+  
+  // Attachment methods
+  getAttachmentsByClaimId(claimId: string): Promise<Attachment[]>;
+  getAttachment(id: string): Promise<Attachment | undefined>;
+  createAttachment(attachment: InsertAttachment): Promise<Attachment>;
+  deleteAttachment(id: string): Promise<void>;
 }
 
 export class DBStorage implements IStorage {
@@ -136,6 +145,25 @@ export class DBStorage implements IStorage {
 
   async deleteDocument(id: string): Promise<void> {
     await db.delete(documents).where(eq(documents.id, id));
+  }
+
+  // Attachment methods
+  async getAttachmentsByClaimId(claimId: string): Promise<Attachment[]> {
+    return await db.select().from(attachments).where(eq(attachments.claimId, claimId)).orderBy(desc(attachments.date));
+  }
+
+  async getAttachment(id: string): Promise<Attachment | undefined> {
+    const result = await db.select().from(attachments).where(eq(attachments.id, id));
+    return result[0];
+  }
+
+  async createAttachment(attachment: InsertAttachment): Promise<Attachment> {
+    const result = await db.insert(attachments).values(attachment).returning();
+    return result[0];
+  }
+
+  async deleteAttachment(id: string): Promise<void> {
+    await db.delete(attachments).where(eq(attachments.id, id));
   }
 }
 

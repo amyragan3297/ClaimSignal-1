@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema } from "@shared/schema";
+import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 
@@ -213,6 +213,59 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error linking adjuster to claim:", error);
       res.status(500).json({ error: "Failed to link adjuster to claim" });
+    }
+  });
+
+  // Get attachments for a claim
+  app.get("/api/claims/:id/attachments", async (req, res) => {
+    try {
+      const attachments = await storage.getAttachmentsByClaimId(req.params.id);
+      res.json(attachments);
+    } catch (error) {
+      console.error("Error fetching attachments:", error);
+      res.status(500).json({ error: "Failed to fetch attachments" });
+    }
+  });
+
+  // Create attachment for a claim
+  app.post("/api/claims/:id/attachments", async (req, res) => {
+    try {
+      const data = { ...req.body, claimId: req.params.id };
+      const validationResult = insertAttachmentSchema.safeParse(data);
+      if (!validationResult.success) {
+        const validationError = fromError(validationResult.error);
+        return res.status(400).json({ error: validationError.toString() });
+      }
+      const attachment = await storage.createAttachment(validationResult.data);
+      res.status(201).json(attachment);
+    } catch (error) {
+      console.error("Error creating attachment:", error);
+      res.status(500).json({ error: "Failed to create attachment" });
+    }
+  });
+
+  // Get single attachment
+  app.get("/api/attachments/:id", async (req, res) => {
+    try {
+      const attachment = await storage.getAttachment(req.params.id);
+      if (!attachment) {
+        return res.status(404).json({ error: "Attachment not found" });
+      }
+      res.json(attachment);
+    } catch (error) {
+      console.error("Error fetching attachment:", error);
+      res.status(500).json({ error: "Failed to fetch attachment" });
+    }
+  });
+
+  // Delete attachment
+  app.delete("/api/attachments/:id", async (req, res) => {
+    try {
+      await storage.deleteAttachment(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting attachment:", error);
+      res.status(500).json({ error: "Failed to delete attachment" });
     }
   });
 
