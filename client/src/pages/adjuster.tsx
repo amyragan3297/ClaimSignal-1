@@ -146,6 +146,43 @@ export default function AdjusterProfile() {
     },
   });
 
+  const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
+
+  const analyzeDocumentMutation = useMutation({
+    mutationFn: async ({ documentUrl, documentName, adjusterId }: { documentUrl: string; documentName: string; adjusterId: string }) => {
+      const res = await fetch('/api/analyze-and-save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentUrl, documentName, adjusterId }),
+      });
+      if (!res.ok) throw new Error('Analysis failed');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['adjuster', id] });
+      queryClient.invalidateQueries({ queryKey: ['adjuster-intelligence', id] });
+      toast({ 
+        title: "Document Analyzed", 
+        description: data.message || "Information extracted and saved",
+      });
+      setAnalyzingDocId(null);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to analyze document", variant: "destructive" });
+      setAnalyzingDocId(null);
+    },
+  });
+
+  const handleAnalyzeDocument = (doc: any) => {
+    if (!adjuster) return;
+    setAnalyzingDocId(doc.id);
+    analyzeDocumentMutation.mutate({
+      documentUrl: doc.objectPath,
+      documentName: doc.name,
+      adjusterId: adjuster.id,
+    });
+  };
+
   const getDocumentIcon = (contentType: string) => {
     if (contentType.startsWith('image/')) return <Image className="w-5 h-5" />;
     if (contentType.startsWith('audio/')) return <Mic className="w-5 h-5" />;
@@ -924,6 +961,22 @@ export default function AdjusterProfile() {
                               data-testid={`button-view-${doc.id}`}
                             >
                               View
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="default"
+                              onClick={() => handleAnalyzeDocument(doc)}
+                              disabled={analyzingDocId === doc.id}
+                              data-testid={`button-analyze-${doc.id}`}
+                            >
+                              {analyzingDocId === doc.id ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                  Analyzing...
+                                </>
+                              ) : (
+                                'Analyze'
+                              )}
                             </Button>
                             <Button 
                               size="sm" 

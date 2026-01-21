@@ -124,3 +124,6 @@ export type Document = typeof documents.$inferSelect;
 
 export type InsertAttachment = z.infer<typeof insertAttachmentSchema>;
 export type Attachment = typeof attachments.$inferSelect;
+
+// Re-export chat models for AI integrations
+export * from "./models/chat";
