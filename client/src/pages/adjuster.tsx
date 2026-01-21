@@ -928,7 +928,7 @@ export default function AdjusterProfile() {
                             <Button 
                               size="sm" 
                               variant="ghost"
-                              className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="text-muted-foreground hover:text-destructive"
                               onClick={() => {
                                 if (confirm('Delete this document?')) {
                                   deleteDocumentMutation.mutate(doc.id);
