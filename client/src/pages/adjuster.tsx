@@ -321,7 +321,7 @@ export default function AdjusterProfile() {
                        <SelectContent>
                          <SelectItem value="">None</SelectItem>
                          {allClaims.map((claim) => (
-                           <SelectItem key={claim.id} value={claim.maskedId}>
+                           <SelectItem key={claim.id} value={claim.id}>
                              #{claim.maskedId} - {claim.carrier}
                            </SelectItem>
                          ))}
