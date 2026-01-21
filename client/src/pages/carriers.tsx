@@ -33,7 +33,7 @@ function CarrierCard({ carrier }: { carrier: string }) {
   };
 
   return (
-    <Card className="bg-card/50 border-border/60 hover:border-primary/30 transition-colors" data-testid={`card-carrier-${carrier}`}>
+    <Card className="bg-card/50 border-border/60 hover:border-primary/30 transition-colors cursor-pointer" data-testid={`card-carrier-${carrier}`}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -128,7 +128,9 @@ export default function Carriers() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {carriers.map((carrier) => (
-              <CarrierCard key={carrier} carrier={carrier} />
+              <Link key={carrier} href={`/carriers/${encodeURIComponent(carrier)}`}>
+                <CarrierCard carrier={carrier} />
+              </Link>
             ))}
           </div>
         )}
