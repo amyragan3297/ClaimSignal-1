@@ -9,6 +9,7 @@ import AdjusterProfile from "@/pages/adjuster";
 import Chat from "@/pages/chat";
 import Claims from "@/pages/claims";
 import ClaimDetail from "@/pages/claim";
+import Carriers from "@/pages/carriers";
 
 function Router() {
   return (
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/chat" component={Chat} />
       <Route path="/claims" component={Claims} />
       <Route path="/claims/:id" component={ClaimDetail} />
+      <Route path="/carriers" component={Carriers} />
       <Route path="/adjuster/:id" component={AdjusterProfile} />
       <Route component={NotFound} />
     </Switch>

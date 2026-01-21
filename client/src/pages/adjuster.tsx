@@ -10,11 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Plus, MapPin, Calendar, FileText, ClipboardList, Phone, Mail, Camera, AlertCircle, Trash2, Paperclip, Upload, File, Image, Mic } from "lucide-react";
+import { User, Plus, MapPin, Calendar, FileText, ClipboardList, Phone, Mail, Camera, AlertCircle, Trash2, Paperclip, Upload, File, Image, Mic, TrendingUp, BarChart3, Clock, Tag, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchAdjuster, createInteraction, updateAdjuster, fetchClaims } from "@/lib/api";
+import { fetchAdjuster, createInteraction, updateAdjuster, fetchClaims, fetchAdjusterIntelligence } from "@/lib/api";
 import { useUpload } from "@/hooks/use-upload";
 import { useToast } from "@/hooks/use-toast";
 
@@ -36,6 +36,12 @@ export default function AdjusterProfile() {
   const { data: allClaims = [] } = useQuery({
     queryKey: ['claims'],
     queryFn: fetchClaims,
+  });
+
+  const { data: intelligence, isLoading: intelLoading } = useQuery({
+    queryKey: ['adjuster-intelligence', id],
+    queryFn: () => fetchAdjusterIntelligence(id!),
+    enabled: !!id,
   });
 
   const createInteractionMutation = useMutation({
@@ -578,6 +584,118 @@ export default function AdjusterProfile() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Intelligence Panel */}
+            <Card className="mt-6 bg-card/50 border-border/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                  Intelligence Panel
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">Derived from your interaction and claim history</p>
+              </CardHeader>
+              <CardContent>
+                {intelLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : intelligence ? (
+                  <div className="space-y-6">
+                    {/* Pattern Tags */}
+                    {intelligence.patternTags.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                          <Tag className="w-4 h-4" />
+                          Behavioral Patterns
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {intelligence.patternTags.map((tag) => (
+                            <Badge 
+                              key={tag} 
+                              variant="secondary" 
+                              className="text-xs"
+                              data-testid={`tag-${tag.toLowerCase().replace(/\s+/g, '-')}`}
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                          <TrendingUp className="w-4 h-4" />
+                          Escalations
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-escalations">
+                          {intelligence.escalationCount}
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                          <Camera className="w-4 h-4" />
+                          Reinspections
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-reinspections">
+                          {intelligence.reinspectionCount}
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                          <Clock className="w-4 h-4" />
+                          Avg Resolution
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-avg-resolution">
+                          {intelligence.avgDaysToResolution !== null 
+                            ? `${intelligence.avgDaysToResolution}d` 
+                            : '—'}
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                          <ClipboardList className="w-4 h-4" />
+                          Total Claims
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-total-claims">
+                          {intelligence.totalClaims}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Outcomes Distribution */}
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-muted-foreground">Outcomes Distribution</div>
+                      <div className="flex gap-4">
+                        <div className="flex items-center gap-2" data-testid="outcome-resolved">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">{intelligence.outcomesResolved} Resolved</span>
+                        </div>
+                        <div className="flex items-center gap-2" data-testid="outcome-stalled">
+                          <XCircle className="w-4 h-4 text-red-500" />
+                          <span className="text-sm">{intelligence.outcomesStalled} Stalled</span>
+                        </div>
+                        <div className="flex items-center gap-2" data-testid="outcome-open">
+                          <Loader2 className="w-4 h-4 text-yellow-500" />
+                          <span className="text-sm">{intelligence.outcomesOpen} Open</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                    <p>No intelligence data available yet.</p>
+                    <p className="text-sm">Log more interactions and claims to see patterns emerge.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="interactions">
