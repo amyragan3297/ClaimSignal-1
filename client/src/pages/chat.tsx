@@ -105,7 +105,12 @@ export default function Chat() {
               <p className="text-xs text-muted-foreground">Powered by Claims Intelligence Engine</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" className="hidden sm:flex gap-2 text-muted-foreground" onClick={() => setMessages([])}>
+          <Button variant="ghost" size="sm" className="hidden sm:flex gap-2 text-muted-foreground" onClick={() => setMessages([{
+              id: Date.now().toString(),
+              role: "assistant",
+              content: "I am your claims intelligence assistant. I can analyze adjuster profiles, suggest negotiation strategies, or draft correspondence. How can I help you today?",
+              timestamp: new Date()
+            }])}>
             <Sparkles className="w-4 h-4" />
             New Session
           </Button>
