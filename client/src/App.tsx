@@ -7,12 +7,16 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import AdjusterProfile from "@/pages/adjuster";
 import Chat from "@/pages/chat";
+import Claims from "@/pages/claims";
+import ClaimDetail from "@/pages/claim";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/chat" component={Chat} />
+      <Route path="/claims" component={Claims} />
+      <Route path="/claims/:id" component={ClaimDetail} />
       <Route path="/adjuster/:id" component={AdjusterProfile} />
       <Route component={NotFound} />
     </Switch>
