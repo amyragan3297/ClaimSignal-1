@@ -56,6 +56,26 @@ export const documents = pgTable("documents", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const attachments = pgTable("attachments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  claimId: varchar("claim_id").notNull().references(() => claims.id, { onDelete: 'cascade' }),
+  adjusterId: varchar("adjuster_id").references(() => adjusters.id, { onDelete: 'set null' }),
+  type: text("type").notNull(), // 'file' or 'email'
+  date: text("date").notNull(),
+  // File fields
+  objectPath: text("object_path"),
+  filename: text("filename"),
+  contentType: text("content_type"),
+  size: integer("size"),
+  description: text("description"),
+  // Email fields
+  direction: text("direction"), // 'sent' or 'received'
+  subject: text("subject"),
+  body: text("body"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertAdjusterSchema = createInsertSchema(adjusters).omit({
   id: true,
@@ -81,6 +101,11 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
   createdAt: true,
 });
 
+export const insertAttachmentSchema = createInsertSchema(attachments).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertAdjuster = z.infer<typeof insertAdjusterSchema>;
 export type Adjuster = typeof adjusters.$inferSelect;
@@ -96,3 +121,6 @@ export type Interaction = typeof interactions.$inferSelect;
 
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type Document = typeof documents.$inferSelect;
+
+export type InsertAttachment = z.infer<typeof insertAttachmentSchema>;
+export type Attachment = typeof attachments.$inferSelect;
