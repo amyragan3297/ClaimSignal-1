@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Search, LayoutDashboard, FileText, Menu, Bot, ClipboardList } from "lucide-react";
+import { Shield, Search, LayoutDashboard, FileText, Menu, Bot, ClipboardList, Building2 } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -38,17 +38,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
             Claims
           </Button>
         </Link>
+        <Link href="/carriers">
+          <Button variant={location === "/carriers" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <Building2 className="w-4 h-4" />
+            Carrier Intelligence
+          </Button>
+        </Link>
         <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
           <Bot className="w-4 h-4" />
-          Tactical Advisor (Phase 2)
+          Tactical Advisor (Phase 3)
         </Button>
         <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
           <LayoutDashboard className="w-4 h-4" />
-          Analytics (Phase 2)
+          Analytics (Phase 3)
         </Button>
         <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
           <FileText className="w-4 h-4" />
-          Reports (Phase 2)
+          Reports (Phase 3)
         </Button>
       </nav>
 

@@ -1,0 +1,106 @@
+Stage Two Components (what we build)
+
+1. Adjuster Intelligence Panel
+
+This appears on the Adjuster Profile, below what you already built.
+
+Displays only derived data, such as:
+	•	Total interactions
+	•	Number of claims involved
+	•	Average time to resolution
+	•	Escalations used (count)
+	•	Outcomes distribution (resolved vs stalled)
+
+No scores yet. Just facts.
+
+⸻
+
+2. Pattern Tags (system-generated)
+
+The system generates internal tags like:
+	•	“Reinspection-heavy”
+	•	“Escalation-responsive”
+	•	“Slow initial response”
+	•	“Documentation-sensitive”
+
+Important:
+	•	You do NOT manually tag these
+	•	They come from interaction + claim history
+	•	They are private
+
+This answers:
+
+“What’s the playbook with this person”
+
+⸻
+
+3. Carrier Intelligence Snapshot
+
+At the carrier level, aggregated across adjusters you’ve dealt with:
+	•	Common denial points
+	•	Avg resolution time
+	•	Escalation effectiveness
+	•	Typical interaction count per claim
+
+This is where your carrier playbooks quietly form.
+
+⸻
+
+Stage Two Rules (non-negotiable)
+	•	No sharing
+	•	No public data
+	•	No user submissions
+	•	No AI recommendations yet
+	•	No ownership ambiguity
+
+This stage is still yours, legally and practically.
+
+⸻
+
+When Stage Two is DONE
+
+Stage Two is complete when:
+	•	You can open an adjuster
+	•	Scroll once
+	•	Immediately understand what you’re walking into
+
+No more guessing.
+
+⸻
+
+STAGE THREE — DECISION SUPPORT (Carefully Controlled)
+
+Stage Three is where the app starts helping you decide, but never acts for you.
+
+This is where most tools fail. We won’t.
+
+⸻
+
+Stage Three Goal
+
+Answer this question:
+
+“What should I do first, based on what usually works”
+
+Not automation. Guidance.
+
+⸻
+
+Stage Three Components
+
+1. Tactical Advisor (Unlocked Carefully)
+
+This is the thing you intentionally muted earlier. Now it earns its place.
+
+It displays suggestions, not actions:
+	•	“Escalation historically works earlier with this adjuster”
+	•	“Documentation-heavy submissions resolve faster here”
+	•	“Expect reinspection after first denial”
+
+No buttons. No workflows. No auto-anything.
+
+⸻
+
+2. What Worked Before (Gold Feature)
+
+On Adjuster and Claim views:

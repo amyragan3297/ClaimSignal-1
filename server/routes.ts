@@ -112,6 +112,45 @@ export async function registerRoutes(
     }
   });
 
+  // Get adjuster intelligence stats
+  app.get("/api/adjusters/:id/intelligence", async (req, res) => {
+    try {
+      const intel = await storage.getAdjusterIntelligence(req.params.id);
+      if (!intel) {
+        return res.status(404).json({ error: "Adjuster not found" });
+      }
+      res.json(intel);
+    } catch (error) {
+      console.error("Error fetching adjuster intelligence:", error);
+      res.status(500).json({ error: "Failed to fetch adjuster intelligence" });
+    }
+  });
+
+  // Get all carriers
+  app.get("/api/carriers", async (_req, res) => {
+    try {
+      const carriers = await storage.getAllCarriers();
+      res.json(carriers);
+    } catch (error) {
+      console.error("Error fetching carriers:", error);
+      res.status(500).json({ error: "Failed to fetch carriers" });
+    }
+  });
+
+  // Get carrier intelligence
+  app.get("/api/carriers/:name/intelligence", async (req, res) => {
+    try {
+      const intel = await storage.getCarrierIntelligence(decodeURIComponent(req.params.name));
+      if (!intel) {
+        return res.status(404).json({ error: "Carrier not found" });
+      }
+      res.json(intel);
+    } catch (error) {
+      console.error("Error fetching carrier intelligence:", error);
+      res.status(500).json({ error: "Failed to fetch carrier intelligence" });
+    }
+  });
+
   // Create document for adjuster
   app.post("/api/adjusters/:id/documents", async (req, res) => {
     try {

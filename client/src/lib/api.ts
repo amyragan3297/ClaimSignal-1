@@ -6,6 +6,32 @@ export type AdjusterWithRelations = Adjuster & {
   documents: Document[];
 };
 
+export type AdjusterIntelligence = {
+  totalInteractions: number;
+  totalClaims: number;
+  escalationCount: number;
+  reinspectionCount: number;
+  avgDaysToResolution: number | null;
+  outcomesResolved: number;
+  outcomesStalled: number;
+  outcomesOpen: number;
+  patternTags: string[];
+};
+
+export type CarrierIntelligence = {
+  carrier: string;
+  totalAdjusters: number;
+  totalClaims: number;
+  avgInteractionsPerClaim: number | null;
+  avgDaysToResolution: number | null;
+  escalationEffectiveness: number | null;
+  outcomesResolved: number;
+  outcomesStalled: number;
+  outcomesOpen: number;
+  frictionLevel: 'Low' | 'Normal' | 'High' | null;
+  resolutionTendency: 'Fast' | 'Normal' | 'Slow' | null;
+};
+
 export type ClaimWithRelations = Claim & {
   adjusters: Adjuster[];
   interactions: Interaction[];
@@ -84,6 +110,31 @@ export async function updateAdjuster(
     throw new Error('Failed to update adjuster');
   }
   
+  return response.json();
+}
+
+export async function fetchAdjusterIntelligence(id: string): Promise<AdjusterIntelligence> {
+  const response = await fetch(`/api/adjusters/${id}/intelligence`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch adjuster intelligence');
+  }
+  return response.json();
+}
+
+// Carriers API
+export async function fetchCarriers(): Promise<string[]> {
+  const response = await fetch('/api/carriers');
+  if (!response.ok) {
+    throw new Error('Failed to fetch carriers');
+  }
+  return response.json();
+}
+
+export async function fetchCarrierIntelligence(name: string): Promise<CarrierIntelligence> {
+  const response = await fetch(`/api/carriers/${encodeURIComponent(name)}/intelligence`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch carrier intelligence');
+  }
   return response.json();
 }
 
