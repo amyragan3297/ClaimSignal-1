@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchClaim, fetchAdjusters, updateClaim, linkAdjusterToClaim, fetchAttachments, createAttachment } from "@/lib/api";
+import { fetchClaim, fetchAdjusters, updateClaim, linkAdjusterToClaim, fetchAttachments, createAttachment, fetchAdjusterIntelligence } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -421,6 +421,26 @@ export default function ClaimDetail() {
                       )}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* What Has Worked Before - pulled from linked adjusters */}
+            {claim.adjusters && claim.adjusters.length > 0 && claim.adjusters.some(a => a.whatWorked) && (
+              <Card className="border-l-4 border-l-primary">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    What Has Worked Before
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">From linked adjuster playbooks</p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {claim.adjusters.filter(a => a.whatWorked).map(adj => (
+                    <div key={adj.id} className="text-sm">
+                      <p className="font-medium text-xs text-muted-foreground mb-1">{adj.name}:</p>
+                      <p className="whitespace-pre-wrap">{adj.whatWorked}</p>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             )}
