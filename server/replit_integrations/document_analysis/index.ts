@@ -2,46 +2,79 @@ import OpenAI from "openai";
 import type { Express, Request, Response } from "express";
 import { storage } from "../../storage";
 import { format } from "date-fns";
+import { ObjectStorageService, objectStorageClient } from "../object_storage";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
 });
 
+const objectStorageService = new ObjectStorageService();
+
 interface ExtractedData {
-  adjusterName?: string;
-  adjusterEmail?: string;
-  adjusterPhone?: string;
-  carrier?: string;
-  claimId?: string;
-  dateOfLoss?: string;
-  propertyAddress?: string;
-  homeownerName?: string;
-  interactionType?: string;
-  interactionDate?: string;
-  interactionDescription?: string;
-  interactionOutcome?: string;
-  internalNotes?: string;
-  riskImpression?: string;
-  whatWorked?: string;
-  claimNotes?: string;
-  estimateAmount?: string;
+  adjusterName?: string | null;
+  adjusterEmail?: string | null;
+  adjusterPhone?: string | null;
+  carrier?: string | null;
+  claimId?: string | null;
+  dateOfLoss?: string | null;
+  propertyAddress?: string | null;
+  homeownerName?: string | null;
+  interactionType?: string | null;
+  interactionDate?: string | null;
+  interactionDescription?: string | null;
+  interactionOutcome?: string | null;
+  internalNotes?: string | null;
+  riskImpression?: string | null;
+  whatWorked?: string | null;
+  claimNotes?: string | null;
+  estimateAmount?: string | null;
+  documentSummary?: string | null;
+}
+
+async function getFileAsBase64(objectPath: string): Promise<{ base64: string; mimeType: string } | null> {
+  try {
+    const file = await objectStorageService.getObjectEntityFile(objectPath);
+    const [metadata] = await file.getMetadata();
+    const mimeType = metadata.contentType || 'application/octet-stream';
+    
+    const chunks: Buffer[] = [];
+    const stream = file.createReadStream();
+    
+    return new Promise((resolve, reject) => {
+      stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+      stream.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        const base64 = buffer.toString('base64');
+        resolve({ base64, mimeType });
+      });
+      stream.on('error', reject);
+    });
+  } catch (error) {
+    console.error('Error fetching file from object storage:', error);
+    return null;
+  }
 }
 
 export function registerDocumentAnalysisRoutes(app: Express): void {
   app.post("/api/analyze-document", async (req: Request, res: Response) => {
     try {
-      const { documentUrl, documentName, adjusterId, claimId } = req.body;
+      const { documentUrl, documentName } = req.body;
 
       if (!documentUrl) {
         return res.status(400).json({ error: "Document URL is required" });
+      }
+
+      const fileData = await getFileAsBase64(documentUrl);
+      if (!fileData) {
+        return res.status(400).json({ error: "Could not fetch document from storage" });
       }
 
       const systemPrompt = `You are an expert insurance claims analyst. Analyze the provided document and extract relevant information.
 
 Extract the following information if present:
 - Adjuster name, email, phone, company/carrier
-- Claim ID or reference number
+- Claim ID or reference number (look for claim numbers, estimate numbers, policy numbers)
 - Date of loss
 - Property address
 - Homeowner/insured name
@@ -49,6 +82,7 @@ Extract the following information if present:
 - Key observations about adjuster behavior
 - Claim amounts, estimates, deductibles
 - Any notes about what worked or didn't work in negotiations
+- A brief summary of what this document is about
 
 Return a JSON object with these fields (use null for missing data):
 {
@@ -60,15 +94,16 @@ Return a JSON object with these fields (use null for missing data):
   "dateOfLoss": string (YYYY-MM-DD format) or null,
   "propertyAddress": string or null,
   "homeownerName": string or null,
-  "interactionType": "Call" | "Email" | "Inspection" | "Reinspection" | "Escalation" | "Other" or null,
+  "interactionType": "Call" | "Email" | "Inspection" | "Reinspection" | "Escalation" | "Estimate" | "Letter" | "Other" or null,
   "interactionDate": string (YYYY-MM-DD format) or null,
   "interactionDescription": string or null,
   "interactionOutcome": string or null,
-  "internalNotes": string (observations about adjuster) or null,
+  "internalNotes": string (observations about adjuster or document) or null,
   "riskImpression": string (assessment of adjuster difficulty) or null,
   "whatWorked": string (successful strategies) or null,
   "claimNotes": string (summary of claim details) or null,
-  "estimateAmount": string or null
+  "estimateAmount": string or null,
+  "documentSummary": string (brief 1-2 sentence description of the document) or null
 }`;
 
       const response = await openai.chat.completions.create({
@@ -84,7 +119,9 @@ Return a JSON object with these fields (use null for missing data):
               },
               {
                 type: "image_url",
-                image_url: { url: documentUrl },
+                image_url: { 
+                  url: `data:${fileData.mimeType};base64,${fileData.base64}` 
+                },
               },
             ],
           },
@@ -115,11 +152,16 @@ Return a JSON object with these fields (use null for missing data):
         return res.status(400).json({ error: "Document URL is required" });
       }
 
+      const fileData = await getFileAsBase64(documentUrl);
+      if (!fileData) {
+        return res.status(400).json({ error: "Could not fetch document from storage" });
+      }
+
       const systemPrompt = `You are an expert insurance claims analyst. Analyze the provided document and extract relevant information.
 
 Extract the following information if present:
 - Adjuster name, email, phone, company/carrier
-- Claim ID or reference number
+- Claim ID or reference number (look for claim numbers, estimate numbers, policy numbers)
 - Date of loss
 - Property address
 - Homeowner/insured name
@@ -127,6 +169,7 @@ Extract the following information if present:
 - Key observations about adjuster behavior
 - Claim amounts, estimates, deductibles
 - Any notes about what worked or didn't work in negotiations
+- A brief summary of what this document is about
 
 Return a JSON object with these fields (use null for missing data):
 {
@@ -138,15 +181,16 @@ Return a JSON object with these fields (use null for missing data):
   "dateOfLoss": string (YYYY-MM-DD format) or null,
   "propertyAddress": string or null,
   "homeownerName": string or null,
-  "interactionType": "Call" | "Email" | "Inspection" | "Reinspection" | "Escalation" | "Other" or null,
+  "interactionType": "Call" | "Email" | "Inspection" | "Reinspection" | "Escalation" | "Estimate" | "Letter" | "Other" or null,
   "interactionDate": string (YYYY-MM-DD format) or null,
   "interactionDescription": string or null,
   "interactionOutcome": string or null,
-  "internalNotes": string (observations about adjuster) or null,
+  "internalNotes": string (observations about adjuster or document) or null,
   "riskImpression": string (assessment of adjuster difficulty) or null,
   "whatWorked": string (successful strategies) or null,
   "claimNotes": string (summary of claim details) or null,
-  "estimateAmount": string or null
+  "estimateAmount": string or null,
+  "documentSummary": string (brief 1-2 sentence description of the document) or null
 }`;
 
       const response = await openai.chat.completions.create({
@@ -162,7 +206,9 @@ Return a JSON object with these fields (use null for missing data):
               },
               {
                 type: "image_url",
-                image_url: { url: documentUrl },
+                image_url: { 
+                  url: `data:${fileData.mimeType};base64,${fileData.base64}` 
+                },
               },
             ],
           },
@@ -175,21 +221,57 @@ Return a JSON object with these fields (use null for missing data):
       const extracted: ExtractedData = JSON.parse(content);
 
       const savedItems: string[] = [];
+      let targetAdjusterId = adjusterId;
+      let targetClaimId = claimId;
 
-      if (adjusterId && extracted.interactionDescription) {
-        await storage.createInteraction({
-          adjusterId,
-          date: extracted.interactionDate || format(new Date(), 'yyyy-MM-dd'),
-          type: extracted.interactionType || 'Other',
-          description: extracted.interactionDescription,
-          outcome: extracted.interactionOutcome || null,
-          claimId: extracted.claimId || claimId || null,
+      if (!targetAdjusterId && extracted.adjusterName && extracted.carrier) {
+        const newAdjuster = await storage.createAdjuster({
+          name: extracted.adjusterName,
+          carrier: extracted.carrier,
+          email: extracted.adjusterEmail || undefined,
+          phone: extracted.adjusterPhone || undefined,
+          internalNotes: extracted.internalNotes || undefined,
+          riskImpression: extracted.riskImpression || undefined,
+          whatWorked: extracted.whatWorked || undefined,
         });
-        savedItems.push('interaction');
+        targetAdjusterId = newAdjuster.id;
+        savedItems.push(`new adjuster: ${extracted.adjusterName}`);
       }
 
-      if (adjusterId) {
-        const updates: any = {};
+      if (!targetClaimId && extracted.claimId && extracted.carrier && extracted.dateOfLoss) {
+        const newClaim = await storage.createClaim({
+          maskedId: extracted.claimId,
+          carrier: extracted.carrier,
+          dateOfLoss: extracted.dateOfLoss,
+          homeownerName: extracted.homeownerName || undefined,
+          propertyAddress: extracted.propertyAddress || undefined,
+          notes: extracted.claimNotes || undefined,
+          status: 'open',
+        });
+        targetClaimId = newClaim.id;
+        savedItems.push(`new claim: ${extracted.claimId}`);
+
+        if (targetAdjusterId) {
+          await storage.linkAdjusterToClaim(targetClaimId, targetAdjusterId);
+          savedItems.push('linked adjuster to claim');
+        }
+      }
+
+      if (targetAdjusterId) {
+        const interactionDesc = extracted.interactionDescription || extracted.documentSummary || 
+          `Document analyzed: ${documentName || 'uploaded document'}${extracted.estimateAmount ? ` - Estimate: ${extracted.estimateAmount}` : ''}`;
+        
+        await storage.createInteraction({
+          adjusterId: targetAdjusterId,
+          date: extracted.interactionDate || format(new Date(), 'yyyy-MM-dd'),
+          type: extracted.interactionType || 'Other',
+          description: interactionDesc,
+          outcome: extracted.interactionOutcome || extracted.claimNotes || null,
+          claimId: extracted.claimId || targetClaimId || null,
+        });
+        savedItems.push('interaction log');
+
+        const updates: Record<string, string> = {};
         if (extracted.internalNotes) updates.internalNotes = extracted.internalNotes;
         if (extracted.riskImpression) updates.riskImpression = extracted.riskImpression;
         if (extracted.whatWorked) updates.whatWorked = extracted.whatWorked;
@@ -197,23 +279,29 @@ Return a JSON object with these fields (use null for missing data):
         if (extracted.adjusterEmail) updates.email = extracted.adjusterEmail;
 
         if (Object.keys(updates).length > 0) {
-          await storage.updateAdjuster(adjusterId, updates);
-          savedItems.push('adjuster profile');
+          await storage.updateAdjuster(targetAdjusterId, updates);
+          savedItems.push('adjuster profile updated');
         }
       }
 
-      if (claimId && extracted.claimNotes) {
-        await storage.updateClaim(claimId, {
+      if (targetClaimId && extracted.claimNotes) {
+        await storage.updateClaim(targetClaimId, {
           notes: extracted.claimNotes,
+          homeownerName: extracted.homeownerName || undefined,
+          propertyAddress: extracted.propertyAddress || undefined,
         });
-        savedItems.push('claim notes');
+        savedItems.push('claim details updated');
       }
 
       res.json({
         success: true,
         extracted,
         savedItems,
-        message: `Analyzed and saved: ${savedItems.join(', ') || 'no items to save'}`,
+        createdAdjusterId: !adjusterId && targetAdjusterId !== adjusterId ? targetAdjusterId : undefined,
+        createdClaimId: !claimId && targetClaimId !== claimId ? targetClaimId : undefined,
+        message: savedItems.length > 0 
+          ? `Analyzed and saved: ${savedItems.join(', ')}` 
+          : 'Document analyzed but no new data to save',
       });
     } catch (error) {
       console.error("Error analyzing document:", error);
