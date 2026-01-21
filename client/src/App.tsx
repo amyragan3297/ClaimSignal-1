@@ -11,6 +11,9 @@ import Claims from "@/pages/claims";
 import ClaimDetail from "@/pages/claim";
 import Carriers from "@/pages/carriers";
 import CarrierDetail from "@/pages/carrier";
+import TacticalAdvisor from "@/pages/tactical-advisor";
+import Analytics from "@/pages/analytics";
+import Reports from "@/pages/reports";
 
 function Router() {
   return (
@@ -22,6 +25,9 @@ function Router() {
       <Route path="/carriers" component={Carriers} />
       <Route path="/carriers/:name" component={CarrierDetail} />
       <Route path="/adjuster/:id" component={AdjusterProfile} />
+      <Route path="/tactical-advisor" component={TacticalAdvisor} />
+      <Route path="/analytics" component={Analytics} />
+      <Route path="/reports" component={Reports} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -44,18 +44,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
             Carrier Intelligence
           </Button>
         </Link>
-        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
-          <Bot className="w-4 h-4" />
-          Tactical Advisor (Phase 3)
-        </Button>
-        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
-          <LayoutDashboard className="w-4 h-4" />
-          Analytics (Phase 3)
-        </Button>
-        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
-          <FileText className="w-4 h-4" />
-          Reports (Phase 3)
-        </Button>
+        <Link href="/tactical-advisor">
+          <Button variant={location === "/tactical-advisor" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <Bot className="w-4 h-4" />
+            Tactical Advisor
+          </Button>
+        </Link>
+        <Link href="/analytics">
+          <Button variant={location === "/analytics" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <LayoutDashboard className="w-4 h-4" />
+            Analytics
+          </Button>
+        </Link>
+        <Link href="/reports">
+          <Button variant={location === "/reports" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <FileText className="w-4 h-4" />
+            Reports
+          </Button>
+        </Link>
       </nav>
 
       <div className="p-4 border-t border-sidebar-border">
