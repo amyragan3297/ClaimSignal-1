@@ -36,6 +36,7 @@ export interface IStorage {
   
   // Interaction methods
   getInteractionsByAdjuster(adjusterId: string): Promise<Interaction[]>;
+  getInteractionsByClaimId(claimId: string): Promise<Interaction[]>;
   createInteraction(interaction: InsertInteraction): Promise<Interaction>;
   deleteAdjuster(id: string): Promise<void>;
   
@@ -108,6 +109,10 @@ export class DBStorage implements IStorage {
   // Interaction methods
   async getInteractionsByAdjuster(adjusterId: string): Promise<Interaction[]> {
     return await db.select().from(interactions).where(eq(interactions.adjusterId, adjusterId)).orderBy(interactions.createdAt);
+  }
+
+  async getInteractionsByClaimId(claimId: string): Promise<Interaction[]> {
+    return await db.select().from(interactions).where(eq(interactions.claimId, claimId)).orderBy(desc(interactions.createdAt));
   }
 
   async createInteraction(interaction: InsertInteraction): Promise<Interaction> {
