@@ -231,6 +231,26 @@ export async function registerRoutes(
   app.post("/api/claims/:id/attachments", async (req, res) => {
     try {
       const data = { ...req.body, claimId: req.params.id };
+      
+      // Validate type
+      if (!['file', 'email'].includes(data.type)) {
+        return res.status(400).json({ error: "Type must be 'file' or 'email'" });
+      }
+      
+      // Validate required fields based on type
+      if (data.type === 'file') {
+        if (!data.objectPath || !data.filename) {
+          return res.status(400).json({ error: "File attachments require objectPath and filename" });
+        }
+      } else if (data.type === 'email') {
+        if (!data.subject || !data.body) {
+          return res.status(400).json({ error: "Email attachments require subject and body" });
+        }
+        if (!['sent', 'received'].includes(data.direction)) {
+          return res.status(400).json({ error: "Email direction must be 'sent' or 'received'" });
+        }
+      }
+      
       const validationResult = insertAttachmentSchema.safeParse(data);
       if (!validationResult.success) {
         const validationError = fromError(validationResult.error);
