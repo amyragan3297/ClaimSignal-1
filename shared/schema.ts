@@ -23,6 +23,7 @@ export const claims = pgTable("claims", {
   dateOfLoss: text("date_of_loss").notNull(),
   status: text("status").notNull().default('open'),
   notes: text("notes"),
+  outcomeNotes: text("outcome_notes"),
   homeownerName: text("homeowner_name"),
   propertyAddress: text("property_address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
