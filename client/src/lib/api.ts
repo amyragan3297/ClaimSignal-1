@@ -1,9 +1,14 @@
-import type { Adjuster, Interaction, Claim, InsertAdjuster, Document } from '@shared/schema';
+import type { Adjuster, Interaction, Claim, InsertAdjuster, InsertClaim, Document } from '@shared/schema';
 
 export type AdjusterWithRelations = Adjuster & {
   claims: Claim[];
   interactions: Interaction[];
   documents: Document[];
+};
+
+export type ClaimWithRelations = Claim & {
+  adjusters: Adjuster[];
+  interactions: Interaction[];
 };
 
 export async function fetchAdjusters(): Promise<Adjuster[]> {
@@ -80,4 +85,73 @@ export async function updateAdjuster(
   }
   
   return response.json();
+}
+
+// Claims API
+export async function fetchClaims(): Promise<Claim[]> {
+  const response = await fetch('/api/claims');
+  if (!response.ok) {
+    throw new Error('Failed to fetch claims');
+  }
+  return response.json();
+}
+
+export async function fetchClaim(id: string): Promise<ClaimWithRelations> {
+  const response = await fetch(`/api/claims/${id}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch claim');
+  }
+  return response.json();
+}
+
+export async function createClaim(claim: InsertClaim): Promise<Claim> {
+  const response = await fetch('/api/claims', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(claim),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create claim');
+  }
+  
+  return response.json();
+}
+
+export async function updateClaim(
+  claimId: string,
+  data: Partial<InsertClaim>
+): Promise<Claim> {
+  const response = await fetch(`/api/claims/${claimId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to update claim');
+  }
+  
+  return response.json();
+}
+
+export async function linkAdjusterToClaim(
+  claimId: string,
+  adjusterId: string
+): Promise<void> {
+  const response = await fetch(`/api/claims/${claimId}/adjusters`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ adjusterId }),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to link adjuster to claim');
+  }
 }

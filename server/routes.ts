@@ -155,7 +155,7 @@ export async function registerRoutes(
     }
   });
 
-  // Get claim by ID with linked adjusters
+  // Get claim by ID with linked adjusters and interactions
   app.get("/api/claims/:id", async (req, res) => {
     try {
       const claim = await storage.getClaim(req.params.id);
@@ -163,7 +163,8 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Claim not found" });
       }
       const adjusters = await storage.getAdjustersByClaimId(claim.id);
-      res.json({ ...claim, adjusters });
+      const interactions = await storage.getInteractionsByClaimId(claim.id);
+      res.json({ ...claim, adjusters, interactions });
     } catch (error) {
       console.error("Error fetching claim:", error);
       res.status(500).json({ error: "Failed to fetch claim" });
