@@ -14,7 +14,7 @@ import { User, Plus, MapPin, Calendar, FileText, ClipboardList, Phone, Mail, Cam
 import { useState } from "react";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchAdjuster, createInteraction, updateAdjuster } from "@/lib/api";
+import { fetchAdjuster, createInteraction, updateAdjuster, fetchClaims } from "@/lib/api";
 import { useUpload } from "@/hooks/use-upload";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,6 +31,11 @@ export default function AdjusterProfile() {
     queryKey: ['adjuster', id],
     queryFn: () => fetchAdjuster(id!),
     enabled: !!id,
+  });
+
+  const { data: allClaims = [] } = useQuery({
+    queryKey: ['claims'],
+    queryFn: fetchClaims,
   });
 
   const createInteractionMutation = useMutation({
@@ -305,13 +310,23 @@ export default function AdjusterProfile() {
                      </div>
                    </div>
                    <div className="space-y-2">
-                     <Label>Claim Reference (optional)</Label>
-                     <Input 
-                      placeholder="e.g., 0000001" 
-                      value={newLog.claimRef}
-                      onChange={(e) => setNewLog({...newLog, claimRef: e.target.value})}
-                      data-testid="input-claim-ref"
-                     />
+                     <Label>Link to Claim (optional)</Label>
+                     <Select 
+                      value={newLog.claimRef} 
+                      onValueChange={(v) => setNewLog({...newLog, claimRef: v})}
+                     >
+                       <SelectTrigger data-testid="select-claim-ref">
+                         <SelectValue placeholder="Select a claim" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="">None</SelectItem>
+                         {allClaims.map((claim) => (
+                           <SelectItem key={claim.id} value={claim.maskedId}>
+                             #{claim.maskedId} - {claim.carrier}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
                    </div>
                    <div className="space-y-2">
                      <Label>Notes</Label>
