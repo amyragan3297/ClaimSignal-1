@@ -1,4 +1,4 @@
-import type { Adjuster, Interaction, Claim, InsertAdjuster, InsertClaim, Document } from '@shared/schema';
+import type { Adjuster, Interaction, Claim, InsertAdjuster, InsertClaim, Document, Attachment, InsertAttachment } from '@shared/schema';
 
 export type AdjusterWithRelations = Adjuster & {
   claims: Claim[];
@@ -153,5 +153,43 @@ export async function linkAdjusterToClaim(
   
   if (!response.ok) {
     throw new Error('Failed to link adjuster to claim');
+  }
+}
+
+// Attachments API
+export async function fetchAttachments(claimId: string): Promise<Attachment[]> {
+  const response = await fetch(`/api/claims/${claimId}/attachments`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch attachments');
+  }
+  return response.json();
+}
+
+export async function createAttachment(
+  claimId: string,
+  attachment: Omit<InsertAttachment, 'claimId'>
+): Promise<Attachment> {
+  const response = await fetch(`/api/claims/${claimId}/attachments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(attachment),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create attachment');
+  }
+  
+  return response.json();
+}
+
+export async function deleteAttachment(attachmentId: string): Promise<void> {
+  const response = await fetch(`/api/attachments/${attachmentId}`, {
+    method: 'DELETE',
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to delete attachment');
   }
 }
