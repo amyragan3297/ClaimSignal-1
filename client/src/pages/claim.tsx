@@ -41,7 +41,7 @@ export default function ClaimDetail() {
     body: '',
     notes: '',
   });
-  const { openFilePicker, uploading } = useUpload();
+  const { uploadFile, isUploading: uploading } = useUpload();
 
   const { data: claim, isLoading } = useQuery({
     queryKey: ['claim', id],
@@ -124,27 +124,27 @@ export default function ClaimDetail() {
     }
   };
 
-  const handleFileUpload = async () => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
     try {
-      const result = await openFilePicker({
-        allowedFileTypes: ['.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg', '.gif'],
-        maxFiles: 1,
-      });
-      if (result && result.length > 0) {
-        const file = result[0];
+      const result = await uploadFile(file);
+      if (result) {
         createAttachmentMutation.mutate({
           type: 'file',
           date: newAttachment.date,
-          objectPath: file.objectPath,
-          filename: file.name,
-          contentType: file.type,
-          size: file.size,
+          objectPath: result.objectPath,
+          filename: result.metadata.name,
+          contentType: result.metadata.contentType,
+          size: result.metadata.size,
           description: newAttachment.description || undefined,
         });
       }
     } catch (error) {
       toast({ title: "Error", description: "Failed to upload file", variant: "destructive" });
     }
+    e.target.value = '';
   };
 
   const handleSaveEmail = () => {
@@ -481,15 +481,24 @@ export default function ClaimDetail() {
                               data-testid="input-file-description"
                             />
                           </div>
-                          <Button 
-                            className="w-full" 
-                            onClick={handleFileUpload}
-                            disabled={uploading || createAttachmentMutation.isPending}
-                            data-testid="button-upload-file"
-                          >
-                            <Paperclip className="w-4 h-4 mr-2" />
-                            {uploading ? 'Uploading...' : 'Select & Upload File'}
-                          </Button>
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.gif"
+                              onChange={handleFileSelect}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              disabled={uploading || createAttachmentMutation.isPending}
+                              data-testid="input-file-upload"
+                            />
+                            <Button 
+                              className="w-full pointer-events-none"
+                              disabled={uploading || createAttachmentMutation.isPending}
+                              data-testid="button-upload-file"
+                            >
+                              <Paperclip className="w-4 h-4 mr-2" />
+                              {uploading ? 'Uploading...' : 'Select & Upload File'}
+                            </Button>
+                          </div>
                         </TabsContent>
                         <TabsContent value="email" className="space-y-4 mt-4">
                           <div className="grid grid-cols-2 gap-4">
@@ -701,11 +710,23 @@ export default function ClaimDetail() {
                           <p className="text-sm">{viewingAttachment.description}</p>
                         </div>
                       )}
-                      {viewingAttachment.size && (
+                      {viewingAttachment.size && viewingAttachment.size > 0 && (
                         <div>
                           <Label className="text-muted-foreground">Size</Label>
                           <p className="text-sm">{(viewingAttachment.size / 1024).toFixed(1)} KB</p>
                         </div>
+                      )}
+                      {viewingAttachment.objectPath && (
+                        <Button 
+                          className="w-full mt-4" 
+                          asChild
+                          data-testid="button-download-file"
+                        >
+                          <a href={viewingAttachment.objectPath} target="_blank" rel="noopener noreferrer">
+                            <Paperclip className="w-4 h-4 mr-2" />
+                            View / Download File
+                          </a>
+                        </Button>
                       )}
                     </>
                   )}
