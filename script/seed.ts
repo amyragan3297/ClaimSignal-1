@@ -1,91 +1,81 @@
 import { db } from '../db';
-import { adjusters, claims, interactions } from '@shared/schema';
+import { adjusters, claims, interactions, claimAdjusters } from '@shared/schema';
 
 const SEED_DATA = {
   adjusters: [
     {
       name: 'Michael Sterling',
       carrier: 'State Farm',
-      riskLevel: 'Low',
-      behaviorScore: 85,
-      metrics: {
-        aggressiveness: 30,
-        responsiveness: 90,
-        fairness: 80,
-        knowledge: 75,
-        negotiation: 60,
-      },
-      commonDenialStyles: ['Pre-existing condition (rare)', 'Policy limits'],
-      responsivenessRating: '24-48 Hours',
-      narrative: 'Generally reasonable to work with. Prefers email communication. Will pay fair value if documentation is solid, but pushes back on "soft" damages without hard proof.',
+      region: 'Southeast',
+      phone: '(555) 123-4567',
+      email: 'msterling@statefarm.com',
+      internalNotes: 'Generally reasonable to work with. Prefers email communication.',
+      riskImpression: 'Low risk - cooperative and fair',
+      whatWorked: 'Solid documentation and professional communication. Responds well to policy language references.',
     },
     {
       name: 'Sarah Jenkins',
       carrier: 'Allstate',
-      riskLevel: 'Severe',
-      behaviorScore: 22,
-      metrics: {
-        aggressiveness: 95,
-        responsiveness: 20,
-        fairness: 15,
-        knowledge: 80,
-        negotiation: 10,
-      },
-      commonDenialStyles: ['Delay tactics', 'Lowball initial offers', 'Coverage disputes', 'Biased medical review'],
-      responsivenessRating: 'Weeks / Unresponsive',
-      narrative: 'Extremely difficult. Document everything. Will ignore emails for weeks. Known for "losing" paperwork. Do not expect fair initial offers. Prepare for litigation early.',
+      region: 'National',
+      phone: '(555) 987-6543',
+      email: 'sjenkins@allstate.com',
+      internalNotes: 'Extremely difficult. Document everything. Will ignore emails for weeks.',
+      riskImpression: 'High risk - expect delays and lowball offers',
+      whatWorked: 'Filed DOI complaint and threatened bad faith suit. Had to escalate to get any movement.',
     },
     {
       name: 'David Thorne',
       carrier: 'Geico',
-      riskLevel: 'Medium',
-      behaviorScore: 55,
-      metrics: {
-        aggressiveness: 60,
-        responsiveness: 50,
-        fairness: 50,
-        knowledge: 40,
-        negotiation: 40,
-      },
-      commonDenialStyles: ['Comparative negligence', 'Minor impact defense'],
-      responsivenessRating: '3-5 Days',
-      narrative: 'By the book, but often misinterprets the book. Stick to facts. Can be reasoned with if you walk him through the policy language step-by-step.',
+      region: 'Texas',
+      phone: '(555) 555-5555',
+      email: 'dthorne@geico.com',
+      internalNotes: 'By the book, but often misinterprets the book. Stick to facts.',
+      riskImpression: 'Medium risk - can be reasoned with',
+      whatWorked: 'Walking him through policy language step-by-step. Be patient and methodical.',
     }
   ],
   claims: [
     {
-      adjusterIndex: 0, // Michael Sterling
-      publicId: 'CLM-0004219',
-      privateId: 'SF-992-221',
-      status: 'Closed',
-      dateOpened: '2023-01-15',
-      dateClosed: '2023-03-20',
-      outcome: 'Settled within 10%',
-    },
-    {
+      maskedId: 'CLM-0004219',
+      carrier: 'State Farm',
+      dateOfLoss: '2023-01-15',
+      status: 'closed',
+      homeownerName: 'John Smith',
+      propertyAddress: '123 Main St, Atlanta, GA',
+      notes: 'Water damage from burst pipe',
+      outcomeNotes: 'Settled within 10% of initial demand. Closed 2023-03-20.',
       adjusterIndex: 0,
-      publicId: 'CLM-0004255',
-      privateId: 'SF-992-999',
-      status: 'Open',
-      dateOpened: '2024-01-10',
     },
     {
-      adjusterIndex: 1, // Sarah Jenkins
-      publicId: 'CLM-0001052',
-      privateId: 'AS-882-111',
-      status: 'Closed',
-      dateOpened: '2021-02-10',
-      dateClosed: '2023-11-05',
-      duration: '2 years, 9 months',
-      outcome: 'Full Policy Limits',
-      whatWorked: 'Filed DOI complaint and threatened bad faith suit after 6 months of silence. Had to depose him to get movement.',
+      maskedId: 'CLM-0004255',
+      carrier: 'State Farm',
+      dateOfLoss: '2024-01-10',
+      status: 'open',
+      homeownerName: 'Jane Doe',
+      propertyAddress: '456 Oak Ave, Savannah, GA',
+      notes: 'Roof damage from storm',
+      adjusterIndex: 0,
     },
     {
+      maskedId: 'CLM-0001052',
+      carrier: 'Allstate',
+      dateOfLoss: '2021-02-10',
+      status: 'closed',
+      homeownerName: 'Robert Johnson',
+      propertyAddress: '789 Elm St, Dallas, TX',
+      notes: 'Fire damage to kitchen',
+      outcomeNotes: 'Full policy limits achieved after 2 years, 9 months. Settled 2023-11-05.',
       adjusterIndex: 1,
-      publicId: 'CLM-0003921',
-      privateId: 'AS-221-002',
-      status: 'Litigation',
-      dateOpened: '2023-06-15',
+    },
+    {
+      maskedId: 'CLM-0003921',
+      carrier: 'Allstate',
+      dateOfLoss: '2023-06-15',
+      status: 'litigation',
+      homeownerName: 'Maria Garcia',
+      propertyAddress: '321 Pine Rd, Houston, TX',
+      notes: 'Hail damage - adjuster unresponsive',
+      adjusterIndex: 1,
     }
   ],
   interactions: [
@@ -93,17 +83,17 @@ const SEED_DATA = {
       adjusterIndex: 0,
       date: '2024-01-20',
       type: 'Email',
-      description: 'Sent initial demand package.',
+      description: 'Sent initial demand package for CLM-0004255.',
       outcome: 'Acknowledged same day',
-      claimId: 'CLM-0004255'
+      claimMaskedId: 'CLM-0004255'
     },
     {
       adjusterIndex: 1,
       date: '2023-08-10',
       type: 'Phone',
-      description: 'Attempted to discuss property damage.',
+      description: 'Attempted to discuss property damage for CLM-0003921.',
       outcome: 'Hung up when pressed on timeline',
-      claimId: 'CLM-0003921'
+      claimMaskedId: 'CLM-0003921'
     }
   ]
 };
@@ -127,22 +117,29 @@ async function seed() {
       console.log(`  ✓ Created adjuster: ${adjusterData.name}`);
     }
 
-    // Insert claims
+    // Insert claims and link to adjusters
+    const claimIdMap: Record<string, string> = {};
     for (const claimData of SEED_DATA.claims) {
       const { adjusterIndex, ...claimFields } = claimData;
-      await db.insert(claims).values({
-        ...claimFields,
+      const [inserted] = await db.insert(claims).values(claimFields).returning();
+      claimIdMap[claimData.maskedId] = inserted.id;
+      
+      // Link adjuster to claim via junction table
+      await db.insert(claimAdjusters).values({
+        claimId: inserted.id,
         adjusterId: adjusterIds[adjusterIndex],
       });
-      console.log(`  ✓ Created claim: ${claimData.publicId}`);
+      
+      console.log(`  ✓ Created claim: ${claimData.maskedId}`);
     }
 
     // Insert interactions
     for (const interactionData of SEED_DATA.interactions) {
-      const { adjusterIndex, ...interactionFields } = interactionData;
+      const { adjusterIndex, claimMaskedId, ...interactionFields } = interactionData;
       await db.insert(interactions).values({
         ...interactionFields,
         adjusterId: adjusterIds[adjusterIndex],
+        claimId: claimMaskedId || null,
       });
       console.log(`  ✓ Created interaction for adjuster index ${adjusterIndex}`);
     }
