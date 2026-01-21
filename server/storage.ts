@@ -21,6 +21,16 @@ import {
 import { db } from "../db";
 import { eq, desc, inArray } from "drizzle-orm";
 
+function trimStringFields<T extends Record<string, unknown>>(obj: T): T {
+  const result = { ...obj };
+  for (const key in result) {
+    if (typeof result[key] === 'string') {
+      (result as Record<string, unknown>)[key] = (result[key] as string).trim();
+    }
+  }
+  return result;
+}
+
 export interface AdjusterIntelligence {
   totalInteractions: number;
   totalClaims: number;
@@ -96,12 +106,14 @@ export class DBStorage implements IStorage {
   }
 
   async createAdjuster(adjuster: InsertAdjuster): Promise<Adjuster> {
-    const result = await db.insert(adjusters).values(adjuster).returning();
+    const trimmedData = trimStringFields(adjuster);
+    const result = await db.insert(adjusters).values(trimmedData).returning();
     return result[0];
   }
 
   async updateAdjuster(id: string, data: Partial<InsertAdjuster>): Promise<Adjuster | undefined> {
-    const result = await db.update(adjusters).set(data).where(eq(adjusters.id, id)).returning();
+    const trimmedData = trimStringFields(data);
+    const result = await db.update(adjusters).set(trimmedData).where(eq(adjusters.id, id)).returning();
     return result[0];
   }
 
@@ -123,12 +135,14 @@ export class DBStorage implements IStorage {
   }
 
   async createClaim(claim: InsertClaim): Promise<Claim> {
-    const result = await db.insert(claims).values(claim).returning();
+    const trimmedData = trimStringFields(claim);
+    const result = await db.insert(claims).values(trimmedData).returning();
     return result[0];
   }
 
   async updateClaim(id: string, data: Partial<InsertClaim>): Promise<Claim | undefined> {
-    const result = await db.update(claims).set(data).where(eq(claims.id, id)).returning();
+    const trimmedData = trimStringFields(data);
+    const result = await db.update(claims).set(trimmedData).where(eq(claims.id, id)).returning();
     return result[0];
   }
 
