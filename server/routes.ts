@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { registerDocumentAnalysisRoutes } from "./replit_integrations/document_analysis";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -12,6 +13,9 @@ export async function registerRoutes(
   
   // Register object storage routes for file uploads
   registerObjectStorageRoutes(app);
+  
+  // Register document analysis routes for AI-powered extraction
+  registerDocumentAnalysisRoutes(app);
   
   // Get all adjusters
   app.get("/api/adjusters", async (_req, res) => {
