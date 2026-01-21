@@ -171,7 +171,7 @@ export default function AdjusterProfile() {
           date: newLog.date,
           type: newLog.type,
           description: newLog.description,
-          claimId: newLog.claimRef || undefined,
+          claimId: newLog.claimRef && newLog.claimRef !== 'none' ? newLog.claimRef : undefined,
         }
       });
       setNewLog({ type: 'Call', description: '', date: format(new Date(), 'yyyy-MM-dd'), claimRef: '' });
@@ -331,7 +331,7 @@ export default function AdjusterProfile() {
                          <SelectValue placeholder="Select a claim" />
                        </SelectTrigger>
                        <SelectContent>
-                         <SelectItem value="">None</SelectItem>
+                         <SelectItem value="none">None</SelectItem>
                          {allClaims.map((claim) => (
                            <SelectItem key={claim.id} value={claim.id}>
                              #{claim.maskedId} - {claim.carrier}
