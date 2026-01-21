@@ -623,12 +623,44 @@ export default function AdjusterProfile() {
                       </div>
                     )}
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {/* Stats Grid - Auto-calculated, read-only */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                          <Phone className="w-4 h-4" />
+                          Total Interactions
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-total-interactions">
+                          {intelligence.totalInteractions}
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                          <ClipboardList className="w-4 h-4" />
+                          Claims Linked
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-total-claims">
+                          {intelligence.totalClaims}
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                          <Clock className="w-4 h-4" />
+                          Avg Days to Resolution
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-avg-resolution">
+                          {intelligence.avgDaysToResolution !== null 
+                            ? `${intelligence.avgDaysToResolution}` 
+                            : '—'}
+                        </div>
+                      </div>
+
                       <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                           <TrendingUp className="w-4 h-4" />
-                          Escalations
+                          Escalations Used
                         </div>
                         <div className="text-2xl font-bold" data-testid="stat-escalations">
                           {intelligence.escalationCount}
@@ -637,52 +669,13 @@ export default function AdjusterProfile() {
 
                       <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                          <Camera className="w-4 h-4" />
-                          Reinspections
+                          <CheckCircle className="w-4 h-4" />
+                          Resolution Rate
                         </div>
-                        <div className="text-2xl font-bold" data-testid="stat-reinspections">
-                          {intelligence.reinspectionCount}
-                        </div>
-                      </div>
-
-                      <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                          <Clock className="w-4 h-4" />
-                          Avg Resolution
-                        </div>
-                        <div className="text-2xl font-bold" data-testid="stat-avg-resolution">
-                          {intelligence.avgDaysToResolution !== null 
-                            ? `${intelligence.avgDaysToResolution}d` 
+                        <div className="text-2xl font-bold" data-testid="stat-resolution-rate">
+                          {(intelligence.outcomesResolved + intelligence.outcomesStalled) > 0
+                            ? `${Math.round((intelligence.outcomesResolved / (intelligence.outcomesResolved + intelligence.outcomesStalled)) * 100)}%`
                             : '—'}
-                        </div>
-                      </div>
-
-                      <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                          <ClipboardList className="w-4 h-4" />
-                          Total Claims
-                        </div>
-                        <div className="text-2xl font-bold" data-testid="stat-total-claims">
-                          {intelligence.totalClaims}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Outcomes Distribution */}
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium text-muted-foreground">Outcomes Distribution</div>
-                      <div className="flex gap-4">
-                        <div className="flex items-center gap-2" data-testid="outcome-resolved">
-                          <CheckCircle className="w-4 h-4 text-green-500" />
-                          <span className="text-sm">{intelligence.outcomesResolved} Resolved</span>
-                        </div>
-                        <div className="flex items-center gap-2" data-testid="outcome-stalled">
-                          <XCircle className="w-4 h-4 text-red-500" />
-                          <span className="text-sm">{intelligence.outcomesStalled} Stalled</span>
-                        </div>
-                        <div className="flex items-center gap-2" data-testid="outcome-open">
-                          <Loader2 className="w-4 h-4 text-yellow-500" />
-                          <span className="text-sm">{intelligence.outcomesOpen} Open</span>
                         </div>
                       </div>
                     </div>
