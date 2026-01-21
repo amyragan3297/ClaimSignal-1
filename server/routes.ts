@@ -332,5 +332,77 @@ export async function registerRoutes(
     }
   });
 
+  // Tactical Advisor endpoint
+  app.post("/api/tactical-advice", async (req, res) => {
+    try {
+      const { adjusterId, claimId, situation } = req.body;
+      
+      if (!situation) {
+        return res.status(400).json({ error: "Situation description is required" });
+      }
+
+      let context = "";
+      
+      if (adjusterId) {
+        const adjuster = await storage.getAdjuster(adjusterId);
+        if (adjuster) {
+          context += `\nAdjuster: ${adjuster.name} (${adjuster.carrier})`;
+          if (adjuster.riskImpression) context += `\nRisk Assessment: ${adjuster.riskImpression}`;
+          if (adjuster.whatWorked) context += `\nWhat has worked before: ${adjuster.whatWorked}`;
+          if (adjuster.internalNotes) context += `\nNotes: ${adjuster.internalNotes}`;
+        }
+      }
+      
+      if (claimId) {
+        const claim = await storage.getClaim(claimId);
+        if (claim) {
+          context += `\nClaim: ${claim.maskedId} (${claim.carrier})`;
+          context += `\nStatus: ${claim.status}`;
+          if (claim.notes) context += `\nClaim Notes: ${claim.notes}`;
+        }
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI({
+        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+      });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-5",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert insurance claims strategist helping public adjusters and contractors negotiate with insurance adjusters. Provide tactical advice based on the situation described.
+
+Return a JSON object with:
+{
+  "strategy": "A 2-3 sentence overview of the recommended strategic approach",
+  "keyPoints": ["Array of 3-5 key points to remember"],
+  "riskLevel": "low" | "medium" | "high",
+  "suggestedActions": ["Array of 4-6 specific actionable steps to take"]
+}
+
+Base your advice on insurance industry best practices, policy interpretation, and negotiation tactics.`
+          },
+          {
+            role: "user",
+            content: `Situation: ${situation}${context ? `\n\nContext:${context}` : ''}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_completion_tokens: 1024,
+      });
+
+      const content = response.choices[0]?.message?.content || "{}";
+      const advice = JSON.parse(content);
+
+      res.json({ success: true, advice });
+    } catch (error) {
+      console.error("Error getting tactical advice:", error);
+      res.status(500).json({ error: "Failed to get tactical advice" });
+    }
+  });
+
   return httpServer;
 }

@@ -2,7 +2,11 @@ import OpenAI from "openai";
 import type { Express, Request, Response } from "express";
 import { storage } from "../../storage";
 import { format } from "date-fns";
-import { ObjectStorageService, objectStorageClient } from "../object_storage";
+import { ObjectStorageService } from "../object_storage";
+import { fromPath } from "pdf2pic";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -32,7 +36,7 @@ interface ExtractedData {
   documentSummary?: string | null;
 }
 
-async function getFileAsBase64(objectPath: string): Promise<{ base64: string; mimeType: string } | null> {
+async function getFileBuffer(objectPath: string): Promise<{ buffer: Buffer; mimeType: string } | null> {
   try {
     const file = await objectStorageService.getObjectEntityFile(objectPath);
     const [metadata] = await file.getMetadata();
@@ -45,8 +49,7 @@ async function getFileAsBase64(objectPath: string): Promise<{ base64: string; mi
       stream.on('data', (chunk: Buffer) => chunks.push(chunk));
       stream.on('end', () => {
         const buffer = Buffer.concat(chunks);
-        const base64 = buffer.toString('base64');
-        resolve({ base64, mimeType });
+        resolve({ buffer, mimeType });
       });
       stream.on('error', reject);
     });
@@ -56,21 +59,76 @@ async function getFileAsBase64(objectPath: string): Promise<{ base64: string; mi
   }
 }
 
-export function registerDocumentAnalysisRoutes(app: Express): void {
-  app.post("/api/analyze-document", async (req: Request, res: Response) => {
+async function convertPdfToImages(pdfBuffer: Buffer): Promise<string[]> {
+  const tempDir = os.tmpdir();
+  const tempPdfPath = path.join(tempDir, `temp_${Date.now()}.pdf`);
+  const MAX_PAGES = 20;
+  
+  try {
+    fs.writeFileSync(tempPdfPath, pdfBuffer);
+    
+    const options = {
+      density: 150,
+      saveFilename: `page_${Date.now()}`,
+      savePath: tempDir,
+      format: "png",
+      width: 1200,
+      height: 1600,
+    };
+    
+    const convert = fromPath(tempPdfPath, options);
+    const images: string[] = [];
+    
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      try {
+        const result = await convert(page, { responseType: "base64" });
+        if (result.base64) {
+          images.push(result.base64);
+        }
+      } catch (e) {
+        break;
+      }
+    }
+    
+    return images;
+  } finally {
     try {
-      const { documentUrl, documentName } = req.body;
+      fs.unlinkSync(tempPdfPath);
+    } catch (e) {}
+  }
+}
 
-      if (!documentUrl) {
-        return res.status(400).json({ error: "Document URL is required" });
-      }
+async function getDocumentContent(objectPath: string): Promise<{ images: Array<{ base64: string; mimeType: string }>; isPdf: boolean } | null> {
+  const fileData = await getFileBuffer(objectPath);
+  if (!fileData) return null;
+  
+  const { buffer, mimeType } = fileData;
+  
+  if (mimeType === 'application/pdf' || objectPath.toLowerCase().endsWith('.pdf')) {
+    const pdfImages = await convertPdfToImages(buffer);
+    if (pdfImages.length === 0) {
+      return null;
+    }
+    return {
+      images: pdfImages.map(b64 => ({ base64: b64, mimeType: 'image/png' })),
+      isPdf: true,
+    };
+  }
+  
+  if (mimeType.startsWith('image/')) {
+    return {
+      images: [{ base64: buffer.toString('base64'), mimeType }],
+      isPdf: false,
+    };
+  }
+  
+  return {
+    images: [{ base64: buffer.toString('base64'), mimeType: 'image/png' }],
+    isPdf: false,
+  };
+}
 
-      const fileData = await getFileAsBase64(documentUrl);
-      if (!fileData) {
-        return res.status(400).json({ error: "Could not fetch document from storage" });
-      }
-
-      const systemPrompt = `You are an expert insurance claims analyst. Analyze the provided document and extract relevant information.
+const systemPrompt = `You are an expert insurance claims analyst. Analyze the provided document and extract relevant information.
 
 Extract the following information if present:
 - Adjuster name, email, phone, company/carrier
@@ -106,6 +164,25 @@ Return a JSON object with these fields (use null for missing data):
   "documentSummary": string (brief 1-2 sentence description of the document) or null
 }`;
 
+export function registerDocumentAnalysisRoutes(app: Express): void {
+  app.post("/api/analyze-document", async (req: Request, res: Response) => {
+    try {
+      const { documentUrl, documentName } = req.body;
+
+      if (!documentUrl) {
+        return res.status(400).json({ error: "Document URL is required" });
+      }
+
+      const docContent = await getDocumentContent(documentUrl);
+      if (!docContent || docContent.images.length === 0) {
+        return res.status(400).json({ error: "Could not fetch or convert document" });
+      }
+
+      const imageContent = docContent.images.map(img => ({
+        type: "image_url" as const,
+        image_url: { url: `data:${img.mimeType};base64,${img.base64}` },
+      }));
+
       const response = await openai.chat.completions.create({
         model: "gpt-5",
         messages: [
@@ -115,14 +192,9 @@ Return a JSON object with these fields (use null for missing data):
             content: [
               {
                 type: "text",
-                text: `Analyze this document "${documentName || 'document'}" and extract all relevant insurance claim information.`,
+                text: `Analyze this document "${documentName || 'document'}" and extract all relevant insurance claim information.${docContent.isPdf ? ' This is a multi-page PDF document.' : ''}`,
               },
-              {
-                type: "image_url",
-                image_url: { 
-                  url: `data:${fileData.mimeType};base64,${fileData.base64}` 
-                },
-              },
+              ...imageContent,
             ],
           },
         ],
@@ -152,46 +224,15 @@ Return a JSON object with these fields (use null for missing data):
         return res.status(400).json({ error: "Document URL is required" });
       }
 
-      const fileData = await getFileAsBase64(documentUrl);
-      if (!fileData) {
-        return res.status(400).json({ error: "Could not fetch document from storage" });
+      const docContent = await getDocumentContent(documentUrl);
+      if (!docContent || docContent.images.length === 0) {
+        return res.status(400).json({ error: "Could not fetch or convert document" });
       }
 
-      const systemPrompt = `You are an expert insurance claims analyst. Analyze the provided document and extract relevant information.
-
-Extract the following information if present:
-- Adjuster name, email, phone, company/carrier
-- Claim ID or reference number (look for claim numbers, estimate numbers, policy numbers)
-- Date of loss
-- Property address
-- Homeowner/insured name
-- Any interactions (calls, emails, inspections) with dates
-- Key observations about adjuster behavior
-- Claim amounts, estimates, deductibles
-- Any notes about what worked or didn't work in negotiations
-- A brief summary of what this document is about
-
-Return a JSON object with these fields (use null for missing data):
-{
-  "adjusterName": string or null,
-  "adjusterEmail": string or null,
-  "adjusterPhone": string or null,
-  "carrier": string or null,
-  "claimId": string or null,
-  "dateOfLoss": string (YYYY-MM-DD format) or null,
-  "propertyAddress": string or null,
-  "homeownerName": string or null,
-  "interactionType": "Call" | "Email" | "Inspection" | "Reinspection" | "Escalation" | "Estimate" | "Letter" | "Other" or null,
-  "interactionDate": string (YYYY-MM-DD format) or null,
-  "interactionDescription": string or null,
-  "interactionOutcome": string or null,
-  "internalNotes": string (observations about adjuster or document) or null,
-  "riskImpression": string (assessment of adjuster difficulty) or null,
-  "whatWorked": string (successful strategies) or null,
-  "claimNotes": string (summary of claim details) or null,
-  "estimateAmount": string or null,
-  "documentSummary": string (brief 1-2 sentence description of the document) or null
-}`;
+      const imageContent = docContent.images.map(img => ({
+        type: "image_url" as const,
+        image_url: { url: `data:${img.mimeType};base64,${img.base64}` },
+      }));
 
       const response = await openai.chat.completions.create({
         model: "gpt-5",
@@ -202,14 +243,9 @@ Return a JSON object with these fields (use null for missing data):
             content: [
               {
                 type: "text",
-                text: `Analyze this document "${documentName || 'document'}" and extract all relevant insurance claim information.`,
+                text: `Analyze this document "${documentName || 'document'}" and extract all relevant insurance claim information.${docContent.isPdf ? ' This is a multi-page PDF document.' : ''}`,
               },
-              {
-                type: "image_url",
-                image_url: { 
-                  url: `data:${fileData.mimeType};base64,${fileData.base64}` 
-                },
-              },
+              ...imageContent,
             ],
           },
         ],
