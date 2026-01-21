@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Search, LayoutDashboard, FileText, Menu, Bot } from "lucide-react";
+import { Shield, Search, LayoutDashboard, FileText, Menu, Bot, ClipboardList } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Button variant={location === "/" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
             <Search className="w-4 h-4" />
             Adjuster Search
+          </Button>
+        </Link>
+        <Link href="/claims">
+          <Button variant={location.startsWith("/claims") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <ClipboardList className="w-4 h-4" />
+            Claims
           </Button>
         </Link>
         <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground opacity-50" disabled>
