@@ -266,29 +266,31 @@ export default function Home() {
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               <div 
-                className="bg-card/30 border border-border/30 p-6 rounded-xl opacity-60"
+                className="bg-card/50 border border-border/50 p-6 rounded-xl cursor-pointer hover:bg-card/70 hover:border-amber-500/30 transition-all"
                 data-testid="button-tactical-advisor"
+                onClick={() => setLocation("/tactical-advisor")}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="bg-muted p-2.5 rounded-lg">
-                    <Bot className="w-6 h-6 text-muted-foreground" />
+                  <div className="bg-amber-500/20 p-2.5 rounded-lg">
+                    <Bot className="w-6 h-6 text-amber-500" />
                   </div>
-                  <span className="text-[10px] uppercase font-mono bg-muted px-2 py-0.5 rounded text-muted-foreground">Phase 2</span>
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-muted-foreground">Tactical Advisor</h3>
+                <h3 className="text-lg font-semibold mb-2">Tactical Advisor</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Get AI-powered strategy recommendations for your current claims.
                 </p>
               </div>
 
-              <div className="bg-card/30 border border-border/30 p-6 rounded-xl opacity-60">
+              <div 
+                className="bg-card/50 border border-border/50 p-6 rounded-xl cursor-pointer hover:bg-card/70 hover:border-amber-500/30 transition-all"
+                onClick={() => setLocation("/analytics")}
+              >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="bg-muted p-2.5 rounded-lg">
-                    <FileSearch className="w-6 h-6 text-muted-foreground" />
+                  <div className="bg-amber-500/20 p-2.5 rounded-lg">
+                    <FileSearch className="w-6 h-6 text-amber-500" />
                   </div>
-                  <span className="text-[10px] uppercase font-mono bg-muted px-2 py-0.5 rounded text-muted-foreground">Phase 2</span>
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-muted-foreground">Pattern Analysis</h3>
+                <h3 className="text-lg font-semibold mb-2">Pattern Analysis</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Deep dive analytics into carrier denial trends.
                 </p>
