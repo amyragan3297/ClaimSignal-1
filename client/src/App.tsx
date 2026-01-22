@@ -18,6 +18,8 @@ import Reports from "@/pages/reports";
 import Login from "@/pages/login";
 import Pricing from "@/pages/pricing";
 import AdminTeam from "@/pages/admin-team";
+import Billing from "@/pages/billing";
+import SubscriptionSuccess from "@/pages/subscription-success";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -48,7 +50,10 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/pricing" component={Pricing} />
-      <Route path="/subscription/success" component={Pricing} />
+      <Route path="/subscription/success" component={SubscriptionSuccess} />
+      <Route path="/billing">
+        <ProtectedRoute component={Billing} />
+      </Route>
       <Route path="/">
         <ProtectedRoute component={Home} />
       </Route>

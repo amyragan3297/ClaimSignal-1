@@ -47,10 +47,24 @@ Preferred communication style: Simple, everyday language.
 - Auth middleware protects all `/api/adjusters`, `/api/claims`, `/api/carriers`, `/api/documents`, `/api/attachments`, and `/api/tactical-advice` routes
 
 ### Stripe Integration
-- Stripe payments for individual subscriptions
-- Webhook handling syncs subscription status from Stripe events
+- **Subscription Products**: ClaimSignal Pro ($49/month, $499/year) and Enterprise ($199/month, $1999/year)
+- **One-time Add-ons**: Expert Claim Review ($299), Carrier Intelligence Report ($99), Training Session ($149)
+- **stripe-replit-sync**: Handles webhook processing and database sync with stripe schema
 - Checkout session flow with verify-subscription endpoint
 - Customer portal for managing subscriptions
+- **Billing Page** (/billing): View subscription, invoices, and purchase add-ons
+- **Seed Script**: `scripts/seed-stripe-products.ts` creates products in Stripe
+
+### Stripe Routes
+- GET `/api/stripe/config` - Publishable key
+- GET `/api/stripe/products` - Subscription products with prices
+- GET `/api/stripe/addons` - One-time purchase products
+- GET `/api/stripe/subscription` - User's current subscription details
+- GET `/api/stripe/invoices` - User's invoice history
+- POST `/api/stripe/checkout` - Create subscription checkout
+- POST `/api/stripe/one-time-checkout` - Create one-time payment checkout
+- GET `/api/stripe/verify-subscription` - Verify subscription after checkout
+- POST `/api/stripe/portal` - Customer billing portal
 
 ### File Upload System
 - Uses Uppy for client-side file management with dashboard modal UI
