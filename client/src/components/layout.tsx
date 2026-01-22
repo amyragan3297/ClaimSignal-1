@@ -1,13 +1,21 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Search, LayoutDashboard, FileText, Menu, Bot, ClipboardList, Building2 } from "lucide-react";
+import { Shield, Search, LayoutDashboard, FileText, Menu, Bot, ClipboardList, Building2, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import logoImage from '@assets/generated_images/modern_geometric_logo_for_claimsignal.png';
+import { useAuth } from "@/lib/auth";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
+  const { logout, userType, email } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const handleLogout = async () => {
+    await logout();
+    setLocation("/login");
+  };
 
   const NavContent = () => (
     <div className="flex flex-col h-full">
@@ -64,11 +72,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </Link>
       </nav>
 
-      <div className="p-4 border-t border-sidebar-border">
+      <div className="p-4 border-t border-sidebar-border space-y-3">
         <div className="bg-sidebar-primary/50 rounded-lg p-3">
-          <p className="text-xs text-muted-foreground font-mono">SYSTEM STATUS: ONLINE</p>
+          <p className="text-xs text-muted-foreground font-mono">
+            {userType === 'team' ? 'TEAM ACCESS' : email || 'INDIVIDUAL'}
+          </p>
           <p className="text-xs text-emerald-500 font-mono mt-1">SECURE CONNECTION</p>
         </div>
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+          onClick={handleLogout}
+          data-testid="button-logout"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </Button>
       </div>
     </div>
   );

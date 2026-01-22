@@ -1,10 +1,59 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { registerDocumentAnalysisRoutes } from "./replit_integrations/document_analysis";
+import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import { z } from "zod";
+
+declare global {
+  namespace Express {
+    interface Request {
+      session?: {
+        userType: 'team' | 'individual';
+        userId?: string;
+      };
+    }
+  }
+}
+
+const loginSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+});
+
+const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+async function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  const token = req.cookies?.session_token || req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  const session = await storage.getSessionByToken(token);
+  if (!session) {
+    return res.status(401).json({ error: 'Session expired' });
+  }
+
+  if (session.userType === 'individual' && session.userId) {
+    const user = await storage.getUserById(session.userId);
+    if (!user || user.subscriptionStatus !== 'active') {
+      return res.status(403).json({ error: 'Active subscription required' });
+    }
+  }
+
+  req.session = {
+    userType: session.userType as 'team' | 'individual',
+    userId: session.userId || undefined,
+  };
+  next();
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -16,6 +65,369 @@ export async function registerRoutes(
   
   // Register document analysis routes for AI-powered extraction
   registerDocumentAnalysisRoutes(app);
+
+  // ========== AUTH ROUTES ==========
+  
+  // Team login
+  app.post("/api/auth/team/login", async (req, res) => {
+    try {
+      const validationResult = loginSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ error: 'Username and password are required' });
+      }
+
+      const { username, password } = validationResult.data;
+      const valid = await storage.verifyTeamLogin(username, password);
+      
+      if (!valid) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+
+      const session = await storage.createSession('team');
+      res.cookie('session_token', session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      res.json({ success: true, userType: 'team' });
+    } catch (error) {
+      console.error("Error in team login:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  // Team credentials setup (first time only)
+  app.post("/api/auth/team/setup", async (req, res) => {
+    try {
+      const existing = await storage.getTeamCredentials();
+      if (existing) {
+        return res.status(400).json({ error: 'Team credentials already exist' });
+      }
+
+      const validationResult = loginSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ error: 'Username and password are required' });
+      }
+
+      const { username, password } = validationResult.data;
+      await storage.createTeamCredentials(username, password);
+      
+      const session = await storage.createSession('team');
+      res.cookie('session_token', session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      res.json({ success: true, userType: 'team' });
+    } catch (error) {
+      console.error("Error in team setup:", error);
+      res.status(500).json({ error: "Setup failed" });
+    }
+  });
+
+  // Check if team is set up
+  app.get("/api/auth/team/status", async (_req, res) => {
+    try {
+      const existing = await storage.getTeamCredentials();
+      res.json({ isSetup: !!existing });
+    } catch (error) {
+      console.error("Error checking team status:", error);
+      res.status(500).json({ error: "Failed to check status" });
+    }
+  });
+
+  // Individual user registration
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const validationResult = registerSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ error: 'Valid email and password (6+ characters) required' });
+      }
+
+      const { email, password } = validationResult.data;
+      
+      const existing = await storage.getUserByEmail(email);
+      if (existing) {
+        return res.status(400).json({ error: 'Email already registered' });
+      }
+
+      const user = await storage.createUser(email, password);
+      const session = await storage.createSession('individual', user.id);
+      
+      res.cookie('session_token', session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      res.json({ success: true, userType: 'individual', userId: user.id, needsSubscription: true });
+    } catch (error) {
+      console.error("Error in registration:", error);
+      res.status(500).json({ error: "Registration failed" });
+    }
+  });
+
+  // Individual user login
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const validationResult = registerSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ error: 'Email and password required' });
+      }
+
+      const { email, password } = validationResult.data;
+      const user = await storage.verifyUserLogin(email, password);
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+
+      const session = await storage.createSession('individual', user.id);
+      res.cookie('session_token', session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      res.json({ 
+        success: true, 
+        userType: 'individual', 
+        userId: user.id,
+        subscriptionStatus: user.subscriptionStatus,
+        needsSubscription: user.subscriptionStatus !== 'active'
+      });
+    } catch (error) {
+      console.error("Error in login:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  // Logout
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      const token = req.cookies?.session_token;
+      if (token) {
+        await storage.deleteSession(token);
+      }
+      res.clearCookie('session_token');
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error in logout:", error);
+      res.status(500).json({ error: "Logout failed" });
+    }
+  });
+
+  // Get current session
+  app.get("/api/auth/session", async (req, res) => {
+    try {
+      const token = req.cookies?.session_token;
+      if (!token) {
+        return res.json({ authenticated: false });
+      }
+
+      const session = await storage.getSessionByToken(token);
+      if (!session) {
+        return res.json({ authenticated: false });
+      }
+
+      if (session.userType === 'individual' && session.userId) {
+        const user = await storage.getUserById(session.userId);
+        return res.json({ 
+          authenticated: true, 
+          userType: 'individual',
+          userId: session.userId,
+          email: user?.email,
+          subscriptionStatus: user?.subscriptionStatus,
+          needsSubscription: user?.subscriptionStatus !== 'active'
+        });
+      }
+
+      return res.json({ 
+        authenticated: true, 
+        userType: 'team'
+      });
+    } catch (error) {
+      console.error("Error getting session:", error);
+      res.status(500).json({ error: "Failed to get session" });
+    }
+  });
+
+  // ========== STRIPE ROUTES ==========
+
+  // Get Stripe publishable key
+  app.get("/api/stripe/config", async (_req, res) => {
+    try {
+      const publishableKey = await getStripePublishableKey();
+      res.json({ publishableKey });
+    } catch (error) {
+      console.error("Error getting Stripe config:", error);
+      res.status(500).json({ error: "Failed to get Stripe config" });
+    }
+  });
+
+  // Get products and prices
+  app.get("/api/stripe/products", async (_req, res) => {
+    try {
+      const rows = await storage.listProductsWithPrices();
+      
+      const productsMap = new Map();
+      for (const row of rows as any[]) {
+        if (!productsMap.has(row.product_id)) {
+          productsMap.set(row.product_id, {
+            id: row.product_id,
+            name: row.product_name,
+            description: row.product_description,
+            active: row.product_active,
+            prices: []
+          });
+        }
+        if (row.price_id) {
+          productsMap.get(row.product_id).prices.push({
+            id: row.price_id,
+            unit_amount: row.unit_amount,
+            currency: row.currency,
+            recurring: row.recurring,
+          });
+        }
+      }
+
+      res.json({ products: Array.from(productsMap.values()) });
+    } catch (error) {
+      console.error("Error getting products:", error);
+      res.status(500).json({ error: "Failed to get products" });
+    }
+  });
+
+  // Create checkout session
+  app.post("/api/stripe/checkout", async (req, res) => {
+    try {
+      const token = req.cookies?.session_token;
+      if (!token) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const session = await storage.getSessionByToken(token);
+      if (!session || session.userType !== 'individual' || !session.userId) {
+        return res.status(401).json({ error: 'Individual account required' });
+      }
+
+      const user = await storage.getUserById(session.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const { priceId } = req.body;
+      if (!priceId) {
+        return res.status(400).json({ error: 'Price ID required' });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: { userId: user.id },
+        });
+        await storage.updateUserStripeInfo(user.id, { stripeCustomerId: customer.id });
+        customerId = customer.id;
+      }
+
+      const baseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+      const checkoutSession = await stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: ['card'],
+        line_items: [{ price: priceId, quantity: 1 }],
+        mode: 'subscription',
+        success_url: `${baseUrl}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/pricing`,
+        metadata: { userId: user.id },
+      });
+
+      res.json({ url: checkoutSession.url });
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      res.status(500).json({ error: "Failed to create checkout session" });
+    }
+  });
+
+  // Verify subscription after checkout
+  app.get("/api/stripe/verify-subscription", async (req, res) => {
+    try {
+      const token = req.cookies?.session_token;
+      if (!token) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const session = await storage.getSessionByToken(token);
+      if (!session || session.userType !== 'individual' || !session.userId) {
+        return res.status(401).json({ error: 'Individual account required' });
+      }
+
+      const { session_id } = req.query;
+      if (!session_id || typeof session_id !== 'string') {
+        return res.status(400).json({ error: 'Session ID required' });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const checkoutSession = await stripe.checkout.sessions.retrieve(session_id);
+      
+      if (checkoutSession.payment_status === 'paid' && checkoutSession.subscription) {
+        await storage.updateUserStripeInfo(session.userId, {
+          stripeSubscriptionId: checkoutSession.subscription as string,
+          subscriptionStatus: 'active',
+        });
+        return res.json({ success: true, subscriptionStatus: 'active' });
+      }
+
+      res.json({ success: false, subscriptionStatus: 'inactive' });
+    } catch (error) {
+      console.error("Error verifying subscription:", error);
+      res.status(500).json({ error: "Failed to verify subscription" });
+    }
+  });
+
+  // Customer portal
+  app.post("/api/stripe/portal", async (req, res) => {
+    try {
+      const token = req.cookies?.session_token;
+      if (!token) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const session = await storage.getSessionByToken(token);
+      if (!session || session.userType !== 'individual' || !session.userId) {
+        return res.status(401).json({ error: 'Individual account required' });
+      }
+
+      const user = await storage.getUserById(session.userId);
+      if (!user?.stripeCustomerId) {
+        return res.status(400).json({ error: 'No subscription found' });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const baseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+      const portalSession = await stripe.billingPortal.sessions.create({
+        customer: user.stripeCustomerId,
+        return_url: `${baseUrl}/`,
+      });
+
+      res.json({ url: portalSession.url });
+    } catch (error) {
+      console.error("Error creating portal session:", error);
+      res.status(500).json({ error: "Failed to create portal session" });
+    }
+  });
+
+  // Apply auth middleware to all protected routes
+  app.use('/api/adjusters', authMiddleware);
+  app.use('/api/claims', authMiddleware);
+  app.use('/api/carriers', authMiddleware);
+  app.use('/api/documents', authMiddleware);
+  app.use('/api/attachments', authMiddleware);
+  app.use('/api/tactical-advice', authMiddleware);
   
   // Get all adjusters
   app.get("/api/adjusters", async (_req, res) => {
