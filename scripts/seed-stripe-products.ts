@@ -10,21 +10,30 @@ async function seedProducts() {
 
   const productsToCreate = [
     {
+      name: 'ClaimSignal Basic',
+      description: 'Essential tools for independent adjusters',
+      metadata: { tier: 'basic', features: 'core', annual_bonus: 'training_session' },
+      prices: [
+        { unit_amount: 2900, currency: 'usd', interval: 'month' as const, nickname: 'Monthly' },
+        { unit_amount: 29900, currency: 'usd', interval: 'year' as const, nickname: 'Yearly (Save 14% + Free Training)' },
+      ]
+    },
+    {
       name: 'ClaimSignal Pro',
       description: 'Full access to ClaimSignal with all premium features',
-      metadata: { tier: 'pro', features: 'all' },
+      metadata: { tier: 'pro', features: 'all', annual_bonus: 'carrier_report' },
       prices: [
         { unit_amount: 4900, currency: 'usd', interval: 'month' as const, nickname: 'Monthly' },
-        { unit_amount: 49900, currency: 'usd', interval: 'year' as const, nickname: 'Yearly (Save 15%)' },
+        { unit_amount: 49900, currency: 'usd', interval: 'year' as const, nickname: 'Yearly (Save 15% + Free Report)' },
       ]
     },
     {
       name: 'ClaimSignal Enterprise',
       description: 'Enterprise-grade features with priority support and advanced analytics',
-      metadata: { tier: 'enterprise', features: 'all,priority_support,advanced_analytics' },
+      metadata: { tier: 'enterprise', features: 'all,priority_support,advanced_analytics', annual_bonus: 'expert_review' },
       prices: [
         { unit_amount: 19900, currency: 'usd', interval: 'month' as const, nickname: 'Monthly' },
-        { unit_amount: 199900, currency: 'usd', interval: 'year' as const, nickname: 'Yearly (Save 16%)' },
+        { unit_amount: 199900, currency: 'usd', interval: 'year' as const, nickname: 'Yearly (Save 16% + Free Review)' },
       ]
     }
   ];
