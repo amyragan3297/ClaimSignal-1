@@ -14,6 +14,7 @@ declare global {
       session?: {
         userType: 'team' | 'individual';
         userId?: string;
+        accessLevel?: 'admin' | 'editor' | 'viewer';
       };
     }
   }
@@ -51,7 +52,22 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   req.session = {
     userType: session.userType as 'team' | 'individual',
     userId: session.userId || undefined,
+    accessLevel: session.accessLevel as 'admin' | 'editor' | 'viewer',
   };
+  next();
+}
+
+function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.session || req.session.accessLevel !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+}
+
+function requireEditor(req: Request, res: Response, next: NextFunction) {
+  if (!req.session || !['admin', 'editor'].includes(req.session.accessLevel || '')) {
+    return res.status(403).json({ error: 'Editor access required' });
+  }
   next();
 }
 
@@ -77,27 +93,27 @@ export async function registerRoutes(
       }
 
       const { username, password } = validationResult.data;
-      const valid = await storage.verifyTeamLogin(username, password);
+      const teamCreds = await storage.verifyTeamLogin(username, password);
       
-      if (!valid) {
+      if (!teamCreds) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      const session = await storage.createSession('team');
+      const session = await storage.createSession('team', teamCreds.accessLevel);
       res.cookie('session_token', session.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-      res.json({ success: true, userType: 'team' });
+      res.json({ success: true, userType: 'team', accessLevel: teamCreds.accessLevel });
     } catch (error) {
       console.error("Error in team login:", error);
       res.status(500).json({ error: "Login failed" });
     }
   });
 
-  // Team credentials setup (first time only)
+  // Team credentials setup (first time only - creates admin)
   app.post("/api/auth/team/setup", async (req, res) => {
     try {
       const existing = await storage.getTeamCredentials();
@@ -111,16 +127,16 @@ export async function registerRoutes(
       }
 
       const { username, password } = validationResult.data;
-      await storage.createTeamCredentials(username, password);
+      const teamCreds = await storage.createTeamCredentials(username, password, 'admin');
       
-      const session = await storage.createSession('team');
+      const session = await storage.createSession('team', 'admin');
       res.cookie('session_token', session.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-      res.json({ success: true, userType: 'team' });
+      res.json({ success: true, userType: 'team', accessLevel: 'admin' });
     } catch (error) {
       console.error("Error in team setup:", error);
       res.status(500).json({ error: "Setup failed" });
@@ -153,8 +169,9 @@ export async function registerRoutes(
         return res.status(400).json({ error: 'Email already registered' });
       }
 
-      const user = await storage.createUser(email, password);
-      const session = await storage.createSession('individual', user.id);
+      // Individual users get 'admin' access by default (they're paying customers)
+      const user = await storage.createUser(email, password, 'admin');
+      const session = await storage.createSession('individual', user.accessLevel, user.id);
       
       res.cookie('session_token', session.token, {
         httpOnly: true,
@@ -162,7 +179,7 @@ export async function registerRoutes(
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-      res.json({ success: true, userType: 'individual', userId: user.id, needsSubscription: true });
+      res.json({ success: true, userType: 'individual', userId: user.id, accessLevel: user.accessLevel, needsSubscription: true });
     } catch (error) {
       console.error("Error in registration:", error);
       res.status(500).json({ error: "Registration failed" });
@@ -184,7 +201,7 @@ export async function registerRoutes(
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      const session = await storage.createSession('individual', user.id);
+      const session = await storage.createSession('individual', user.accessLevel, user.id);
       res.cookie('session_token', session.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -195,6 +212,7 @@ export async function registerRoutes(
         success: true, 
         userType: 'individual', 
         userId: user.id,
+        accessLevel: user.accessLevel,
         subscriptionStatus: user.subscriptionStatus,
         needsSubscription: user.subscriptionStatus !== 'active'
       });
@@ -239,6 +257,7 @@ export async function registerRoutes(
           userType: 'individual',
           userId: session.userId,
           email: user?.email,
+          accessLevel: session.accessLevel,
           subscriptionStatus: user?.subscriptionStatus,
           needsSubscription: user?.subscriptionStatus !== 'active'
         });
@@ -246,11 +265,98 @@ export async function registerRoutes(
 
       return res.json({ 
         authenticated: true, 
-        userType: 'team'
+        userType: 'team',
+        accessLevel: session.accessLevel
       });
     } catch (error) {
       console.error("Error getting session:", error);
       res.status(500).json({ error: "Failed to get session" });
+    }
+  });
+
+  // ========== TEAM MANAGEMENT ROUTES (Admin only) ==========
+  
+  // Get all team credentials (admin only)
+  app.get("/api/admin/team-credentials", authMiddleware, requireAdmin, async (_req, res) => {
+    try {
+      const teams = await storage.getAllTeamCredentials();
+      // Don't send password hashes
+      const sanitized = teams.map(t => ({
+        id: t.id,
+        username: t.username,
+        accessLevel: t.accessLevel,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+      }));
+      res.json(sanitized);
+    } catch (error) {
+      console.error("Error fetching team credentials:", error);
+      res.status(500).json({ error: "Failed to fetch team credentials" });
+    }
+  });
+
+  // Create new team credentials (admin only)
+  app.post("/api/admin/team-credentials", authMiddleware, requireAdmin, async (req, res) => {
+    try {
+      const schema = z.object({
+        username: z.string().min(1),
+        password: z.string().min(6),
+        accessLevel: z.enum(['admin', 'editor', 'viewer']).default('viewer'),
+      });
+      
+      const validationResult = schema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ error: 'Username, password (6+ chars), and access level required' });
+      }
+
+      const { username, password, accessLevel } = validationResult.data;
+      
+      // Check if username exists
+      const existing = await storage.getTeamCredentialsByUsername(username);
+      if (existing) {
+        return res.status(400).json({ error: 'Username already exists' });
+      }
+
+      const creds = await storage.createTeamCredentials(username, password, accessLevel);
+      res.json({
+        id: creds.id,
+        username: creds.username,
+        accessLevel: creds.accessLevel,
+        createdAt: creds.createdAt,
+      });
+    } catch (error) {
+      console.error("Error creating team credentials:", error);
+      res.status(500).json({ error: "Failed to create team credentials" });
+    }
+  });
+
+  // Update team access level (admin only)
+  app.patch("/api/admin/team-credentials/:id/access-level", authMiddleware, requireAdmin, async (req, res) => {
+    try {
+      const schema = z.object({
+        accessLevel: z.enum(['admin', 'editor', 'viewer']),
+      });
+      
+      const validationResult = schema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ error: 'Valid access level required' });
+      }
+
+      const { accessLevel } = validationResult.data;
+      const updated = await storage.updateTeamAccessLevel(req.params.id, accessLevel);
+      
+      if (!updated) {
+        return res.status(404).json({ error: 'Team credentials not found' });
+      }
+
+      res.json({
+        id: updated.id,
+        username: updated.username,
+        accessLevel: updated.accessLevel,
+      });
+    } catch (error) {
+      console.error("Error updating team access level:", error);
+      res.status(500).json({ error: "Failed to update access level" });
     }
   });
 
@@ -437,6 +543,21 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching adjusters:", error);
       res.status(500).json({ error: "Failed to fetch adjusters" });
+    }
+  });
+
+  // Search adjusters by name or carrier
+  app.get("/api/adjusters/search", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 2) {
+        return res.status(400).json({ error: "Search query must be at least 2 characters" });
+      }
+      const adjusters = await storage.searchAdjusters(query);
+      res.json(adjusters);
+    } catch (error) {
+      console.error("Error searching adjusters:", error);
+      res.status(500).json({ error: "Failed to search adjusters" });
     }
   });
 

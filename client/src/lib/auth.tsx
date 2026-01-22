@@ -5,6 +5,7 @@ interface AuthState {
   userType: 'team' | 'individual' | null;
   userId?: string;
   email?: string;
+  accessLevel?: 'admin' | 'editor' | 'viewer';
   subscriptionStatus?: string;
   needsSubscription?: boolean;
   loading: boolean;
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           userType: data.userType,
           userId: data.userId,
           email: data.email,
+          accessLevel: data.accessLevel,
           subscriptionStatus: data.subscriptionStatus,
           needsSubscription: data.needsSubscription,
           loading: false,
@@ -46,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setState({
           authenticated: false,
           userType: null,
+          accessLevel: undefined,
           loading: false,
         });
       }

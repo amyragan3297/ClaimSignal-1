@@ -108,6 +108,13 @@ export class DBStorage implements IStorage {
     return await db.select().from(adjusters);
   }
 
+  async searchAdjusters(query: string): Promise<Adjuster[]> {
+    const searchTerm = `%${query.toLowerCase()}%`;
+    return await db.select().from(adjusters).where(
+      sql`LOWER(${adjusters.name}) LIKE ${searchTerm} OR LOWER(${adjusters.carrier}) LIKE ${searchTerm}`
+    );
+  }
+
   async getAdjuster(id: string): Promise<Adjuster | undefined> {
     const result = await db.select().from(adjusters).where(eq(adjusters.id, id));
     return result[0];
@@ -404,11 +411,12 @@ export class DBStorage implements IStorage {
     return result[0];
   }
 
-  async createTeamCredentials(username: string, password: string): Promise<TeamCredentials> {
+  async createTeamCredentials(username: string, password: string, accessLevel: string = 'viewer'): Promise<TeamCredentials> {
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await db.insert(teamCredentials).values({
       username: username.trim(),
       passwordHash,
+      accessLevel,
     }).returning();
     return result[0];
   }
@@ -423,10 +431,28 @@ export class DBStorage implements IStorage {
     return result[0];
   }
 
-  async verifyTeamLogin(username: string, password: string): Promise<boolean> {
+  async updateTeamAccessLevel(id: string, accessLevel: string): Promise<TeamCredentials | undefined> {
+    const result = await db.update(teamCredentials).set({
+      accessLevel,
+      updatedAt: new Date(),
+    }).where(eq(teamCredentials.id, id)).returning();
+    return result[0];
+  }
+
+  async getAllTeamCredentials(): Promise<TeamCredentials[]> {
+    return await db.select().from(teamCredentials);
+  }
+
+  async verifyTeamLogin(username: string, password: string): Promise<TeamCredentials | null> {
     const creds = await db.select().from(teamCredentials).where(eq(teamCredentials.username, username.trim())).limit(1);
-    if (!creds[0]) return false;
-    return bcrypt.compare(password, creds[0].passwordHash);
+    if (!creds[0]) return null;
+    const valid = await bcrypt.compare(password, creds[0].passwordHash);
+    return valid ? creds[0] : null;
+  }
+
+  async getTeamCredentialsByUsername(username: string): Promise<TeamCredentials | undefined> {
+    const result = await db.select().from(teamCredentials).where(eq(teamCredentials.username, username.trim())).limit(1);
+    return result[0];
   }
 
   // Auth methods - Individual users
@@ -440,12 +466,18 @@ export class DBStorage implements IStorage {
     return result[0];
   }
 
-  async createUser(email: string, password: string): Promise<User> {
+  async createUser(email: string, password: string, accessLevel: string = 'viewer'): Promise<User> {
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await db.insert(users).values({
       email: email.toLowerCase().trim(),
       passwordHash,
+      accessLevel,
     }).returning();
+    return result[0];
+  }
+
+  async updateUserAccessLevel(id: string, accessLevel: string): Promise<User | undefined> {
+    const result = await db.update(users).set({ accessLevel }).where(eq(users.id, id)).returning();
     return result[0];
   }
 
@@ -466,13 +498,14 @@ export class DBStorage implements IStorage {
   }
 
   // Session methods
-  async createSession(userType: 'team' | 'individual', userId?: string): Promise<Session> {
+  async createSession(userType: 'team' | 'individual', accessLevel: string = 'viewer', userId?: string): Promise<Session> {
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
     const result = await db.insert(sessions).values({
       token,
       userType,
       userId: userId || null,
+      accessLevel,
       expiresAt,
     }).returning();
     return result[0];

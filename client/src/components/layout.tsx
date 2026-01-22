@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Search, LayoutDashboard, FileText, Menu, Bot, ClipboardList, Building2, LogOut } from "lucide-react";
+import { Shield, Search, LayoutDashboard, FileText, Menu, Bot, ClipboardList, Building2, LogOut, Users } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth";
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
-  const { logout, userType, email } = useAuth();
+  const { logout, userType, email, accessLevel } = useAuth();
   const [, setLocation] = useLocation();
 
   const handleLogout = async () => {
@@ -70,12 +70,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
             Reports
           </Button>
         </Link>
+        {accessLevel === 'admin' && (
+          <Link href="/admin/team">
+            <Button variant={location.startsWith("/admin") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+              <Users className="w-4 h-4" />
+              Team Management
+            </Button>
+          </Link>
+        )}
       </nav>
 
       <div className="p-4 border-t border-sidebar-border space-y-3">
         <div className="bg-sidebar-primary/50 rounded-lg p-3">
           <p className="text-xs text-muted-foreground font-mono">
             {userType === 'team' ? 'TEAM ACCESS' : email || 'INDIVIDUAL'}
+          </p>
+          <p className="text-xs font-mono mt-1">
+            <span className={accessLevel === 'admin' ? 'text-amber-500' : accessLevel === 'editor' ? 'text-blue-500' : 'text-muted-foreground'}>
+              {accessLevel?.toUpperCase() || 'VIEWER'}
+            </span>
           </p>
           <p className="text-xs text-emerald-500 font-mono mt-1">SECURE CONNECTION</p>
         </div>

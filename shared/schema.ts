@@ -3,11 +3,15 @@ import { pgTable, text, varchar, integer, timestamp, jsonb, boolean } from "driz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Access level types: 'admin' (full access), 'editor' (add/edit), 'viewer' (read only)
+export type AccessLevel = 'admin' | 'editor' | 'viewer';
+
 // Team credentials for shared login
 export const teamCredentials = pgTable("team_credentials", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  accessLevel: text("access_level").notNull().default('viewer'),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -17,6 +21,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  accessLevel: text("access_level").notNull().default('viewer'),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   subscriptionStatus: text("subscription_status").default('inactive'),
@@ -29,6 +34,7 @@ export const sessions = pgTable("sessions", {
   token: text("token").notNull().unique(),
   userType: text("user_type").notNull(), // 'team' or 'individual'
   userId: text("user_id"), // null for team, user id for individual
+  accessLevel: text("access_level").notNull().default('viewer'), // 'admin', 'editor', 'viewer'
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
