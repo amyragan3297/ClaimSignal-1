@@ -528,6 +528,186 @@ export async function registerRoutes(
     }
   });
 
+  // One-time payment checkout (for add-on services)
+  app.post("/api/stripe/one-time-checkout", async (req, res) => {
+    try {
+      const token = req.cookies?.session_token;
+      if (!token) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const session = await storage.getSessionByToken(token);
+      if (!session || session.userType !== 'individual' || !session.userId) {
+        return res.status(401).json({ error: 'Individual account required' });
+      }
+
+      const user = await storage.getUserById(session.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const { priceId } = req.body;
+      if (!priceId) {
+        return res.status(400).json({ error: 'Price ID required' });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: { userId: user.id },
+        });
+        await storage.updateUserStripeInfo(user.id, { stripeCustomerId: customer.id });
+        customerId = customer.id;
+      }
+
+      const baseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+      const checkoutSession = await stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: ['card'],
+        line_items: [{ price: priceId, quantity: 1 }],
+        mode: 'payment',
+        success_url: `${baseUrl}/billing?payment=success`,
+        cancel_url: `${baseUrl}/billing`,
+        metadata: { userId: user.id, type: 'one_time' },
+        invoice_creation: { enabled: true },
+      });
+
+      res.json({ url: checkoutSession.url });
+    } catch (error) {
+      console.error("Error creating one-time checkout:", error);
+      res.status(500).json({ error: "Failed to create checkout session" });
+    }
+  });
+
+  // Get user invoices
+  app.get("/api/stripe/invoices", async (req, res) => {
+    try {
+      const token = req.cookies?.session_token;
+      if (!token) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const session = await storage.getSessionByToken(token);
+      if (!session || session.userType !== 'individual' || !session.userId) {
+        return res.status(401).json({ error: 'Individual account required' });
+      }
+
+      const user = await storage.getUserById(session.userId);
+      if (!user?.stripeCustomerId) {
+        return res.json({ invoices: [] });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const invoices = await stripe.invoices.list({
+        customer: user.stripeCustomerId,
+        limit: 24,
+      });
+
+      res.json({
+        invoices: invoices.data.map(inv => ({
+          id: inv.id,
+          number: inv.number,
+          status: inv.status,
+          amount_due: inv.amount_due,
+          amount_paid: inv.amount_paid,
+          currency: inv.currency,
+          created: inv.created,
+          invoice_pdf: inv.invoice_pdf,
+          hosted_invoice_url: inv.hosted_invoice_url,
+          description: inv.description || inv.lines.data[0]?.description || 'Invoice',
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      res.status(500).json({ error: "Failed to fetch invoices" });
+    }
+  });
+
+  // Get subscription details
+  app.get("/api/stripe/subscription", async (req, res) => {
+    try {
+      const token = req.cookies?.session_token;
+      if (!token) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const session = await storage.getSessionByToken(token);
+      if (!session || session.userType !== 'individual' || !session.userId) {
+        return res.status(401).json({ error: 'Individual account required' });
+      }
+
+      const user = await storage.getUserById(session.userId);
+      if (!user?.stripeSubscriptionId) {
+        return res.json({ subscription: null });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId, {
+        expand: ['items.data.price.product'],
+      });
+
+      const item = subscription.items.data[0];
+      const price = item?.price;
+      const product = price?.product as any;
+
+      const sub = subscription as any;
+      res.json({
+        subscription: {
+          id: subscription.id,
+          status: subscription.status,
+          current_period_start: sub.current_period_start || item?.current_period_start || Math.floor(Date.now() / 1000),
+          current_period_end: sub.current_period_end || item?.current_period_end || Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+          cancel_at_period_end: subscription.cancel_at_period_end,
+          product_name: product?.name || 'Subscription',
+          price_amount: price?.unit_amount || 0,
+          price_currency: price?.currency || 'usd',
+          price_interval: price?.recurring?.interval || 'month',
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+      res.status(500).json({ error: "Failed to fetch subscription" });
+    }
+  });
+
+  // Get one-time products (add-on services)
+  app.get("/api/stripe/addons", async (req, res) => {
+    try {
+      const rows = await storage.listProductsWithPrices();
+      
+      const productsMap = new Map();
+      for (const row of rows as any[]) {
+        const metadata = row.product_metadata || {};
+        if (metadata.type !== 'one_time') continue;
+        
+        if (!productsMap.has(row.product_id)) {
+          productsMap.set(row.product_id, {
+            id: row.product_id,
+            name: row.product_name,
+            description: row.product_description,
+            category: metadata.category || 'service',
+            prices: []
+          });
+        }
+        if (row.price_id) {
+          productsMap.get(row.product_id).prices.push({
+            id: row.price_id,
+            unit_amount: row.unit_amount,
+            currency: row.currency,
+          });
+        }
+      }
+
+      res.json({ addons: Array.from(productsMap.values()) });
+    } catch (error) {
+      console.error("Error getting addons:", error);
+      res.status(500).json({ error: "Failed to get add-on products" });
+    }
+  });
+
   // Apply auth middleware to all protected routes
   app.use('/api/adjusters', authMiddleware);
   app.use('/api/claims', authMiddleware);
