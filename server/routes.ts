@@ -343,7 +343,8 @@ export async function registerRoutes(
       }
 
       const { accessLevel } = validationResult.data;
-      const updated = await storage.updateTeamAccessLevel(req.params.id, accessLevel);
+      const id = req.params.id as string;
+      const updated = await storage.updateTeamAccessLevel(id, accessLevel);
       
       if (!updated) {
         return res.status(404).json({ error: 'Team credentials not found' });
