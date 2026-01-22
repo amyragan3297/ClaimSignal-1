@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema } from "@shared/schema";
+import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema, insertServiceRequestSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { registerDocumentAnalysisRoutes } from "./replit_integrations/document_analysis";
@@ -1115,6 +1115,71 @@ Base your advice on insurance industry best practices, policy interpretation, an
     } catch (error) {
       console.error("Error getting tactical advice:", error);
       res.status(500).json({ error: "Failed to get tactical advice" });
+    }
+  });
+
+  // Service request routes - public route for customers to submit requests
+  app.post("/api/service-requests", async (req, res) => {
+    try {
+      const parsed = insertServiceRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: fromError(parsed.error).message });
+      }
+
+      const request = await storage.createServiceRequest(parsed.data);
+      res.status(201).json({ success: true, request });
+    } catch (error) {
+      console.error("Error creating service request:", error);
+      res.status(500).json({ error: "Failed to create service request" });
+    }
+  });
+
+  // Get contact email for customers
+  app.get("/api/contact-info", (req, res) => {
+    const contactEmail = process.env.CONTACT_EMAIL || "support@claimsignal.com";
+    res.json({ email: contactEmail });
+  });
+
+  // Protected routes for admins to manage service requests
+  app.get("/api/service-requests", authMiddleware, async (req, res) => {
+    try {
+      const requests = await storage.getAllServiceRequests();
+      res.json({ requests });
+    } catch (error) {
+      console.error("Error fetching service requests:", error);
+      res.status(500).json({ error: "Failed to fetch service requests" });
+    }
+  });
+
+  app.get("/api/service-requests/:id", authMiddleware, async (req, res) => {
+    try {
+      const id = req.params.id as string;
+      const request = await storage.getServiceRequest(id);
+      if (!request) {
+        return res.status(404).json({ error: "Service request not found" });
+      }
+      res.json({ request });
+    } catch (error) {
+      console.error("Error fetching service request:", error);
+      res.status(500).json({ error: "Failed to fetch service request" });
+    }
+  });
+
+  app.patch("/api/service-requests/:id", authMiddleware, async (req, res) => {
+    try {
+      const id = req.params.id as string;
+      const { status, adminNotes } = req.body;
+      const updated = await storage.updateServiceRequest(id, {
+        status,
+        adminNotes,
+      });
+      if (!updated) {
+        return res.status(404).json({ error: "Service request not found" });
+      }
+      res.json({ success: true, request: updated });
+    } catch (error) {
+      console.error("Error updating service request:", error);
+      res.status(500).json({ error: "Failed to update service request" });
     }
   });
 

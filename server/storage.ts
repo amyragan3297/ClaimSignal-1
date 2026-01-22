@@ -14,6 +14,8 @@ import {
   type TeamCredentials,
   type User,
   type Session,
+  type ServiceRequest,
+  type InsertServiceRequest,
   adjusters,
   claims,
   claimAdjusters,
@@ -22,7 +24,8 @@ import {
   attachments,
   teamCredentials,
   users,
-  sessions
+  sessions,
+  serviceRequests
 } from "@shared/schema";
 import { db } from "../db";
 import { eq, desc, inArray, lt, sql } from "drizzle-orm";
@@ -582,6 +585,29 @@ export class DBStorage implements IStorage {
 
   async getUserByStripeSubscriptionId(subscriptionId: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.stripeSubscriptionId, subscriptionId)).limit(1);
+    return result[0];
+  }
+
+  // Service request methods
+  async createServiceRequest(request: InsertServiceRequest): Promise<ServiceRequest> {
+    const result = await db.insert(serviceRequests).values(request).returning();
+    return result[0];
+  }
+
+  async getAllServiceRequests(): Promise<ServiceRequest[]> {
+    return await db.select().from(serviceRequests).orderBy(desc(serviceRequests.createdAt));
+  }
+
+  async getServiceRequest(id: string): Promise<ServiceRequest | undefined> {
+    const result = await db.select().from(serviceRequests).where(eq(serviceRequests.id, id));
+    return result[0];
+  }
+
+  async updateServiceRequest(id: string, data: Partial<ServiceRequest>): Promise<ServiceRequest | undefined> {
+    const result = await db.update(serviceRequests).set({
+      ...data,
+      updatedAt: new Date(),
+    }).where(eq(serviceRequests.id, id)).returning();
     return result[0];
   }
 }
