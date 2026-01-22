@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Plus } from "lucide-react";
+import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Plus, Upload } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
@@ -11,6 +11,8 @@ import { fetchAdjusters, createAdjuster } from "@/lib/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import { useUpload } from "@/hooks/use-upload";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -18,6 +20,7 @@ export default function Home() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { getUploadParameters } = useUpload();
   
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
@@ -263,7 +266,7 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
               <div 
                 className="bg-card/50 border border-border/50 p-6 rounded-xl cursor-pointer hover:bg-card/70 hover:border-amber-500/30 transition-all"
@@ -295,6 +298,29 @@ export default function Home() {
                   Deep dive analytics into carrier denial trends.
                 </p>
               </div>
+
+              <ObjectUploader
+                onGetUploadParameters={getUploadParameters}
+                onComplete={(result) => {
+                  toast({
+                    title: "Upload complete",
+                    description: `Successfully uploaded ${result.successful?.length || 0} file(s)`,
+                  });
+                }}
+                maxNumberOfFiles={10}
+                maxFileSize={50 * 1024 * 1024}
+                buttonClassName="bg-card/50 border border-border/50 p-6 rounded-xl cursor-pointer hover:bg-card/70 hover:border-amber-500/30 transition-all h-auto flex flex-col items-start text-left w-full"
+              >
+                <div className="flex items-start justify-between mb-4 w-full">
+                  <div className="bg-amber-500/20 p-2.5 rounded-lg">
+                    <Upload className="w-6 h-6 text-amber-500" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Upload Documents</h3>
+                <p className="text-sm text-muted-foreground mb-4 font-normal">
+                  Upload claim documents, photos, and evidence files.
+                </p>
+              </ObjectUploader>
             </motion.div>
           )}
           
