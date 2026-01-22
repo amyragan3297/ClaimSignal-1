@@ -17,6 +17,7 @@ import Analytics from "@/pages/analytics";
 import Reports from "@/pages/reports";
 import Login from "@/pages/login";
 import Pricing from "@/pages/pricing";
+import AdminTeam from "@/pages/admin-team";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -77,6 +78,9 @@ function Router() {
       </Route>
       <Route path="/reports">
         <ProtectedRoute component={Reports} />
+      </Route>
+      <Route path="/admin/team">
+        <ProtectedRoute component={AdminTeam} />
       </Route>
       <Route component={NotFound} />
     </Switch>
