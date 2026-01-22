@@ -191,5 +191,39 @@ export type Document = typeof documents.$inferSelect;
 export type InsertAttachment = z.infer<typeof insertAttachmentSchema>;
 export type Attachment = typeof attachments.$inferSelect;
 
+// Service requests from customers who purchased add-ons
+export const serviceRequests = pgTable("service_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  // Customer info
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone"),
+  // Service details
+  serviceType: text("service_type").notNull(), // 'expert_review', 'carrier_report', 'training'
+  stripePaymentId: text("stripe_payment_id"), // reference to the Stripe payment
+  // Claim/request details
+  claimDescription: text("claim_description"),
+  carrierName: text("carrier_name"),
+  urgency: text("urgency").default('normal'), // 'normal', 'urgent'
+  // Document paths (stored in object storage)
+  documentPaths: text("document_paths").array(),
+  // Status tracking
+  status: text("status").notNull().default('pending'), // 'pending', 'in_progress', 'completed', 'cancelled'
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertServiceRequestSchema = createInsertSchema(serviceRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+  adminNotes: true,
+});
+
+export type InsertServiceRequest = z.infer<typeof insertServiceRequestSchema>;
+export type ServiceRequest = typeof serviceRequests.$inferSelect;
+
 // Re-export chat models for AI integrations
 export * from "./models/chat";
