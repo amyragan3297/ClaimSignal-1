@@ -12,13 +12,56 @@ export const teamCredentials = pgTable("team_credentials", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Active sessions
+// Individual users (for paid subscriptions)
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStatus: text("subscription_status").default('inactive'),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Active sessions (for both team and individual logins)
 export const sessions = pgTable("sessions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   token: text("token").notNull().unique(),
+  userType: text("user_type").notNull(), // 'team' or 'individual'
+  userId: text("user_id"), // null for team, user id for individual
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Insert schemas for auth
+export const insertTeamCredentialsSchema = createInsertSchema(teamCredentials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  stripeCustomerId: true,
+  stripeSubscriptionId: true,
+  subscriptionStatus: true,
+});
+
+export const insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types for auth
+export type InsertTeamCredentials = z.infer<typeof insertTeamCredentialsSchema>;
+export type TeamCredentials = typeof teamCredentials.$inferSelect;
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
+export type InsertSession = z.infer<typeof insertSessionSchema>;
+export type Session = typeof sessions.$inferSelect;
 
 export const adjusters = pgTable("adjusters", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

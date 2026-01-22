@@ -11,15 +11,23 @@ import {
   type InsertClaimAdjuster,
   type Attachment,
   type InsertAttachment,
+  type TeamCredentials,
+  type User,
+  type Session,
   adjusters,
   claims,
   claimAdjusters,
   interactions,
   documents,
-  attachments
+  attachments,
+  teamCredentials,
+  users,
+  sessions
 } from "@shared/schema";
 import { db } from "../db";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, lt, sql } from "drizzle-orm";
+import bcrypt from "bcrypt";
+import { randomBytes } from "crypto";
 
 function trimStringFields<T extends Record<string, unknown>>(obj: T): T {
   const result = { ...obj };
@@ -388,6 +396,160 @@ export class DBStorage implements IStorage {
       frictionLevel,
       resolutionTendency,
     };
+  }
+
+  // Auth methods - Team credentials
+  async getTeamCredentials(): Promise<TeamCredentials | undefined> {
+    const result = await db.select().from(teamCredentials).limit(1);
+    return result[0];
+  }
+
+  async createTeamCredentials(username: string, password: string): Promise<TeamCredentials> {
+    const passwordHash = await bcrypt.hash(password, 10);
+    const result = await db.insert(teamCredentials).values({
+      username: username.trim(),
+      passwordHash,
+    }).returning();
+    return result[0];
+  }
+
+  async updateTeamCredentials(id: string, username: string, password: string): Promise<TeamCredentials | undefined> {
+    const passwordHash = await bcrypt.hash(password, 10);
+    const result = await db.update(teamCredentials).set({
+      username: username.trim(),
+      passwordHash,
+      updatedAt: new Date(),
+    }).where(eq(teamCredentials.id, id)).returning();
+    return result[0];
+  }
+
+  async verifyTeamLogin(username: string, password: string): Promise<boolean> {
+    const creds = await db.select().from(teamCredentials).where(eq(teamCredentials.username, username.trim())).limit(1);
+    if (!creds[0]) return false;
+    return bcrypt.compare(password, creds[0].passwordHash);
+  }
+
+  // Auth methods - Individual users
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim())).limit(1);
+    return result[0];
+  }
+
+  async getUserById(id: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createUser(email: string, password: string): Promise<User> {
+    const passwordHash = await bcrypt.hash(password, 10);
+    const result = await db.insert(users).values({
+      email: email.toLowerCase().trim(),
+      passwordHash,
+    }).returning();
+    return result[0];
+  }
+
+  async verifyUserLogin(email: string, password: string): Promise<User | undefined> {
+    const user = await this.getUserByEmail(email);
+    if (!user) return undefined;
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    return valid ? user : undefined;
+  }
+
+  async updateUserStripeInfo(userId: string, data: {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    subscriptionStatus?: string;
+  }): Promise<User | undefined> {
+    const result = await db.update(users).set(data).where(eq(users.id, userId)).returning();
+    return result[0];
+  }
+
+  // Session methods
+  async createSession(userType: 'team' | 'individual', userId?: string): Promise<Session> {
+    const token = randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const result = await db.insert(sessions).values({
+      token,
+      userType,
+      userId: userId || null,
+      expiresAt,
+    }).returning();
+    return result[0];
+  }
+
+  async getSessionByToken(token: string): Promise<Session | undefined> {
+    const result = await db.select().from(sessions).where(eq(sessions.token, token)).limit(1);
+    const session = result[0];
+    if (!session) return undefined;
+    if (new Date(session.expiresAt) < new Date()) {
+      await this.deleteSession(token);
+      return undefined;
+    }
+    return session;
+  }
+
+  async deleteSession(token: string): Promise<void> {
+    await db.delete(sessions).where(eq(sessions.token, token));
+  }
+
+  async cleanExpiredSessions(): Promise<void> {
+    await db.delete(sessions).where(lt(sessions.expiresAt, new Date()));
+  }
+
+  // Stripe data queries (from stripe schema)
+  async getProduct(productId: string) {
+    const result = await db.execute(
+      sql`SELECT * FROM stripe.products WHERE id = ${productId}`
+    );
+    return (result.rows as any[])[0] || null;
+  }
+
+  async listProducts() {
+    const result = await db.execute(
+      sql`SELECT * FROM stripe.products WHERE active = true`
+    );
+    return result.rows;
+  }
+
+  async listProductsWithPrices() {
+    const result = await db.execute(
+      sql`
+        SELECT 
+          p.id as product_id,
+          p.name as product_name,
+          p.description as product_description,
+          p.active as product_active,
+          p.metadata as product_metadata,
+          pr.id as price_id,
+          pr.unit_amount,
+          pr.currency,
+          pr.recurring,
+          pr.active as price_active
+        FROM stripe.products p
+        LEFT JOIN stripe.prices pr ON pr.product = p.id AND pr.active = true
+        WHERE p.active = true
+        ORDER BY p.id, pr.unit_amount
+      `
+    );
+    return result.rows;
+  }
+
+  async getSubscription(subscriptionId: string) {
+    const result = await db.execute(
+      sql`SELECT * FROM stripe.subscriptions WHERE id = ${subscriptionId}`
+    );
+    return (result.rows as any[])[0] || null;
+  }
+
+  async getUserByStripeCustomerId(customerId: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.stripeCustomerId, customerId)).limit(1);
+    return result[0];
+  }
+
+  async getUserByStripeSubscriptionId(subscriptionId: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.stripeSubscriptionId, subscriptionId)).limit(1);
+    return result[0];
   }
 }
 

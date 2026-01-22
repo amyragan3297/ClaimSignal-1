@@ -36,6 +36,21 @@ Preferred communication style: Simple, everyday language.
 - **Interactions**: Logged interactions between adjusters and claims (emails, calls, etc.)
 - **Documents**: File attachments linked to adjusters
 - **ClaimAdjusters**: Junction table linking claims to adjusters (many-to-many)
+- **TeamCredentials**: Shared team login credentials (username/password hash)
+- **Users**: Individual user accounts with Stripe subscription info
+- **Sessions**: Active user sessions with tokens and expiry
+
+### Authentication System
+- **Team Login**: Shared credentials for team access - all team members use same username/password
+- **Individual Login**: Personal accounts with email/password requiring paid Stripe subscription
+- Session-based auth with HTTP-only cookies (7-day expiry)
+- Auth middleware protects all `/api/adjusters`, `/api/claims`, `/api/carriers`, `/api/documents`, `/api/attachments`, and `/api/tactical-advice` routes
+
+### Stripe Integration
+- Stripe payments for individual subscriptions
+- Webhook handling syncs subscription status from Stripe events
+- Checkout session flow with verify-subscription endpoint
+- Customer portal for managing subscriptions
 
 ### File Upload System
 - Uses Uppy for client-side file management with dashboard modal UI
