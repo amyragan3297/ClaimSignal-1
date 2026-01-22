@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Check, Loader2, ShieldAlert } from "lucide-react";
+import { Check, Loader2, ShieldAlert, Gift, Star } from "lucide-react";
 
 interface Price {
   id: string;
@@ -97,13 +97,45 @@ export default function Pricing() {
     }).format(amount / 100);
   };
 
-  const features = [
+  const tierFeatures: Record<string, { features: string[]; bonus: string; highlight?: boolean }> = {
+    'ClaimSignal Basic': {
+      features: [
+        "Access to adjuster database",
+        "Basic claim tracking",
+        "Document storage (100 docs)",
+        "Email support",
+      ],
+      bonus: "Free Training Session ($149 value)",
+    },
+    'ClaimSignal Pro': {
+      features: [
+        "Full adjuster database access",
+        "Advanced claim analytics",
+        "Unlimited document storage",
+        "AI tactical advisor",
+        "Priority email support",
+      ],
+      bonus: "Free Carrier Report ($99 value)",
+      highlight: true,
+    },
+    'ClaimSignal Enterprise': {
+      features: [
+        "Everything in Pro",
+        "Team collaboration tools",
+        "Advanced analytics dashboard",
+        "API access",
+        "Dedicated support",
+        "Custom integrations",
+      ],
+      bonus: "Free Expert Review ($299 value)",
+    },
+  };
+
+  const defaultFeatures = [
     "Full access to adjuster database",
     "Claim tracking & analytics",
-    "Carrier intelligence reports",
     "Document management",
     "AI tactical advisor",
-    "Unlimited searches",
   ];
 
   return (
@@ -135,7 +167,7 @@ export default function Pricing() {
                 Subscription products are being configured. Please check back soon.
               </p>
               <ul className="space-y-2">
-                {features.map((feature, i) => (
+                {defaultFeatures.map((feature, i) => (
                   <li key={i} className="flex items-center gap-2 text-slate-300">
                     <Check className="h-4 w-4 text-green-500" />
                     {feature}
@@ -155,53 +187,98 @@ export default function Pricing() {
           </Card>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <Card key={product.id} className="bg-slate-800/50 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white">{product.name}</CardTitle>
-                  <CardDescription className="text-slate-400">
-                    {product.description || "Full access to all features"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {product.prices.map((price) => (
-                    <div key={price.id} className="mb-4">
-                      <div className="text-3xl font-bold text-white">
-                        {formatPrice(price.unit_amount, price.currency)}
-                        {price.recurring && (
-                          <span className="text-lg font-normal text-slate-400">
-                            /{price.recurring.interval}
-                          </span>
-                        )}
+            {products
+              .filter(p => p.prices.some(price => price.recurring))
+              .sort((a, b) => {
+                const order = ['ClaimSignal Basic', 'ClaimSignal Pro', 'ClaimSignal Enterprise'];
+                return order.indexOf(a.name) - order.indexOf(b.name);
+              })
+              .map((product) => {
+                const tier = tierFeatures[product.name];
+                const features = tier?.features || defaultFeatures;
+                const isHighlighted = tier?.highlight;
+                const monthlyPrice = product.prices.find(p => p.recurring?.interval === 'month');
+                const yearlyPrice = product.prices.find(p => p.recurring?.interval === 'year');
+
+                return (
+                  <Card 
+                    key={product.id} 
+                    className={`bg-slate-800/50 border-slate-700 relative ${isHighlighted ? 'ring-2 ring-amber-500' : ''}`}
+                  >
+                    {isHighlighted && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                        <Star className="h-3 w-3" /> Most Popular
                       </div>
-                    </div>
-                  ))}
-                  <ul className="space-y-2 mt-4">
-                    {features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-slate-300 text-sm">
-                        <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  {product.prices[0] && (
-                    <Button
-                      onClick={() => handleCheckout(product.prices[0].id)}
-                      className="w-full bg-amber-600 hover:bg-amber-500"
-                      disabled={checkoutLoading === product.prices[0].id}
-                      data-testid={`button-checkout-${product.id}`}
-                    >
-                      {checkoutLoading === product.prices[0].id ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : null}
-                      Subscribe Now
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
+                    )}
+                    <CardHeader>
+                      <CardTitle className="text-white">{product.name.replace('ClaimSignal ', '')}</CardTitle>
+                      <CardDescription className="text-slate-400">
+                        {product.description || "Full access to all features"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {monthlyPrice && (
+                        <div className="mb-2">
+                          <div className="text-3xl font-bold text-white">
+                            {formatPrice(monthlyPrice.unit_amount, monthlyPrice.currency)}
+                            <span className="text-lg font-normal text-slate-400">/month</span>
+                          </div>
+                        </div>
+                      )}
+                      {yearlyPrice && (
+                        <div className="mb-4 p-3 bg-green-900/30 border border-green-700/50 rounded-lg">
+                          <div className="text-lg font-semibold text-green-400">
+                            {formatPrice(yearlyPrice.unit_amount, yearlyPrice.currency)}/year
+                          </div>
+                          {tier?.bonus && (
+                            <div className="flex items-center gap-1 text-sm text-green-300 mt-1">
+                              <Gift className="h-4 w-4" />
+                              {tier.bonus}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <ul className="space-y-2 mt-4">
+                        {features.map((feature, i) => (
+                          <li key={i} className="flex items-center gap-2 text-slate-300 text-sm">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <CardFooter className="flex flex-col gap-2">
+                      {monthlyPrice && (
+                        <Button
+                          onClick={() => handleCheckout(monthlyPrice.id)}
+                          variant="outline"
+                          className="w-full border-slate-600 text-slate-300 hover:bg-slate-700"
+                          disabled={checkoutLoading === monthlyPrice.id}
+                          data-testid={`button-checkout-monthly-${product.id}`}
+                        >
+                          {checkoutLoading === monthlyPrice.id ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : null}
+                          Start Monthly
+                        </Button>
+                      )}
+                      {yearlyPrice && (
+                        <Button
+                          onClick={() => handleCheckout(yearlyPrice.id)}
+                          className="w-full bg-amber-600 hover:bg-amber-500"
+                          disabled={checkoutLoading === yearlyPrice.id}
+                          data-testid={`button-checkout-yearly-${product.id}`}
+                        >
+                          {checkoutLoading === yearlyPrice.id ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : null}
+                          Start Yearly + Bonus
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                );
+              })}
           </div>
         )}
 
