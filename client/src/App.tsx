@@ -24,6 +24,8 @@ import SubmitRequest from "@/pages/submit-request";
 import AdminRequests from "@/pages/admin-requests";
 import SettingsPage from "@/pages/settings";
 import SupplementsPage from "@/pages/supplements";
+import CaseStudiesPage from "@/pages/case-studies";
+import RiskAlertsPage from "@/pages/risk-alerts";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -99,6 +101,12 @@ function Router() {
       </Route>
       <Route path="/supplements">
         <ProtectedRoute component={SupplementsPage} />
+      </Route>
+      <Route path="/case-studies">
+        <ProtectedRoute component={CaseStudiesPage} />
+      </Route>
+      <Route path="/risk-alerts">
+        <ProtectedRoute component={RiskAlertsPage} />
       </Route>
       <Route path="/submit-request" component={SubmitRequest} />
       <Route component={NotFound} />

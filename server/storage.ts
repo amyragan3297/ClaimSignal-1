@@ -33,7 +33,10 @@ import {
   serviceRequests,
   appSettings,
   supplements,
-  supplementLineItems
+  supplementLineItems,
+  caseStudies,
+  type CaseStudy,
+  type InsertCaseStudy
 } from "@shared/schema";
 import { db } from "../db";
 import { eq, desc, inArray, lt, sql } from "drizzle-orm";
@@ -92,6 +95,7 @@ export interface IStorage {
   getClaim(id: string): Promise<Claim | undefined>;
   findClaimByMaskedId(maskedId: string): Promise<Claim | undefined>;
   getClaimsByAdjuster(adjusterId: string): Promise<Claim[]>;
+  getAllClaimAdjusters(): Promise<ClaimAdjuster[]>;
   createClaim(claim: InsertClaim): Promise<Claim>;
   updateClaim(id: string, data: Partial<InsertClaim>): Promise<Claim | undefined>;
   linkAdjusterToClaim(claimId: string, adjusterId: string): Promise<ClaimAdjuster>;
@@ -113,6 +117,13 @@ export interface IStorage {
   getAttachment(id: string): Promise<Attachment | undefined>;
   createAttachment(attachment: InsertAttachment): Promise<Attachment>;
   deleteAttachment(id: string): Promise<void>;
+  
+  // Case Study methods
+  getAllCaseStudies(): Promise<CaseStudy[]>;
+  getCaseStudy(id: string): Promise<CaseStudy | undefined>;
+  createCaseStudy(caseStudy: InsertCaseStudy): Promise<CaseStudy>;
+  updateCaseStudy(id: string, data: Partial<InsertCaseStudy>): Promise<CaseStudy | undefined>;
+  deleteCaseStudy(id: string): Promise<void>;
 }
 
 export class DBStorage implements IStorage {
@@ -174,6 +185,10 @@ export class DBStorage implements IStorage {
     if (links.length === 0) return [];
     const claimIds = links.map(l => l.claimId);
     return await db.select().from(claims).where(inArray(claims.id, claimIds));
+  }
+
+  async getAllClaimAdjusters(): Promise<ClaimAdjuster[]> {
+    return await db.select().from(claimAdjusters);
   }
 
   async createClaim(claim: InsertClaim): Promise<Claim> {
@@ -727,6 +742,43 @@ export class DBStorage implements IStorage {
     const requestedTotal = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
     const approvedTotal = items.reduce((sum, item) => sum + (item.approvedAmount || 0), 0);
     return { requestedTotal, approvedTotal };
+  }
+
+  // Case Study methods
+  async getAllCaseStudies(): Promise<CaseStudy[]> {
+    return await db.select().from(caseStudies).orderBy(desc(caseStudies.createdAt));
+  }
+
+  async getCaseStudy(id: string): Promise<CaseStudy | undefined> {
+    const result = await db.select().from(caseStudies).where(eq(caseStudies.id, id));
+    return result[0];
+  }
+
+  async createCaseStudy(caseStudy: InsertCaseStudy): Promise<CaseStudy> {
+    const result = await db.insert(caseStudies).values(caseStudy).returning();
+    return result[0];
+  }
+
+  async updateCaseStudy(id: string, data: Partial<InsertCaseStudy>): Promise<CaseStudy | undefined> {
+    const result = await db.update(caseStudies).set({ ...data, updatedAt: new Date() }).where(eq(caseStudies.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteCaseStudy(id: string): Promise<void> {
+    await db.delete(caseStudies).where(eq(caseStudies.id, id));
+  }
+
+  async getCaseStudyByClaimId(claimId: string): Promise<CaseStudy | undefined> {
+    const result = await db.select().from(caseStudies).where(eq(caseStudies.linkedClaimId, claimId));
+    return result[0];
+  }
+
+  async getNextCaseStudyId(): Promise<string> {
+    const year = new Date().getFullYear();
+    const allStudies = await this.getAllCaseStudies();
+    const thisYearStudies = allStudies.filter(s => s.caseId.includes(`CS-${year}`));
+    const nextNum = thisYearStudies.length + 1;
+    return `CS-${year}-${String(nextNum).padStart(4, '0')}`;
   }
 }
 

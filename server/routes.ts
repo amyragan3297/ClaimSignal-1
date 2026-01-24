@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema, insertServiceRequestSchema, insertSupplementSchema, insertSupplementLineItemSchema } from "@shared/schema";
+import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema, insertServiceRequestSchema, insertSupplementSchema, insertSupplementLineItemSchema, insertCaseStudySchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { registerDocumentAnalysisRoutes } from "./replit_integrations/document_analysis";
@@ -912,6 +912,17 @@ export async function registerRoutes(
     }
   });
 
+  // Get all claim-adjuster relationships for risk analysis
+  app.get("/api/claim-adjusters", authMiddleware, async (_req, res) => {
+    try {
+      const claimAdjusters = await storage.getAllClaimAdjusters();
+      res.json(claimAdjusters);
+    } catch (error) {
+      console.error("Error fetching claim-adjusters:", error);
+      res.status(500).json({ error: "Failed to fetch claim-adjusters" });
+    }
+  });
+
   // Get claim by ID with linked adjusters and interactions
   app.get("/api/claims/:id", async (req, res) => {
     try {
@@ -1403,6 +1414,133 @@ Base your advice on insurance industry best practices, policy interpretation, an
     } catch (error) {
       console.error("Error calculating supplement totals:", error);
       res.status(500).json({ error: "Failed to calculate totals" });
+    }
+  });
+
+  // ============ Case Studies Routes ============
+  
+  // Get all case studies
+  app.get("/api/case-studies", authMiddleware, async (_req, res) => {
+    try {
+      const studies = await storage.getAllCaseStudies();
+      res.json({ caseStudies: studies });
+    } catch (error) {
+      console.error("Error fetching case studies:", error);
+      res.status(500).json({ error: "Failed to fetch case studies" });
+    }
+  });
+
+  // Get single case study
+  app.get("/api/case-studies/:id", authMiddleware, async (req, res) => {
+    try {
+      const study = await storage.getCaseStudy(req.params.id as string);
+      if (!study) {
+        return res.status(404).json({ error: "Case study not found" });
+      }
+      res.json(study);
+    } catch (error) {
+      console.error("Error fetching case study:", error);
+      res.status(500).json({ error: "Failed to fetch case study" });
+    }
+  });
+
+  // Create case study
+  app.post("/api/case-studies", authMiddleware, async (req, res) => {
+    try {
+      const caseId = await storage.getNextCaseStudyId();
+      const parsed = insertCaseStudySchema.safeParse({ ...req.body, caseId });
+      if (!parsed.success) {
+        return res.status(400).json({ error: fromError(parsed.error).message });
+      }
+      const study = await storage.createCaseStudy(parsed.data);
+      res.status(201).json(study);
+    } catch (error) {
+      console.error("Error creating case study:", error);
+      res.status(500).json({ error: "Failed to create case study" });
+    }
+  });
+
+  // Update case study
+  app.patch("/api/case-studies/:id", authMiddleware, async (req, res) => {
+    try {
+      const study = await storage.updateCaseStudy(req.params.id as string, req.body);
+      if (!study) {
+        return res.status(404).json({ error: "Case study not found" });
+      }
+      res.json(study);
+    } catch (error) {
+      console.error("Error updating case study:", error);
+      res.status(500).json({ error: "Failed to update case study" });
+    }
+  });
+
+  // Delete case study
+  app.delete("/api/case-studies/:id", authMiddleware, async (req, res) => {
+    try {
+      await storage.deleteCaseStudy(req.params.id as string);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting case study:", error);
+      res.status(500).json({ error: "Failed to delete case study" });
+    }
+  });
+
+  // Auto-generate case study from claim using AI
+  app.post("/api/case-studies/generate-from-claim/:claimId", authMiddleware, async (req, res) => {
+    try {
+      const claimId = req.params.claimId as string;
+      const claim = await storage.getClaim(claimId);
+      if (!claim) {
+        return res.status(404).json({ error: "Claim not found" });
+      }
+
+      // Get all interactions for this claim to build the story
+      const interactions = await storage.getInteractionsByClaimId(claimId);
+      const supplements = await storage.getSupplementsByClaimId(claimId);
+      const adjusters = await storage.getAdjustersByClaimId(claimId);
+
+      // Count denials and friction signals
+      const denialInteractions = interactions.filter(i => 
+        i.description?.toLowerCase().includes('denied') || 
+        i.outcome?.toLowerCase().includes('denied')
+      );
+      
+      const frictionSignals: string[] = [];
+      const actionsTaken: string[] = [];
+      
+      interactions.forEach(i => {
+        if (i.description?.toLowerCase().includes('denied') || i.description?.toLowerCase().includes('rejected')) {
+          frictionSignals.push(i.description.substring(0, 100));
+        }
+        if (i.type === 'Escalation' || i.type === 'Re-inspection') {
+          actionsTaken.push(`${i.type}: ${i.description?.substring(0, 100) || 'No details'}`);
+        }
+      });
+
+      // Calculate total recovered from supplements
+      const totalRecovered = supplements.reduce((sum, s) => sum + (s.approvedAmount || 0), 0);
+
+      const caseId = await storage.getNextCaseStudyId();
+      const study = await storage.createCaseStudy({
+        caseId,
+        title: `${claim.maskedId} - ${claim.carrier} claim ${claim.status === 'resolved' ? 'approved' : 'in progress'}`,
+        carrier: claim.carrier,
+        region: claim.propertyAddress?.split(',').pop()?.trim() || undefined,
+        claimType: 'general',
+        outcome: claim.status === 'resolved' ? 'approved' : 'partial',
+        summary: claim.notes || `Claim at ${claim.propertyAddress || 'property'}`,
+        frictionSignals: frictionSignals.length > 0 ? frictionSignals : undefined,
+        actionsTaken: actionsTaken.length > 0 ? actionsTaken : undefined,
+        denialsOvercome: denialInteractions.length,
+        amountRecovered: totalRecovered > 0 ? totalRecovered : undefined,
+        linkedClaimId: claim.id,
+        linkedAdjusterId: adjusters[0]?.id || undefined,
+      });
+
+      res.status(201).json(study);
+    } catch (error) {
+      console.error("Error generating case study:", error);
+      res.status(500).json({ error: "Failed to generate case study" });
     }
   });
 
