@@ -2,7 +2,7 @@ import { Layout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, ClipboardList, Clock, TrendingUp, CheckCircle, XCircle, Loader2, ArrowLeft, BarChart3 } from "lucide-react";
+import { Building2, Users, ClipboardList, Clock, TrendingUp, CheckCircle, XCircle, Loader2, ArrowLeft, BarChart3, AlertTriangle, FileCheck, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { fetchCarrierIntelligence, fetchAdjusters, fetchClaims } from "@/lib/api";
@@ -133,6 +133,55 @@ export default function CarrierDetail() {
                 <CardContent>
                   <div className="text-2xl font-bold" data-testid="stat-avg-interactions">
                     {intel.avgInteractionsPerClaim !== null ? intel.avgInteractionsPerClaim : '—'}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Performance Metrics */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <Card className="bg-card/50 border-border/60">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Risk Score
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold" data-testid="stat-risk-score">
+                    {intel.riskScore !== null ? (
+                      <span className={intel.riskScore >= 70 ? 'text-red-500' : intel.riskScore >= 50 ? 'text-amber-500' : 'text-green-500'}>
+                        {intel.riskScore}
+                      </span>
+                    ) : '—'}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/50 border-border/60">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <FileCheck className="w-4 h-4" />
+                    Supplement Success
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold" data-testid="stat-supplement-success">
+                    {intel.supplementSuccessRate !== null ? `${intel.supplementSuccessRate}%` : '—'}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/50 border-border/60">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    Re-inspection Win
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold" data-testid="stat-reinspection-win">
+                    {intel.reinspectionWinRate !== null ? `${intel.reinspectionWinRate}%` : '—'}
                   </div>
                 </CardContent>
               </Card>

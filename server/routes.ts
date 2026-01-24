@@ -1057,6 +1057,17 @@ export async function registerRoutes(
     }
   });
 
+  // Performance Summary KPIs
+  app.get("/api/analytics/performance-summary", authMiddleware, async (_req, res) => {
+    try {
+      const summary = await storage.getPerformanceSummary();
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching performance summary:", error);
+      res.status(500).json({ error: "Failed to fetch performance summary" });
+    }
+  });
+
   // Tactical Advisor endpoint
   app.post("/api/tactical-advice", async (req, res) => {
     try {

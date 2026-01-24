@@ -63,6 +63,12 @@ export interface AdjusterIntelligence {
   outcomesStalled: number;
   outcomesOpen: number;
   patternTags: string[];
+  // Behavioral metrics
+  riskScore: number;
+  responsivenessScore: number | null;
+  cooperationLevel: 'Low' | 'Moderate' | 'High' | null;
+  supplementApprovalRate: number | null;
+  avgInteractionsPerClaim: number | null;
 }
 
 export interface CarrierIntelligence {
@@ -77,6 +83,9 @@ export interface CarrierIntelligence {
   outcomesOpen: number;
   frictionLevel: 'Low' | 'Normal' | 'High' | null;
   resolutionTendency: 'Fast' | 'Normal' | 'Slow' | null;
+  riskScore: number | null;
+  supplementSuccessRate: number | null;
+  reinspectionWinRate: number | null;
 }
 
 export interface IStorage {
@@ -124,6 +133,19 @@ export interface IStorage {
   createCaseStudy(caseStudy: InsertCaseStudy): Promise<CaseStudy>;
   updateCaseStudy(id: string, data: Partial<InsertCaseStudy>): Promise<CaseStudy | undefined>;
   deleteCaseStudy(id: string): Promise<void>;
+  
+  // Analytics methods
+  getPerformanceSummary(): Promise<PerformanceSummary>;
+}
+
+export interface PerformanceSummary {
+  supplementSuccessRate: number | null;
+  reinspectionWinRate: number | null;
+  escalationSuccessRate: number | null;
+  avgDaysToApproval: number | null;
+  totalSupplements: number;
+  totalReinspections: number;
+  totalEscalations: number;
 }
 
 export class DBStorage implements IStorage {
@@ -322,6 +344,58 @@ export class DBStorage implements IStorage {
       : 0;
     if (avgInteractionsResolved > 5) patternTags.push("Documentation-sensitive");
 
+    // Calculate behavioral metrics
+    // Risk score based on riskImpression field
+    let riskScore = 50;
+    const impression = (adjuster.riskImpression || '').toLowerCase();
+    if (impression.includes('difficult') || impression.includes('aggressive')) riskScore += 15;
+    if (impression.includes('unresponsive') || impression.includes('delay')) riskScore += 10;
+    if (impression.includes('denied') || impression.includes('rejection')) riskScore += 10;
+    if (impression.includes('lowball') || impression.includes('scope reduction')) riskScore += 10;
+    if (impression.includes('fair') || impression.includes('reasonable')) riskScore -= 15;
+    if (impression.includes('responsive') || impression.includes('cooperative')) riskScore -= 10;
+    if (impression.includes('approved') || impression.includes('professional')) riskScore -= 10;
+    riskScore = Math.max(0, Math.min(100, riskScore));
+
+    // Responsiveness score (0-100) based on how quickly claims progress
+    let responsivenessScore: number | null = null;
+    if (avgDaysToResolution !== null && adjusterClaims.length > 0) {
+      // Lower days = higher responsiveness
+      if (avgDaysToResolution <= 14) responsivenessScore = 90;
+      else if (avgDaysToResolution <= 30) responsivenessScore = 75;
+      else if (avgDaysToResolution <= 45) responsivenessScore = 60;
+      else if (avgDaysToResolution <= 60) responsivenessScore = 45;
+      else responsivenessScore = 30;
+    }
+
+    // Cooperation level based on outcomes and escalation patterns
+    let cooperationLevel: 'Low' | 'Moderate' | 'High' | null = null;
+    if (adjusterClaims.length >= 2) {
+      const resolvedRatio = (resolvedClaims.length + openClaims.length) / adjusterClaims.length;
+      const escalationRatio = totalInteractions > 0 ? escalationCount / totalInteractions : 0;
+      
+      if (resolvedRatio > 0.7 && escalationRatio < 0.15) cooperationLevel = 'High';
+      else if (resolvedRatio > 0.4 && escalationRatio < 0.3) cooperationLevel = 'Moderate';
+      else cooperationLevel = 'Low';
+    }
+
+    // Supplement approval rate for this adjuster's claims
+    const adjusterClaimIds = adjusterClaims.map(c => c.id);
+    const adjusterSupplements = adjusterClaimIds.length > 0 
+      ? await db.select().from(supplements).where(inArray(supplements.claimId, adjusterClaimIds))
+      : [];
+    let supplementApprovalRate: number | null = null;
+    const completedSupplements = adjusterSupplements.filter(s => s.status === 'approved' || s.status === 'denied');
+    if (completedSupplements.length > 0) {
+      const approvedCount = completedSupplements.filter(s => s.status === 'approved').length;
+      supplementApprovalRate = Math.round((approvedCount / completedSupplements.length) * 100);
+    }
+
+    // Avg interactions per claim
+    const avgInteractionsPerClaim = adjusterClaims.length > 0
+      ? Math.round((totalInteractions / adjusterClaims.length) * 10) / 10
+      : null;
+
     return {
       totalInteractions,
       totalClaims: adjusterClaims.length,
@@ -332,6 +406,11 @@ export class DBStorage implements IStorage {
       outcomesStalled: stalledClaims.length,
       outcomesOpen: openClaims.length,
       patternTags,
+      riskScore,
+      responsivenessScore,
+      cooperationLevel,
+      supplementApprovalRate,
+      avgInteractionsPerClaim,
     };
   }
 
@@ -432,6 +511,52 @@ export class DBStorage implements IStorage {
       else resolutionTendency = 'Slow';
     }
 
+    // Calculate carrier risk score based on adjuster behavior
+    let riskScore: number | null = null;
+    if (carrierAdjusters.length > 0) {
+      let totalScore = 0;
+      for (const adj of carrierAdjusters) {
+        let score = 50;
+        const impression = (adj.riskImpression || '').toLowerCase();
+        if (impression.includes('difficult') || impression.includes('aggressive')) score += 15;
+        if (impression.includes('unresponsive') || impression.includes('delay')) score += 10;
+        if (impression.includes('denied') || impression.includes('rejection')) score += 10;
+        if (impression.includes('lowball') || impression.includes('scope reduction')) score += 10;
+        if (impression.includes('fair') || impression.includes('reasonable')) score -= 15;
+        if (impression.includes('responsive') || impression.includes('cooperative')) score -= 10;
+        if (impression.includes('approved') || impression.includes('professional')) score -= 10;
+        totalScore += Math.max(0, Math.min(100, score));
+      }
+      riskScore = Math.round(totalScore / carrierAdjusters.length);
+    }
+
+    // Supplement success rate (based on claims that had supplements)
+    const allSupplements = await db.select().from(supplements).where(
+      inArray(supplements.claimId, carrierClaims.map(c => c.id))
+    );
+    let supplementSuccessRate: number | null = null;
+    const completedSupplements = allSupplements.filter(s => s.status === 'approved' || s.status === 'denied');
+    if (completedSupplements.length > 0) {
+      const approvedSupplements = completedSupplements.filter(s => s.status === 'approved').length;
+      supplementSuccessRate = Math.round((approvedSupplements / completedSupplements.length) * 100);
+    }
+
+    // Reinspection win rate (based on interactions with type containing "reinspection" or "re-inspection")
+    const reinspectionInteractions = allInteractions.filter(i => 
+      i.type.toLowerCase().includes('reinspection') || 
+      i.type.toLowerCase().includes('re-inspection') ||
+      i.type === 'Inspection'
+    );
+    let reinspectionWinRate: number | null = null;
+    if (reinspectionInteractions.length > 0) {
+      const successfulReinspections = reinspectionInteractions.filter(i => 
+        i.outcome?.toLowerCase().includes('approved') || 
+        i.outcome?.toLowerCase().includes('successful') ||
+        i.outcome?.toLowerCase().includes('favorable')
+      ).length;
+      reinspectionWinRate = Math.round((successfulReinspections / reinspectionInteractions.length) * 100);
+    }
+
     return {
       carrier,
       totalAdjusters: carrierAdjusters.length,
@@ -444,6 +569,9 @@ export class DBStorage implements IStorage {
       outcomesOpen: openClaims.length,
       frictionLevel,
       resolutionTendency,
+      riskScore,
+      supplementSuccessRate,
+      reinspectionWinRate,
     };
   }
 
@@ -779,6 +907,80 @@ export class DBStorage implements IStorage {
     const thisYearStudies = allStudies.filter(s => s.caseId.includes(`CS-${year}`));
     const nextNum = thisYearStudies.length + 1;
     return `CS-${year}-${String(nextNum).padStart(4, '0')}`;
+  }
+
+  async getPerformanceSummary(): Promise<PerformanceSummary> {
+    // Get all supplements
+    const allSupplements = await db.select().from(supplements);
+    const completedSupplements = allSupplements.filter(s => s.status === 'approved' || s.status === 'denied');
+    let supplementSuccessRate: number | null = null;
+    if (completedSupplements.length > 0) {
+      const approvedCount = completedSupplements.filter(s => s.status === 'approved').length;
+      supplementSuccessRate = Math.round((approvedCount / completedSupplements.length) * 100);
+    }
+
+    // Get all interactions for reinspection and escalation metrics
+    const allInteractions = await db.select().from(interactions);
+    
+    // Reinspection win rate
+    const reinspectionInteractions = allInteractions.filter(i => 
+      i.type.toLowerCase().includes('reinspection') || 
+      i.type.toLowerCase().includes('re-inspection') ||
+      i.type === 'Inspection'
+    );
+    let reinspectionWinRate: number | null = null;
+    if (reinspectionInteractions.length > 0) {
+      const successfulReinspections = reinspectionInteractions.filter(i => 
+        i.outcome?.toLowerCase().includes('approved') || 
+        i.outcome?.toLowerCase().includes('successful') ||
+        i.outcome?.toLowerCase().includes('favorable')
+      ).length;
+      reinspectionWinRate = Math.round((successfulReinspections / reinspectionInteractions.length) * 100);
+    }
+
+    // Escalation success rate
+    const escalationInteractions = allInteractions.filter(i => 
+      i.type === 'Escalation' || i.type.toLowerCase().includes('escalat')
+    );
+    let escalationSuccessRate: number | null = null;
+    if (escalationInteractions.length > 0) {
+      const successfulEscalations = escalationInteractions.filter(i => 
+        i.outcome?.toLowerCase().includes('approved') || 
+        i.outcome?.toLowerCase().includes('successful') ||
+        i.outcome?.toLowerCase().includes('favorable') ||
+        i.outcome?.toLowerCase().includes('resolved')
+      ).length;
+      escalationSuccessRate = Math.round((successfulEscalations / escalationInteractions.length) * 100);
+    }
+
+    // Avg days to approval (from resolved claims)
+    const allClaims = await this.getAllClaims();
+    const resolvedClaims = allClaims.filter(c => c.status === 'resolved' || c.status === 'closed');
+    let avgDaysToApproval: number | null = null;
+    if (resolvedClaims.length > 0) {
+      const approvalDays = resolvedClaims.map(claim => {
+        if (!claim.dateOfLoss) return null;
+        const startDate = new Date(claim.dateOfLoss).getTime();
+        // Use createdAt or last update as end date
+        const endDate = claim.createdAt ? new Date(claim.createdAt).getTime() : Date.now();
+        const days = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+        return days >= 0 ? days : null;
+      }).filter((d): d is number => d !== null);
+      
+      if (approvalDays.length > 0) {
+        avgDaysToApproval = Math.round(approvalDays.reduce((a, b) => a + b, 0) / approvalDays.length);
+      }
+    }
+
+    return {
+      supplementSuccessRate,
+      reinspectionWinRate,
+      escalationSuccessRate,
+      avgDaysToApproval,
+      totalSupplements: allSupplements.length,
+      totalReinspections: reinspectionInteractions.length,
+      totalEscalations: escalationInteractions.length,
+    };
   }
 }
 

@@ -722,6 +722,58 @@ export default function AdjusterProfile() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Behavioral Performance Metrics */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <TrendingUp className="w-4 h-4" />
+                        Behavioral Performance
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                          <div className="text-sm text-muted-foreground mb-1">Risk Score</div>
+                          <div className={`text-2xl font-bold ${intelligence.riskScore >= 70 ? 'text-red-500' : intelligence.riskScore >= 50 ? 'text-amber-500' : 'text-green-500'}`} data-testid="stat-risk-score">
+                            {intelligence.riskScore}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {intelligence.riskScore >= 70 ? 'High' : intelligence.riskScore >= 50 ? 'Elevated' : 'Low'}
+                          </div>
+                        </div>
+
+                        <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                          <div className="text-sm text-muted-foreground mb-1">Responsiveness</div>
+                          <div className="text-2xl font-bold" data-testid="stat-responsiveness">
+                            {intelligence.responsivenessScore !== null ? intelligence.responsivenessScore : '—'}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {intelligence.responsivenessScore !== null ? (
+                              intelligence.responsivenessScore >= 75 ? 'Quick' : intelligence.responsivenessScore >= 50 ? 'Moderate' : 'Slow'
+                            ) : 'N/A'}
+                          </div>
+                        </div>
+
+                        <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                          <div className="text-sm text-muted-foreground mb-1">Cooperation</div>
+                          <div className={`text-2xl font-bold ${intelligence.cooperationLevel === 'High' ? 'text-green-500' : intelligence.cooperationLevel === 'Moderate' ? 'text-amber-500' : intelligence.cooperationLevel === 'Low' ? 'text-red-500' : ''}`} data-testid="stat-cooperation">
+                            {intelligence.cooperationLevel || '—'}
+                          </div>
+                        </div>
+
+                        <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                          <div className="text-sm text-muted-foreground mb-1">Supplement Approval</div>
+                          <div className="text-2xl font-bold" data-testid="stat-supplement-approval">
+                            {intelligence.supplementApprovalRate !== null ? `${intelligence.supplementApprovalRate}%` : '—'}
+                          </div>
+                        </div>
+
+                        <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                          <div className="text-sm text-muted-foreground mb-1">Avg Interactions/Claim</div>
+                          <div className="text-2xl font-bold" data-testid="stat-avg-interactions-claim">
+                            {intelligence.avgInteractionsPerClaim !== null ? intelligence.avgInteractionsPerClaim : '—'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
