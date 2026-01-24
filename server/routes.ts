@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema, insertServiceRequestSchema } from "@shared/schema";
+import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema, insertServiceRequestSchema, insertSupplementSchema, insertSupplementLineItemSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { registerDocumentAnalysisRoutes } from "./replit_integrations/document_analysis";
@@ -1242,6 +1242,167 @@ Base your advice on insurance industry best practices, policy interpretation, an
     } catch (error) {
       console.error("Error saving settings:", error);
       res.status(500).json({ error: "Failed to save settings" });
+    }
+  });
+
+  // Supplement routes
+  app.get("/api/supplements", authMiddleware, async (_req, res) => {
+    try {
+      const supplements = await storage.getAllSupplements();
+      res.json({ supplements });
+    } catch (error) {
+      console.error("Error fetching supplements:", error);
+      res.status(500).json({ error: "Failed to fetch supplements" });
+    }
+  });
+
+  app.get("/api/claims/:claimId/supplements", authMiddleware, async (req, res) => {
+    try {
+      const claimId = req.params.claimId as string;
+      const supplements = await storage.getSupplementsByClaimId(claimId);
+      res.json({ supplements });
+    } catch (error) {
+      console.error("Error fetching claim supplements:", error);
+      res.status(500).json({ error: "Failed to fetch supplements" });
+    }
+  });
+
+  app.get("/api/supplements/:id", authMiddleware, async (req, res) => {
+    try {
+      const supplement = await storage.getSupplement(req.params.id as string);
+      if (!supplement) {
+        return res.status(404).json({ error: "Supplement not found" });
+      }
+      const lineItems = await storage.getLineItemsBySupplement(supplement.id);
+      res.json({ supplement, lineItems });
+    } catch (error) {
+      console.error("Error fetching supplement:", error);
+      res.status(500).json({ error: "Failed to fetch supplement" });
+    }
+  });
+
+  app.post("/api/supplements", authMiddleware, async (req, res) => {
+    try {
+      const parsed = insertSupplementSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: fromError(parsed.error).message });
+      }
+      const supplement = await storage.createSupplement(parsed.data);
+      res.json({ success: true, supplement });
+    } catch (error) {
+      console.error("Error creating supplement:", error);
+      res.status(500).json({ error: "Failed to create supplement" });
+    }
+  });
+
+  app.patch("/api/supplements/:id", authMiddleware, async (req, res) => {
+    try {
+      const updated = await storage.updateSupplement(req.params.id as string, req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Supplement not found" });
+      }
+      res.json({ success: true, supplement: updated });
+    } catch (error) {
+      console.error("Error updating supplement:", error);
+      res.status(500).json({ error: "Failed to update supplement" });
+    }
+  });
+
+  app.delete("/api/supplements/:id", authMiddleware, async (req, res) => {
+    try {
+      const deleted = await storage.deleteSupplement(req.params.id as string);
+      if (!deleted) {
+        return res.status(404).json({ error: "Supplement not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting supplement:", error);
+      res.status(500).json({ error: "Failed to delete supplement" });
+    }
+  });
+
+  // Supplement line item routes
+  app.post("/api/supplements/:supplementId/line-items", authMiddleware, async (req, res) => {
+    try {
+      const supplementId = req.params.supplementId as string;
+      const parsed = insertSupplementLineItemSchema.safeParse({ ...req.body, supplementId });
+      if (!parsed.success) {
+        return res.status(400).json({ error: fromError(parsed.error).message });
+      }
+      const lineItem = await storage.createLineItem(parsed.data);
+      
+      // Recalculate supplement totals
+      const totals = await storage.calculateSupplementTotal(supplementId);
+      await storage.updateSupplement(supplementId, {
+        requestedAmount: totals.requestedTotal,
+        approvedAmount: totals.approvedTotal,
+      });
+      
+      res.json({ success: true, lineItem });
+    } catch (error) {
+      console.error("Error creating line item:", error);
+      res.status(500).json({ error: "Failed to create line item" });
+    }
+  });
+
+  app.patch("/api/line-items/:id", authMiddleware, async (req, res) => {
+    try {
+      const updated = await storage.updateLineItem(req.params.id as string, req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Line item not found" });
+      }
+      
+      // Recalculate supplement totals
+      const totals = await storage.calculateSupplementTotal(updated.supplementId);
+      await storage.updateSupplement(updated.supplementId, {
+        requestedAmount: totals.requestedTotal,
+        approvedAmount: totals.approvedTotal,
+      });
+      
+      res.json({ success: true, lineItem: updated });
+    } catch (error) {
+      console.error("Error updating line item:", error);
+      res.status(500).json({ error: "Failed to update line item" });
+    }
+  });
+
+  app.delete("/api/line-items/:id", authMiddleware, async (req, res) => {
+    try {
+      const deleted = await storage.deleteLineItem(req.params.id as string);
+      if (!deleted) {
+        return res.status(404).json({ error: "Line item not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting line item:", error);
+      res.status(500).json({ error: "Failed to delete line item" });
+    }
+  });
+
+  // Calculate claim supplement totals
+  app.get("/api/claims/:claimId/supplement-totals", authMiddleware, async (req, res) => {
+    try {
+      const claimId = req.params.claimId as string;
+      const supplements = await storage.getSupplementsByClaimId(claimId);
+      
+      let totalRequested = 0;
+      let totalApproved = 0;
+      
+      for (const supp of supplements) {
+        totalRequested += supp.requestedAmount || 0;
+        totalApproved += supp.approvedAmount || 0;
+      }
+      
+      res.json({
+        claimId,
+        totalSupplements: supplements.length,
+        totalRequested,
+        totalApproved,
+        pendingAmount: totalRequested - totalApproved,
+      });
+    } catch (error) {
+      console.error("Error calculating supplement totals:", error);
+      res.status(500).json({ error: "Failed to calculate totals" });
     }
   });
 
