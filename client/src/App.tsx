@@ -26,6 +26,7 @@ import SettingsPage from "@/pages/settings";
 import SupplementsPage from "@/pages/supplements";
 import CaseStudiesPage from "@/pages/case-studies";
 import RiskAlertsPage from "@/pages/risk-alerts";
+import Adjusters from "@/pages/adjusters";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -77,6 +78,9 @@ function Router() {
       </Route>
       <Route path="/carriers/:name">
         <ProtectedRoute component={CarrierDetail} />
+      </Route>
+      <Route path="/adjusters">
+        <ProtectedRoute component={Adjusters} />
       </Route>
       <Route path="/adjuster/:id">
         <ProtectedRoute component={AdjusterProfile} />
