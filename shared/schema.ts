@@ -225,5 +225,73 @@ export const insertServiceRequestSchema = createInsertSchema(serviceRequests).om
 export type InsertServiceRequest = z.infer<typeof insertServiceRequestSchema>;
 export type ServiceRequest = typeof serviceRequests.$inferSelect;
 
+// App settings for configuration
+export const appSettings = pgTable("app_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: text("key").notNull().unique(),
+  value: text("value"),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type AppSetting = typeof appSettings.$inferSelect;
+
+// Supplements for claims - additional damage discovered after initial claim
+export const supplements = pgTable("supplements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  claimId: varchar("claim_id").notNull().references(() => claims.id, { onDelete: 'cascade' }),
+  // Supplement info
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").notNull().default('pending'), // 'pending', 'submitted', 'approved', 'denied', 'negotiating'
+  // Amounts
+  requestedAmount: integer("requested_amount"), // in cents
+  approvedAmount: integer("approved_amount"), // in cents
+  // AI-extracted data from documents
+  extractedData: jsonb("extracted_data"), // { lineItems: [...], damageDescriptions: [...], etc }
+  // Document references
+  documentPaths: text("document_paths").array(),
+  // Dates
+  submittedDate: text("submitted_date"),
+  responseDate: text("response_date"),
+  // Notes
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertSupplementSchema = createInsertSchema(supplements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  extractedData: true,
+});
+
+export type InsertSupplement = z.infer<typeof insertSupplementSchema>;
+export type Supplement = typeof supplements.$inferSelect;
+
+// Supplement line items (individual items within a supplement)
+export const supplementLineItems = pgTable("supplement_line_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  supplementId: varchar("supplement_id").notNull().references(() => supplements.id, { onDelete: 'cascade' }),
+  description: text("description").notNull(),
+  category: text("category"), // 'roof', 'siding', 'interior', 'contents', etc
+  quantity: integer("quantity").default(1),
+  unitPrice: integer("unit_price"), // in cents
+  totalPrice: integer("total_price"), // in cents
+  status: text("status").default('pending'), // 'pending', 'approved', 'denied', 'partial'
+  approvedAmount: integer("approved_amount"), // in cents
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertSupplementLineItemSchema = createInsertSchema(supplementLineItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSupplementLineItem = z.infer<typeof insertSupplementLineItemSchema>;
+export type SupplementLineItem = typeof supplementLineItems.$inferSelect;
+
 // Re-export chat models for AI integrations
 export * from "./models/chat";
