@@ -80,6 +80,7 @@ export interface IStorage {
   // Adjuster methods
   getAllAdjusters(): Promise<Adjuster[]>;
   getAdjuster(id: string): Promise<Adjuster | undefined>;
+  findAdjusterByNameAndCarrier(name: string, carrier: string): Promise<Adjuster | undefined>;
   createAdjuster(adjuster: InsertAdjuster): Promise<Adjuster>;
   updateAdjuster(id: string, data: Partial<InsertAdjuster>): Promise<Adjuster | undefined>;
   getAdjusterIntelligence(id: string): Promise<AdjusterIntelligence | undefined>;
@@ -89,6 +90,7 @@ export interface IStorage {
   // Claim methods
   getAllClaims(): Promise<Claim[]>;
   getClaim(id: string): Promise<Claim | undefined>;
+  findClaimByMaskedId(maskedId: string): Promise<Claim | undefined>;
   getClaimsByAdjuster(adjusterId: string): Promise<Claim[]>;
   createClaim(claim: InsertClaim): Promise<Claim>;
   updateClaim(id: string, data: Partial<InsertClaim>): Promise<Claim | undefined>;
@@ -126,6 +128,13 @@ export class DBStorage implements IStorage {
     );
   }
 
+  async findAdjusterByNameAndCarrier(name: string, carrier: string): Promise<Adjuster | undefined> {
+    const results = await db.select().from(adjusters).where(
+      sql`LOWER(${adjusters.name}) = LOWER(${name}) AND LOWER(${adjusters.carrier}) = LOWER(${carrier})`
+    );
+    return results[0];
+  }
+
   async getAdjuster(id: string): Promise<Adjuster | undefined> {
     const result = await db.select().from(adjusters).where(eq(adjusters.id, id));
     return result[0];
@@ -151,6 +160,13 @@ export class DBStorage implements IStorage {
   async getClaim(id: string): Promise<Claim | undefined> {
     const result = await db.select().from(claims).where(eq(claims.id, id));
     return result[0];
+  }
+
+  async findClaimByMaskedId(maskedId: string): Promise<Claim | undefined> {
+    const results = await db.select().from(claims).where(
+      sql`LOWER(${claims.maskedId}) = LOWER(${maskedId})`
+    );
+    return results[0];
   }
 
   async getClaimsByAdjuster(adjusterId: string): Promise<Claim[]> {

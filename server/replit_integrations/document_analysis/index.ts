@@ -281,35 +281,54 @@ export function registerDocumentAnalysisRoutes(app: Express): void {
       let targetClaimId = claimId;
 
       if (!targetAdjusterId && extracted.adjusterName && extracted.carrier) {
-        const newAdjuster = await storage.createAdjuster({
-          name: extracted.adjusterName,
-          carrier: extracted.carrier,
-          email: extracted.adjusterEmail || undefined,
-          phone: extracted.adjusterPhone || undefined,
-          internalNotes: extracted.internalNotes || undefined,
-          riskImpression: extracted.riskImpression || undefined,
-          whatWorked: extracted.whatWorked || undefined,
-        });
-        targetAdjusterId = newAdjuster.id;
-        savedItems.push(`new adjuster: ${extracted.adjusterName}`);
+        // Check if adjuster already exists
+        const existingAdjuster = await storage.findAdjusterByNameAndCarrier(extracted.adjusterName, extracted.carrier);
+        if (existingAdjuster) {
+          targetAdjusterId = existingAdjuster.id;
+          savedItems.push(`found existing adjuster: ${extracted.adjusterName}`);
+        } else {
+          const newAdjuster = await storage.createAdjuster({
+            name: extracted.adjusterName,
+            carrier: extracted.carrier,
+            email: extracted.adjusterEmail || undefined,
+            phone: extracted.adjusterPhone || undefined,
+            internalNotes: extracted.internalNotes || undefined,
+            riskImpression: extracted.riskImpression || undefined,
+            whatWorked: extracted.whatWorked || undefined,
+          });
+          targetAdjusterId = newAdjuster.id;
+          savedItems.push(`new adjuster: ${extracted.adjusterName}`);
+        }
       }
 
-      if (!targetClaimId && extracted.claimId && extracted.carrier && extracted.dateOfLoss) {
-        const newClaim = await storage.createClaim({
-          maskedId: extracted.claimId,
-          carrier: extracted.carrier,
-          dateOfLoss: extracted.dateOfLoss,
-          homeownerName: extracted.homeownerName || undefined,
-          propertyAddress: extracted.propertyAddress || undefined,
-          notes: extracted.claimNotes || undefined,
-          status: 'open',
-        });
-        targetClaimId = newClaim.id;
-        savedItems.push(`new claim: ${extracted.claimId}`);
+      if (!targetClaimId && extracted.claimId && extracted.carrier) {
+        // Check if claim already exists by claim number
+        const existingClaim = await storage.findClaimByMaskedId(extracted.claimId);
+        if (existingClaim) {
+          targetClaimId = existingClaim.id;
+          savedItems.push(`found existing claim: ${extracted.claimId}`);
+        } else if (extracted.dateOfLoss) {
+          const newClaim = await storage.createClaim({
+            maskedId: extracted.claimId,
+            carrier: extracted.carrier,
+            dateOfLoss: extracted.dateOfLoss,
+            homeownerName: extracted.homeownerName || undefined,
+            propertyAddress: extracted.propertyAddress || undefined,
+            notes: extracted.claimNotes || undefined,
+            status: 'open',
+          });
+          targetClaimId = newClaim.id;
+          savedItems.push(`new claim: ${extracted.claimId}`);
+        }
 
-        if (targetAdjusterId) {
-          await storage.linkAdjusterToClaim(targetClaimId, targetAdjusterId);
-          savedItems.push('linked adjuster to claim');
+        if (targetClaimId && targetAdjusterId) {
+          // Check if already linked before linking
+          try {
+            await storage.linkAdjusterToClaim(targetClaimId, targetAdjusterId);
+            savedItems.push('linked adjuster to claim');
+          } catch (e) {
+            // Already linked, ignore
+          }
         }
       }
 
