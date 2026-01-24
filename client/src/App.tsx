@@ -23,6 +23,7 @@ import SubscriptionSuccess from "@/pages/subscription-success";
 import SubmitRequest from "@/pages/submit-request";
 import AdminRequests from "@/pages/admin-requests";
 import SettingsPage from "@/pages/settings";
+import SupplementsPage from "@/pages/supplements";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -95,6 +96,9 @@ function Router() {
       </Route>
       <Route path="/settings">
         <ProtectedRoute component={SettingsPage} />
+      </Route>
+      <Route path="/supplements">
+        <ProtectedRoute component={SupplementsPage} />
       </Route>
       <Route path="/submit-request" component={SubmitRequest} />
       <Route component={NotFound} />
