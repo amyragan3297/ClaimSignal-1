@@ -1198,5 +1198,52 @@ Base your advice on insurance industry best practices, policy interpretation, an
     }
   });
 
+  // App settings routes
+  app.get("/api/settings", authMiddleware, async (_req, res) => {
+    try {
+      const settings = await storage.getAllAppSettings();
+      const settingsMap: Record<string, string | null> = {};
+      settings.forEach(s => {
+        settingsMap[s.key] = s.value;
+      });
+      res.json({ settings: settingsMap });
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  app.post("/api/settings", authMiddleware, async (req, res) => {
+    try {
+      const { key, value, description } = req.body;
+      if (!key) {
+        return res.status(400).json({ error: "Key is required" });
+      }
+      const setting = await storage.setAppSetting(key, value, description);
+      res.json({ success: true, setting });
+    } catch (error) {
+      console.error("Error saving setting:", error);
+      res.status(500).json({ error: "Failed to save setting" });
+    }
+  });
+
+  app.put("/api/settings/bulk", authMiddleware, async (req, res) => {
+    try {
+      const { settings } = req.body;
+      if (!settings || typeof settings !== 'object') {
+        return res.status(400).json({ error: "Settings object is required" });
+      }
+      const updated: Record<string, string | null> = {};
+      for (const [key, value] of Object.entries(settings)) {
+        const setting = await storage.setAppSetting(key, value as string);
+        updated[key] = setting.value;
+      }
+      res.json({ success: true, settings: updated });
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      res.status(500).json({ error: "Failed to save settings" });
+    }
+  });
+
   return httpServer;
 }
