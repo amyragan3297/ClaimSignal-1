@@ -17,6 +17,10 @@ import {
   type ServiceRequest,
   type InsertServiceRequest,
   type AppSetting,
+  type Supplement,
+  type InsertSupplement,
+  type SupplementLineItem,
+  type InsertSupplementLineItem,
   adjusters,
   claims,
   claimAdjusters,
@@ -27,7 +31,9 @@ import {
   users,
   sessions,
   serviceRequests,
-  appSettings
+  appSettings,
+  supplements,
+  supplementLineItems
 } from "@shared/schema";
 import { db } from "../db";
 import { eq, desc, inArray, lt, sql } from "drizzle-orm";
@@ -645,6 +651,66 @@ export class DBStorage implements IStorage {
   async deleteAppSetting(key: string): Promise<boolean> {
     const result = await db.delete(appSettings).where(eq(appSettings.key, key)).returning();
     return result.length > 0;
+  }
+
+  // Supplement methods
+  async getSupplementsByClaimId(claimId: string): Promise<Supplement[]> {
+    return await db.select().from(supplements).where(eq(supplements.claimId, claimId)).orderBy(desc(supplements.createdAt));
+  }
+
+  async getAllSupplements(): Promise<Supplement[]> {
+    return await db.select().from(supplements).orderBy(desc(supplements.createdAt));
+  }
+
+  async getSupplement(id: string): Promise<Supplement | undefined> {
+    const result = await db.select().from(supplements).where(eq(supplements.id, id));
+    return result[0];
+  }
+
+  async createSupplement(data: InsertSupplement): Promise<Supplement> {
+    const result = await db.insert(supplements).values(data).returning();
+    return result[0];
+  }
+
+  async updateSupplement(id: string, data: Partial<Supplement>): Promise<Supplement | undefined> {
+    const result = await db.update(supplements).set({
+      ...data,
+      updatedAt: new Date(),
+    }).where(eq(supplements.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteSupplement(id: string): Promise<boolean> {
+    const result = await db.delete(supplements).where(eq(supplements.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Supplement line item methods
+  async getLineItemsBySupplement(supplementId: string): Promise<SupplementLineItem[]> {
+    return await db.select().from(supplementLineItems).where(eq(supplementLineItems.supplementId, supplementId));
+  }
+
+  async createLineItem(data: InsertSupplementLineItem): Promise<SupplementLineItem> {
+    const result = await db.insert(supplementLineItems).values(data).returning();
+    return result[0];
+  }
+
+  async updateLineItem(id: string, data: Partial<SupplementLineItem>): Promise<SupplementLineItem | undefined> {
+    const result = await db.update(supplementLineItems).set(data).where(eq(supplementLineItems.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteLineItem(id: string): Promise<boolean> {
+    const result = await db.delete(supplementLineItems).where(eq(supplementLineItems.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Calculate supplement totals
+  async calculateSupplementTotal(supplementId: string): Promise<{ requestedTotal: number; approvedTotal: number }> {
+    const items = await this.getLineItemsBySupplement(supplementId);
+    const requestedTotal = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+    const approvedTotal = items.reduce((sum, item) => sum + (item.approvedAmount || 0), 0);
+    return { requestedTotal, approvedTotal };
   }
 }
 
