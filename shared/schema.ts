@@ -293,5 +293,42 @@ export const insertSupplementLineItemSchema = createInsertSchema(supplementLineI
 export type InsertSupplementLineItem = z.infer<typeof insertSupplementLineItemSchema>;
 export type SupplementLineItem = typeof supplementLineItems.$inferSelect;
 
+// Case Studies - Training-grade templates for successful claim strategies
+export const caseStudies = pgTable("case_studies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  caseId: text("case_id").notNull(), // e.g., "CS-2024-0001"
+  title: text("title").notNull(), // e.g., "Initial denial reversed after photo sequencing correction"
+  carrier: text("carrier").notNull(),
+  region: text("region"), // e.g., "Alabama", "Southeast"
+  claimType: text("claim_type"), // 'roof', 'water', 'fire', 'wind', 'hail', etc.
+  outcome: text("outcome").notNull().default('approved'), // 'approved', 'partial', 'denied'
+  // The story
+  summary: text("summary"), // Brief description of what happened
+  frictionSignals: text("friction_signals").array(), // What obstacles were encountered
+  actionsTaken: text("actions_taken").array(), // What was done to overcome them
+  turningPoint: text("turning_point"), // The key moment that changed the outcome
+  keySignal: text("key_signal"), // The main learning/takeaway
+  // Metrics
+  denialsOvercome: integer("denials_overcome").default(0), // How many times denied before approval
+  daysToResolution: integer("days_to_resolution"),
+  amountRecovered: integer("amount_recovered"), // in cents
+  // Linked data (optional)
+  linkedClaimId: varchar("linked_claim_id").references(() => claims.id),
+  linkedAdjusterId: varchar("linked_adjuster_id").references(() => adjusters.id),
+  // Visibility
+  isPublic: boolean("is_public").default(false), // Can be shared/anonymized
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertCaseStudySchema = createInsertSchema(caseStudies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCaseStudy = z.infer<typeof insertCaseStudySchema>;
+export type CaseStudy = typeof caseStudies.$inferSelect;
+
 // Re-export chat models for AI integrations
 export * from "./models/chat";
