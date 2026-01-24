@@ -1083,17 +1083,17 @@ export async function registerRoutes(
       });
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
             content: `You are an expert insurance claims strategist helping public adjusters and contractors negotiate with insurance adjusters. Provide tactical advice based on the situation described.
 
-Return a JSON object with:
+You MUST return a valid JSON object with exactly this structure:
 {
   "strategy": "A 2-3 sentence overview of the recommended strategic approach",
   "keyPoints": ["Array of 3-5 key points to remember"],
-  "riskLevel": "low" | "medium" | "high",
+  "riskLevel": "low" or "medium" or "high",
   "suggestedActions": ["Array of 4-6 specific actionable steps to take"]
 }
 
@@ -1105,11 +1105,26 @@ Base your advice on insurance industry best practices, policy interpretation, an
           }
         ],
         response_format: { type: "json_object" },
-        max_completion_tokens: 1024,
+        max_tokens: 1024,
       });
 
       const content = response.choices[0]?.message?.content || "{}";
-      const advice = JSON.parse(content);
+      let advice;
+      try {
+        advice = JSON.parse(content);
+      } catch (parseError) {
+        console.error("Error parsing AI response:", content);
+        advice = {
+          strategy: content,
+          keyPoints: [],
+          riskLevel: "medium",
+          suggestedActions: []
+        };
+      }
+
+      if (!advice.riskLevel) advice.riskLevel = "medium";
+      if (!advice.keyPoints) advice.keyPoints = [];
+      if (!advice.suggestedActions) advice.suggestedActions = [];
 
       res.json({ success: true, advice });
     } catch (error) {
