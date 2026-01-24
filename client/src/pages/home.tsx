@@ -1,15 +1,16 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Plus, Upload } from "lucide-react";
+import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Plus, Upload, FileUp } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchAdjusters, createAdjuster } from "@/lib/api";
+import { fetchAdjusters, createAdjuster, fetchClaims } from "@/lib/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { useUpload } from "@/hooks/use-upload";
@@ -18,9 +19,16 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [query, setQuery] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [selectedClaimForUpload, setSelectedClaimForUpload] = useState<string>("");
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { getUploadParameters } = useUpload();
+
+  const { data: claims = [] } = useQuery({
+    queryKey: ['claims'],
+    queryFn: fetchClaims,
+  });
   
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
