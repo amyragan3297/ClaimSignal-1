@@ -1,16 +1,15 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Plus, Upload, FileUp } from "lucide-react";
+import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchAdjusters, createAdjuster, fetchClaims } from "@/lib/api";
+import { fetchAdjusters, createAdjuster } from "@/lib/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { useUpload } from "@/hooks/use-upload";
@@ -19,16 +18,11 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [query, setQuery] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [selectedClaimForUpload, setSelectedClaimForUpload] = useState<string>("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<Array<{ name: string; status: 'pending' | 'analyzing' | 'done' | 'error'; message?: string }>>([]);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { getUploadParameters } = useUpload();
-
-  const { data: claims = [] } = useQuery({
-    queryKey: ['claims'],
-    queryFn: fetchClaims,
-  });
   
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
@@ -309,11 +303,59 @@ export default function Home() {
 
               <ObjectUploader
                 onGetUploadParameters={getUploadParameters}
-                onComplete={(result) => {
+                onComplete={async (result) => {
+                  const files = result.successful || [];
+                  if (files.length === 0) return;
+                  
+                  setIsAnalyzing(true);
+                  setAnalysisResults(files.map(f => ({ name: f.name, status: 'pending' as const })));
+                  
+                  for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    setAnalysisResults(prev => prev.map((r, idx) => 
+                      idx === i ? { ...r, status: 'analyzing' as const } : r
+                    ));
+                    
+                    try {
+                      const response = await fetch('/api/analyze-and-save', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          documentUrl: file.uploadURL?.split('?')[0].replace(/.*\.appspot\.com\//, '').replace(/.*storage\.googleapis\.com\/[^/]+\//, '') || file.name,
+                          documentName: file.name,
+                        }),
+                      });
+                      
+                      const data = await response.json();
+                      
+                      if (data.success) {
+                        setAnalysisResults(prev => prev.map((r, idx) => 
+                          idx === i ? { ...r, status: 'done' as const, message: data.message } : r
+                        ));
+                      } else {
+                        setAnalysisResults(prev => prev.map((r, idx) => 
+                          idx === i ? { ...r, status: 'error' as const, message: data.error } : r
+                        ));
+                      }
+                    } catch (error) {
+                      setAnalysisResults(prev => prev.map((r, idx) => 
+                        idx === i ? { ...r, status: 'error' as const, message: 'Analysis failed' } : r
+                      ));
+                    }
+                  }
+                  
+                  queryClient.invalidateQueries({ queryKey: ['adjusters'] });
+                  queryClient.invalidateQueries({ queryKey: ['claims'] });
+                  
                   toast({
-                    title: "Upload complete",
-                    description: `Successfully uploaded ${result.successful?.length || 0} file(s)`,
+                    title: "Documents processed",
+                    description: `AI analyzed ${files.length} document(s) and sorted them into claims`,
                   });
+                  
+                  setTimeout(() => {
+                    setIsAnalyzing(false);
+                    setAnalysisResults([]);
+                  }, 3000);
                 }}
                 maxNumberOfFiles={10}
                 maxFileSize={50 * 1024 * 1024}
@@ -321,13 +363,40 @@ export default function Home() {
               >
                 <div className="flex items-start justify-between mb-4 w-full">
                   <div className="bg-amber-500/20 p-2.5 rounded-lg">
-                    <Upload className="w-6 h-6 text-amber-500" />
+                    {isAnalyzing ? (
+                      <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
+                    ) : (
+                      <Upload className="w-6 h-6 text-amber-500" />
+                    )}
                   </div>
+                  {isAnalyzing && (
+                    <div className="flex items-center gap-1 text-xs text-amber-500">
+                      <Sparkles className="w-3 h-3" />
+                      AI Processing
+                    </div>
+                  )}
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Upload Documents</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  {isAnalyzing ? 'Processing...' : 'Smart Upload'}
+                </h3>
                 <p className="text-sm text-muted-foreground mb-4 font-normal">
-                  Upload claim documents, photos, and evidence files.
+                  {isAnalyzing 
+                    ? 'AI is extracting claim info and sorting documents...' 
+                    : 'AI automatically extracts claim data and sorts into the right claim'}
                 </p>
+                {analysisResults.length > 0 && (
+                  <div className="w-full space-y-1 text-xs">
+                    {analysisResults.map((result, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        {result.status === 'pending' && <div className="w-3 h-3 rounded-full bg-muted" />}
+                        {result.status === 'analyzing' && <Loader2 className="w-3 h-3 animate-spin text-amber-500" />}
+                        {result.status === 'done' && <CheckCircle className="w-3 h-3 text-green-500" />}
+                        {result.status === 'error' && <div className="w-3 h-3 rounded-full bg-red-500" />}
+                        <span className="truncate flex-1">{result.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </ObjectUploader>
             </motion.div>
           )}
