@@ -101,3 +101,33 @@ Preferred communication style: Simple, everyday language.
 - TanStack React Query for data fetching
 - Zod for validation with drizzle-zod integration
 - date-fns for date formatting
+
+## Analytics Features
+
+### Performance Summary (/analytics)
+- Global KPIs: Supplement Success %, Re-inspection Win %, Escalation Success %, Avg Time to Approval
+- API: GET `/api/analytics/performance-summary`
+
+### Risk Alerts (/risk-alerts)
+- Calculates risk scores (0-100) from adjuster behavior
+- Color-coded classification: RED (70+), YELLOW (50-69), GREEN (<50)
+- Carrier breakdown with visual stats
+
+### Case Studies (/case-studies)
+- Auto-generated from claim interactions
+- Friction signals and actions tracking with chip/tag inputs
+- Turning points for documentation
+
+### Carrier Intelligence (/carriers/:name)
+- Carrier-level metrics: Risk Score, Supplement Success Rate, Re-inspection Win Rate
+- Resolution tendency analysis
+- Friction level assessment
+- API: GET `/api/carriers/:name/intelligence`
+
+### Adjuster Behavioral Performance
+- Risk Score (0-100, color coded)
+- Responsiveness Score (based on avg days to resolution)
+- Cooperation Level (High/Moderate/Low)
+- Supplement Approval Rate
+- Avg Interactions Per Claim
+- API: GET `/api/adjusters/:id/intelligence`

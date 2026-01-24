@@ -1,9 +1,19 @@
 import { Layout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, TrendingUp, TrendingDown, Users, FileText, Building2, Clock, AlertTriangle, CheckCircle, BarChart3 } from "lucide-react";
+import { LayoutDashboard, TrendingUp, TrendingDown, Users, FileText, Building2, Clock, AlertTriangle, CheckCircle, BarChart3, FileCheck, RefreshCw, ArrowUpRight, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAdjusters, fetchClaims } from "@/lib/api";
+
+interface PerformanceSummary {
+  supplementSuccessRate: number | null;
+  reinspectionWinRate: number | null;
+  escalationSuccessRate: number | null;
+  avgDaysToApproval: number | null;
+  totalSupplements: number;
+  totalReinspections: number;
+  totalEscalations: number;
+}
 
 export default function Analytics() {
   const { data: adjusters = [] } = useQuery({
@@ -14,6 +24,15 @@ export default function Analytics() {
   const { data: claims = [] } = useQuery({
     queryKey: ['claims'],
     queryFn: fetchClaims,
+  });
+
+  const { data: performanceSummary, isLoading: loadingPerformance } = useQuery<PerformanceSummary>({
+    queryKey: ['performance-summary'],
+    queryFn: async () => {
+      const res = await fetch('/api/analytics/performance-summary', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch performance summary');
+      return res.json();
+    },
   });
 
   const carriers = Array.from(new Set(adjusters.map((a: any) => a.carrier?.trim()).filter(Boolean)));
@@ -132,6 +151,72 @@ export default function Analytics() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Performance Summary KPIs */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Performance Summary
+            </CardTitle>
+            <CardDescription>Key success metrics across all claims and adjusters</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingPerformance ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : performanceSummary ? (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileCheck className="w-4 h-4 text-emerald-500" />
+                    <span className="text-sm font-medium text-muted-foreground">Supplement Success</span>
+                  </div>
+                  <div className="text-3xl font-bold" data-testid="perf-supplement-success">
+                    {performanceSummary.supplementSuccessRate !== null ? `${performanceSummary.supplementSuccessRate}%` : '—'}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{performanceSummary.totalSupplements} total supplements</p>
+                </div>
+
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <RefreshCw className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm font-medium text-muted-foreground">Re-inspection Win</span>
+                  </div>
+                  <div className="text-3xl font-bold" data-testid="perf-reinspection-win">
+                    {performanceSummary.reinspectionWinRate !== null ? `${performanceSummary.reinspectionWinRate}%` : '—'}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{performanceSummary.totalReinspections} total inspections</p>
+                </div>
+
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ArrowUpRight className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm font-medium text-muted-foreground">Escalation Success</span>
+                  </div>
+                  <div className="text-3xl font-bold" data-testid="perf-escalation-success">
+                    {performanceSummary.escalationSuccessRate !== null ? `${performanceSummary.escalationSuccessRate}%` : '—'}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{performanceSummary.totalEscalations} total escalations</p>
+                </div>
+
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm font-medium text-muted-foreground">Avg Time to Approval</span>
+                  </div>
+                  <div className="text-3xl font-bold" data-testid="perf-avg-approval-time">
+                    {performanceSummary.avgDaysToApproval !== null ? `${performanceSummary.avgDaysToApproval}d` : '—'}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">for resolved claims</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No performance data available</p>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid lg:grid-cols-2 gap-6">
           <Card>

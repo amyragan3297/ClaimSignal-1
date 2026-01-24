@@ -16,6 +16,12 @@ export type AdjusterIntelligence = {
   outcomesStalled: number;
   outcomesOpen: number;
   patternTags: string[];
+  // Behavioral metrics
+  riskScore: number;
+  responsivenessScore: number | null;
+  cooperationLevel: 'Low' | 'Moderate' | 'High' | null;
+  supplementApprovalRate: number | null;
+  avgInteractionsPerClaim: number | null;
 };
 
 export type CarrierIntelligence = {
@@ -30,6 +36,9 @@ export type CarrierIntelligence = {
   outcomesOpen: number;
   frictionLevel: 'Low' | 'Normal' | 'High' | null;
   resolutionTendency: 'Fast' | 'Normal' | 'Slow' | null;
+  riskScore: number | null;
+  supplementSuccessRate: number | null;
+  reinspectionWinRate: number | null;
 };
 
 export type ClaimWithRelations = Claim & {
