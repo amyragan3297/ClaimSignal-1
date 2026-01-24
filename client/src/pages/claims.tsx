@@ -320,12 +320,13 @@ export default function Claims() {
                                   continue;
                                 }
                                 
-                                if (data.success) {
+                                if (data.success && data.createdClaimId) {
                                   successCount++;
                                   lastMessage = data.message || 'Document processed';
-                                  if (data.createdClaimId) {
-                                    lastCreatedClaimId = data.createdClaimId;
-                                  }
+                                  lastCreatedClaimId = data.createdClaimId;
+                                } else if (data.success) {
+                                  // Analyzed but no claim data found
+                                  errorCount++;
                                 } else {
                                   errorCount++;
                                 }
@@ -362,7 +363,7 @@ export default function Claims() {
                               });
                             } else {
                               setUploadStatus('error');
-                              setUploadMessage('Could not extract claim information from documents');
+                              setUploadMessage('Could not extract claim ID, carrier, or date of loss from the document. Try a different document or use manual entry.');
                             }
                           }}
                           maxNumberOfFiles={5}
