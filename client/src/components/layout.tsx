@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Search, LayoutDashboard, FileText, Menu, Bot, ClipboardList, Building2, LogOut, Users } from "lucide-react";
+import { Shield, Search, LayoutDashboard, FileText, Menu, Bot, ClipboardList, Building2, LogOut, Users, Settings } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -75,6 +75,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Button variant={location.startsWith("/admin") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
               <Users className="w-4 h-4" />
               Team Management
+            </Button>
+          </Link>
+        )}
+        {accessLevel === 'admin' && (
+          <Link href="/settings">
+            <Button variant={location === "/settings" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+              <Settings className="w-4 h-4" />
+              Settings
             </Button>
           </Link>
         )}

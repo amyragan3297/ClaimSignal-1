@@ -128,21 +128,28 @@ async function getDocumentContent(objectPath: string): Promise<{ images: Array<{
   };
 }
 
-const systemPrompt = `You are an expert insurance claims analyst. Analyze the provided document and extract relevant information.
+const systemPrompt = `You are an expert insurance claims analyst. Analyze the provided document and extract ALL relevant information you can find.
 
-Extract the following information if present:
-- Adjuster name, email, phone, company/carrier
-- Claim ID or reference number (look for claim numbers, estimate numbers, policy numbers)
-- Date of loss
-- Property address
-- Homeowner/insured name
-- Any interactions (calls, emails, inspections) with dates
-- Key observations about adjuster behavior
-- Claim amounts, estimates, deductibles
-- Any notes about what worked or didn't work in negotiations
-- A brief summary of what this document is about
+IMPORTANT: Be thorough and look for information in various formats. Insurance documents come in many types:
+- Xactimate estimates and reports
+- Carrier correspondence and letters
+- Customer copies of estimates
+- Inspection reports
+- Policy documents
+- Emails and communications
 
-Return a JSON object with these fields (use null for missing data):
+Look for these pieces of information (they may be labeled differently):
+- Claim number, claim ID, file number, reference number, estimate number, policy number
+- Insurance company/carrier name (State Farm, Allstate, USAA, Farmers, etc.)
+- Date of loss, loss date, incident date
+- Adjuster name, field adjuster, desk adjuster
+- Adjuster contact info (phone, email)
+- Property address, risk location, insured location
+- Homeowner/insured name, policyholder name
+- Estimate amounts, RCV, ACV, deductible, total
+- Any dates related to inspections, calls, or correspondence
+
+Return a JSON object with these fields. Extract whatever you can find - use null ONLY if the information is truly not present:
 {
   "adjusterName": string or null,
   "adjusterEmail": string or null,
@@ -156,13 +163,15 @@ Return a JSON object with these fields (use null for missing data):
   "interactionDate": string (YYYY-MM-DD format) or null,
   "interactionDescription": string or null,
   "interactionOutcome": string or null,
-  "internalNotes": string (observations about adjuster or document) or null,
-  "riskImpression": string (assessment of adjuster difficulty) or null,
-  "whatWorked": string (successful strategies) or null,
-  "claimNotes": string (summary of claim details) or null,
+  "internalNotes": string (observations about the document) or null,
+  "riskImpression": string (any notes about claim complexity or issues) or null,
+  "whatWorked": string (any negotiation notes) or null,
+  "claimNotes": string (summary of key claim details, amounts, coverage) or null,
   "estimateAmount": string or null,
-  "documentSummary": string (brief 1-2 sentence description of the document) or null
-}`;
+  "documentSummary": string (what type of document this is and its main purpose) or null
+}
+
+Be aggressive about finding data. If you see a number that could be a claim number, extract it. If you see a company logo or name, extract the carrier.`;
 
 export function registerDocumentAnalysisRoutes(app: Express): void {
   app.post("/api/analyze-document", async (req: Request, res: Response) => {
@@ -178,7 +187,12 @@ export function registerDocumentAnalysisRoutes(app: Express): void {
         return res.status(400).json({ error: "Could not fetch or convert document" });
       }
 
-      const imageContent = docContent.images.map(img => ({
+      // Limit to first 3 pages to avoid context overload
+      const pagesToAnalyze = docContent.images.slice(0, 3);
+      console.log(`[analyze-document] Processing ${pagesToAnalyze.length} of ${docContent.images.length} page(s), isPdf: ${docContent.isPdf}`);
+      console.log(`[analyze-document] First image size: ${pagesToAnalyze[0]?.base64?.length || 0} chars`);
+
+      const imageContent = pagesToAnalyze.map(img => ({
         type: "image_url" as const,
         image_url: { url: `data:${img.mimeType};base64,${img.base64}` },
       }));
@@ -199,10 +213,13 @@ export function registerDocumentAnalysisRoutes(app: Express): void {
           },
         ],
         response_format: { type: "json_object" },
-        max_completion_tokens: 2048,
+        max_completion_tokens: 8192,
       });
 
-      const content = response.choices[0]?.message?.content || "{}";
+      const rawContent = response.choices[0]?.message?.content;
+      console.log("AI raw response:", rawContent);
+      console.log("AI finish reason:", response.choices[0]?.finish_reason);
+      const content = rawContent || "{}";
       const extracted: ExtractedData = JSON.parse(content);
 
       res.json({
@@ -229,7 +246,10 @@ export function registerDocumentAnalysisRoutes(app: Express): void {
         return res.status(400).json({ error: "Could not fetch or convert document" });
       }
 
-      const imageContent = docContent.images.map(img => ({
+      // Limit to first 3 pages to avoid context overload
+      const pagesToAnalyze = docContent.images.slice(0, 3);
+
+      const imageContent = pagesToAnalyze.map(img => ({
         type: "image_url" as const,
         image_url: { url: `data:${img.mimeType};base64,${img.base64}` },
       }));
@@ -250,7 +270,7 @@ export function registerDocumentAnalysisRoutes(app: Express): void {
           },
         ],
         response_format: { type: "json_object" },
-        max_completion_tokens: 2048,
+        max_completion_tokens: 8192,
       });
 
       const content = response.choices[0]?.message?.content || "{}";

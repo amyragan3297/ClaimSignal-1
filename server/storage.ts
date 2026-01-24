@@ -16,6 +16,7 @@ import {
   type Session,
   type ServiceRequest,
   type InsertServiceRequest,
+  type AppSetting,
   adjusters,
   claims,
   claimAdjusters,
@@ -25,7 +26,8 @@ import {
   teamCredentials,
   users,
   sessions,
-  serviceRequests
+  serviceRequests,
+  appSettings
 } from "@shared/schema";
 import { db } from "../db";
 import { eq, desc, inArray, lt, sql } from "drizzle-orm";
@@ -609,6 +611,40 @@ export class DBStorage implements IStorage {
       updatedAt: new Date(),
     }).where(eq(serviceRequests.id, id)).returning();
     return result[0];
+  }
+
+  // App settings methods
+  async getAllAppSettings(): Promise<AppSetting[]> {
+    return await db.select().from(appSettings);
+  }
+
+  async getAppSetting(key: string): Promise<AppSetting | undefined> {
+    const result = await db.select().from(appSettings).where(eq(appSettings.key, key));
+    return result[0];
+  }
+
+  async setAppSetting(key: string, value: string, description?: string): Promise<AppSetting> {
+    const existing = await this.getAppSetting(key);
+    if (existing) {
+      const result = await db.update(appSettings).set({
+        value,
+        description: description || existing.description,
+        updatedAt: new Date(),
+      }).where(eq(appSettings.key, key)).returning();
+      return result[0];
+    } else {
+      const result = await db.insert(appSettings).values({
+        key,
+        value,
+        description,
+      }).returning();
+      return result[0];
+    }
+  }
+
+  async deleteAppSetting(key: string): Promise<boolean> {
+    const result = await db.delete(appSettings).where(eq(appSettings.key, key)).returning();
+    return result.length > 0;
   }
 }
 
