@@ -179,6 +179,10 @@ export function useUpload(options: UseUploadOptions = {}) {
       }
 
       const data = await response.json();
+      
+      // Store objectPath in file meta for later retrieval
+      file.meta.objectPath = data.objectPath;
+      
       return {
         method: "PUT",
         url: data.uploadURL,

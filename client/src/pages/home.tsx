@@ -310,6 +310,9 @@ export default function Home() {
                   setIsAnalyzing(true);
                   setAnalysisResults(files.map(f => ({ name: f.name, status: 'pending' as const })));
                   
+                  let successCount = 0;
+                  let errorCount = 0;
+                  
                   for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     setAnalysisResults(prev => prev.map((r, idx) => 
@@ -317,11 +320,18 @@ export default function Home() {
                     ));
                     
                     try {
+                      // Get objectPath from file meta (set during getUploadParameters)
+                      const objectPath = file.meta?.objectPath as string | undefined;
+                      
+                      if (!objectPath) {
+                        throw new Error('File path not available');
+                      }
+                      
                       const response = await fetch('/api/analyze-and-save', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                          documentUrl: file.uploadURL?.split('?')[0].replace(/.*\.appspot\.com\//, '').replace(/.*storage\.googleapis\.com\/[^/]+\//, '') || file.name,
+                          documentUrl: objectPath,
                           documentName: file.name,
                         }),
                       });
@@ -329,17 +339,20 @@ export default function Home() {
                       const data = await response.json();
                       
                       if (data.success) {
+                        successCount++;
                         setAnalysisResults(prev => prev.map((r, idx) => 
                           idx === i ? { ...r, status: 'done' as const, message: data.message } : r
                         ));
                       } else {
+                        errorCount++;
                         setAnalysisResults(prev => prev.map((r, idx) => 
                           idx === i ? { ...r, status: 'error' as const, message: data.error } : r
                         ));
                       }
                     } catch (error) {
+                      errorCount++;
                       setAnalysisResults(prev => prev.map((r, idx) => 
-                        idx === i ? { ...r, status: 'error' as const, message: 'Analysis failed' } : r
+                        idx === i ? { ...r, status: 'error' as const, message: error instanceof Error ? error.message : 'Analysis failed' } : r
                       ));
                     }
                   }
@@ -347,15 +360,29 @@ export default function Home() {
                   queryClient.invalidateQueries({ queryKey: ['adjusters'] });
                   queryClient.invalidateQueries({ queryKey: ['claims'] });
                   
-                  toast({
-                    title: "Documents processed",
-                    description: `AI analyzed ${files.length} document(s) and sorted them into claims`,
-                  });
+                  if (errorCount === 0) {
+                    toast({
+                      title: "Documents processed",
+                      description: `AI analyzed ${successCount} document(s) and sorted them into claims`,
+                    });
+                  } else if (successCount > 0) {
+                    toast({
+                      title: "Partial success",
+                      description: `Processed ${successCount} file(s), ${errorCount} failed`,
+                      variant: "destructive",
+                    });
+                  } else {
+                    toast({
+                      title: "Analysis failed",
+                      description: `Could not process ${errorCount} file(s)`,
+                      variant: "destructive",
+                    });
+                  }
                   
                   setTimeout(() => {
                     setIsAnalyzing(false);
                     setAnalysisResults([]);
-                  }, 3000);
+                  }, 5000);
                 }}
                 maxNumberOfFiles={10}
                 maxFileSize={50 * 1024 * 1024}
