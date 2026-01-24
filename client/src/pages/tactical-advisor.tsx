@@ -165,48 +165,56 @@ export default function TacticalAdvisor() {
               {advice ? (
                 <ScrollArea className="h-[400px] pr-4">
                   <div className="space-y-6">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Risk Assessment:</span>
-                      <Badge className={getRiskColor(advice.riskLevel)}>
-                        {advice.riskLevel === 'high' && <AlertTriangle className="w-3 h-3 mr-1" />}
-                        {advice.riskLevel === 'low' && <CheckCircle className="w-3 h-3 mr-1" />}
-                        {advice.riskLevel.toUpperCase()} RISK
-                      </Badge>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-2 flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        Strategy Overview
-                      </h4>
-                      <p className="text-muted-foreground text-sm leading-relaxed">{advice.strategy}</p>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-2">Key Points</h4>
-                      <ul className="space-y-2">
-                        {advice.keyPoints.map((point, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm">
-                            <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                            <span className="text-muted-foreground">{point}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-2">Suggested Actions</h4>
-                      <div className="space-y-2">
-                        {advice.suggestedActions.map((action, i) => (
-                          <div key={i} className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg text-sm">
-                            <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">
-                              {i + 1}
-                            </span>
-                            <span>{action}</span>
-                          </div>
-                        ))}
+                    {advice.riskLevel && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Risk Assessment:</span>
+                        <Badge className={getRiskColor(advice.riskLevel)}>
+                          {advice.riskLevel === 'high' && <AlertTriangle className="w-3 h-3 mr-1" />}
+                          {advice.riskLevel === 'low' && <CheckCircle className="w-3 h-3 mr-1" />}
+                          {advice.riskLevel.toUpperCase()} RISK
+                        </Badge>
                       </div>
-                    </div>
+                    )}
+
+                    {advice.strategy && (
+                      <div>
+                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                          <Shield className="w-4 h-4" />
+                          Strategy Overview
+                        </h4>
+                        <p className="text-muted-foreground text-sm leading-relaxed">{advice.strategy}</p>
+                      </div>
+                    )}
+
+                    {advice.keyPoints && advice.keyPoints.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-2">Key Points</h4>
+                        <ul className="space-y-2">
+                          {advice.keyPoints.map((point: string, i: number) => (
+                            <li key={i} className="flex items-start gap-2 text-sm">
+                              <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                              <span className="text-muted-foreground">{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {advice.suggestedActions && advice.suggestedActions.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-2">Suggested Actions</h4>
+                        <div className="space-y-2">
+                          {advice.suggestedActions.map((action: string, i: number) => (
+                            <div key={i} className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg text-sm">
+                              <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">
+                                {i + 1}
+                              </span>
+                              <span>{action}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </ScrollArea>
               ) : (
