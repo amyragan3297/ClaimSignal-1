@@ -12,15 +12,22 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, ClipboardList, Calendar, ArrowRight, Building2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, ClipboardList, Calendar, ArrowRight, Building2, Upload, Loader2, Sparkles, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { differenceInDays, format } from "date-fns";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import { useUpload } from "@/hooks/use-upload";
 
 export default function Claims() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'manual' | 'upload'>('manual');
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'analyzing' | 'done' | 'error'>('idle');
+  const [uploadMessage, setUploadMessage] = useState('');
+  const { getUploadParameters } = useUpload();
 
   const { data: claims = [] } = useQuery({
     queryKey: ['claims'],
@@ -41,6 +48,11 @@ export default function Claims() {
     notes: '',
     adjusterId: '',
   });
+
+  const resetUploadState = () => {
+    setUploadStatus('idle');
+    setUploadMessage('');
+  };
 
   const createClaimMutation = useMutation({
     mutationFn: async () => {
@@ -122,93 +134,266 @@ export default function Claims() {
               <DialogHeader>
                 <DialogTitle>Create New Claim</DialogTitle>
                 <DialogDescription>
-                  Enter the claim details to start tracking it.
+                  Enter details manually or upload documents to auto-fill.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
+              
+              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'manual' | 'upload'); resetUploadState(); }}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="manual" className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Manual Entry
+                  </TabsTrigger>
+                  <TabsTrigger value="upload" className="gap-2">
+                    <Upload className="w-4 h-4" />
+                    Upload & Auto-Fill
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="manual" className="space-y-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Claim ID *</Label>
+                      <Input 
+                        placeholder="e.g., 0000001"
+                        value={newClaim.maskedId}
+                        onChange={(e) => setNewClaim({...newClaim, maskedId: e.target.value})}
+                        data-testid="input-claim-id"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Date of Loss *</Label>
+                      <Input 
+                        type="date"
+                        value={newClaim.dateOfLoss}
+                        onChange={(e) => setNewClaim({...newClaim, dateOfLoss: e.target.value})}
+                        data-testid="input-date-of-loss"
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
-                    <Label>Claim ID *</Label>
+                    <Label>Carrier *</Label>
                     <Input 
-                      placeholder="e.g., 0000001"
-                      value={newClaim.maskedId}
-                      onChange={(e) => setNewClaim({...newClaim, maskedId: e.target.value})}
-                      data-testid="input-claim-id"
+                      placeholder="e.g., State Farm"
+                      value={newClaim.carrier}
+                      onChange={(e) => setNewClaim({...newClaim, carrier: e.target.value})}
+                      data-testid="input-claim-carrier"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Date of Loss *</Label>
+                    <Label>Homeowner Name</Label>
                     <Input 
-                      type="date"
-                      value={newClaim.dateOfLoss}
-                      onChange={(e) => setNewClaim({...newClaim, dateOfLoss: e.target.value})}
-                      data-testid="input-date-of-loss"
+                      placeholder="e.g., John Smith"
+                      value={newClaim.homeownerName}
+                      onChange={(e) => setNewClaim({...newClaim, homeownerName: e.target.value})}
+                      data-testid="input-homeowner-name"
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Carrier *</Label>
-                  <Input 
-                    placeholder="e.g., State Farm"
-                    value={newClaim.carrier}
-                    onChange={(e) => setNewClaim({...newClaim, carrier: e.target.value})}
-                    data-testid="input-claim-carrier"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Homeowner Name</Label>
-                  <Input 
-                    placeholder="e.g., John Smith"
-                    value={newClaim.homeownerName}
-                    onChange={(e) => setNewClaim({...newClaim, homeownerName: e.target.value})}
-                    data-testid="input-homeowner-name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Property Address</Label>
-                  <Input 
-                    placeholder="e.g., 123 Main St, City, State"
-                    value={newClaim.propertyAddress}
-                    onChange={(e) => setNewClaim({...newClaim, propertyAddress: e.target.value})}
-                    data-testid="input-property-address"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Link Adjuster</Label>
-                  <Select 
-                    value={newClaim.adjusterId} 
-                    onValueChange={(v) => setNewClaim({...newClaim, adjusterId: v})}
+                  <div className="space-y-2">
+                    <Label>Property Address</Label>
+                    <Input 
+                      placeholder="e.g., 123 Main St, City, State"
+                      value={newClaim.propertyAddress}
+                      onChange={(e) => setNewClaim({...newClaim, propertyAddress: e.target.value})}
+                      data-testid="input-property-address"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Link Adjuster</Label>
+                    <Select 
+                      value={newClaim.adjusterId} 
+                      onValueChange={(v) => setNewClaim({...newClaim, adjusterId: v})}
+                    >
+                      <SelectTrigger data-testid="select-adjuster">
+                        <SelectValue placeholder="Select adjuster (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {adjusters.map((adj) => (
+                          <SelectItem key={adj.id} value={adj.id}>
+                            {adj.name} ({adj.carrier})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Notes</Label>
+                    <Textarea 
+                      placeholder="Initial notes about this claim..."
+                      value={newClaim.notes}
+                      onChange={(e) => setNewClaim({...newClaim, notes: e.target.value})}
+                      data-testid="input-claim-notes"
+                    />
+                  </div>
+                  <Button 
+                    className="w-full" 
+                    onClick={handleCreateClaim}
+                    disabled={!newClaim.maskedId || !newClaim.carrier || !newClaim.dateOfLoss || createClaimMutation.isPending}
+                    data-testid="button-save-claim"
                   >
-                    <SelectTrigger data-testid="select-adjuster">
-                      <SelectValue placeholder="Select adjuster (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {adjusters.map((adj) => (
-                        <SelectItem key={adj.id} value={adj.id}>
-                          {adj.name} ({adj.carrier})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Notes</Label>
-                  <Textarea 
-                    placeholder="Initial notes about this claim..."
-                    value={newClaim.notes}
-                    onChange={(e) => setNewClaim({...newClaim, notes: e.target.value})}
-                    data-testid="input-claim-notes"
-                  />
-                </div>
-                <Button 
-                  className="w-full" 
-                  onClick={handleCreateClaim}
-                  disabled={!newClaim.maskedId || !newClaim.carrier || !newClaim.dateOfLoss || createClaimMutation.isPending}
-                  data-testid="button-save-claim"
-                >
-                  {createClaimMutation.isPending ? 'Creating...' : 'Create Claim'}
-                </Button>
-              </div>
+                    {createClaimMutation.isPending ? 'Creating...' : 'Create Claim'}
+                  </Button>
+                </TabsContent>
+                
+                <TabsContent value="upload" className="py-4">
+                  <div className="space-y-4">
+                    <div className="text-center p-6 border-2 border-dashed rounded-lg bg-muted/30">
+                      <div className="flex justify-center mb-3">
+                        {uploadStatus === 'idle' && <Upload className="w-10 h-10 text-muted-foreground" />}
+                        {uploadStatus === 'analyzing' && <Sparkles className="w-10 h-10 text-amber-500 animate-pulse" />}
+                        {uploadStatus === 'done' && <CheckCircle className="w-10 h-10 text-green-500" />}
+                        {uploadStatus === 'error' && <Upload className="w-10 h-10 text-red-500" />}
+                      </div>
+                      
+                      {uploadStatus === 'idle' && (
+                        <>
+                          <h4 className="font-medium mb-1">Upload claim documents</h4>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            AI will extract claim details and create the claim automatically
+                          </p>
+                        </>
+                      )}
+                      
+                      {uploadStatus === 'analyzing' && (
+                        <>
+                          <h4 className="font-medium mb-1">AI is analyzing your documents</h4>
+                          <p className="text-sm text-muted-foreground">Extracting claim details, adjuster info, and more...</p>
+                        </>
+                      )}
+                      
+                      {uploadStatus === 'done' && (
+                        <>
+                          <h4 className="font-medium mb-1 text-green-600">Claim created successfully!</h4>
+                          <p className="text-sm text-muted-foreground">{uploadMessage}</p>
+                        </>
+                      )}
+                      
+                      {uploadStatus === 'error' && (
+                        <>
+                          <h4 className="font-medium mb-1 text-red-600">Analysis failed</h4>
+                          <p className="text-sm text-muted-foreground">{uploadMessage || 'Please try again or use manual entry'}</p>
+                        </>
+                      )}
+                      
+                      {(uploadStatus === 'idle' || uploadStatus === 'error') && (
+                        <ObjectUploader
+                          onGetUploadParameters={getUploadParameters}
+                          onComplete={async (result) => {
+                            const files = result.successful || [];
+                            if (files.length === 0) return;
+                            
+                            setUploadStatus('analyzing');
+                            
+                            let successCount = 0;
+                            let errorCount = 0;
+                            let lastCreatedClaimId: string | null = null;
+                            let lastMessage = '';
+                            
+                            for (const file of files) {
+                              try {
+                                const objectPath = file.meta?.objectPath as string | undefined;
+                                
+                                if (!objectPath) {
+                                  errorCount++;
+                                  continue;
+                                }
+                                
+                                const response = await fetch('/api/analyze-and-save', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    documentUrl: objectPath,
+                                    documentName: file.name,
+                                  }),
+                                });
+                                
+                                if (!response.ok) {
+                                  errorCount++;
+                                  continue;
+                                }
+                                
+                                let data;
+                                try {
+                                  data = await response.json();
+                                } catch {
+                                  errorCount++;
+                                  continue;
+                                }
+                                
+                                if (data.success) {
+                                  successCount++;
+                                  lastMessage = data.message || 'Document processed';
+                                  if (data.createdClaimId) {
+                                    lastCreatedClaimId = data.createdClaimId;
+                                  }
+                                } else {
+                                  errorCount++;
+                                }
+                              } catch {
+                                errorCount++;
+                              }
+                            }
+                            
+                            queryClient.invalidateQueries({ queryKey: ['claims'] });
+                            queryClient.invalidateQueries({ queryKey: ['adjusters'] });
+                            
+                            if (successCount > 0 && errorCount === 0) {
+                              setUploadStatus('done');
+                              setUploadMessage(lastMessage);
+                              toast({
+                                title: "Claim created",
+                                description: lastMessage,
+                              });
+                              
+                              if (lastCreatedClaimId) {
+                                setTimeout(() => {
+                                  setIsAddOpen(false);
+                                  resetUploadState();
+                                  setLocation(`/claims/${lastCreatedClaimId}`);
+                                }, 1500);
+                              }
+                            } else if (successCount > 0) {
+                              setUploadStatus('done');
+                              setUploadMessage(`Processed ${successCount} file(s), ${errorCount} failed`);
+                              toast({
+                                title: "Partial success",
+                                description: `Processed ${successCount} file(s), ${errorCount} failed`,
+                                variant: "destructive",
+                              });
+                            } else {
+                              setUploadStatus('error');
+                              setUploadMessage('Could not extract claim information from documents');
+                            }
+                          }}
+                          maxNumberOfFiles={5}
+                          maxFileSize={50 * 1024 * 1024}
+                          buttonClassName="bg-primary text-primary-foreground hover:bg-primary/90"
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          Select Documents
+                        </ObjectUploader>
+                      )}
+                      
+                      {uploadStatus === 'done' && (
+                        <Button 
+                          variant="outline" 
+                          className="mt-4"
+                          onClick={() => {
+                            setIsAddOpen(false);
+                            resetUploadState();
+                          }}
+                        >
+                          Close
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground text-center">
+                      Supported: PDFs, images, and claim documents
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </DialogContent>
           </Dialog>
         </div>
