@@ -5,10 +5,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, Send, Lightbulb, AlertTriangle, CheckCircle, Loader2, Zap, Target, Shield } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Bot, Lightbulb, AlertTriangle, CheckCircle, Loader2, Zap, Target, Shield, MessageSquare, Plus, Trash2, Save, Users } from "lucide-react";
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAdjusters, fetchClaims } from "@/lib/api";
+import { format } from "date-fns";
 
 interface TacticalAdvice {
   strategy: string;
@@ -17,11 +19,25 @@ interface TacticalAdvice {
   suggestedActions: string[];
 }
 
+interface TacticalNote {
+  id: string;
+  claimId: string | null;
+  adjusterId: string | null;
+  content: string;
+  author: string | null;
+  isAiGenerated: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function TacticalAdvisor() {
   const [selectedAdjuster, setSelectedAdjuster] = useState<string>("");
   const [selectedClaim, setSelectedClaim] = useState<string>("");
   const [situation, setSituation] = useState("");
   const [advice, setAdvice] = useState<TacticalAdvice | null>(null);
+  const [newNote, setNewNote] = useState("");
+  const [activeTab, setActiveTab] = useState("ai-advice");
+  const queryClient = useQueryClient();
 
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
@@ -31,6 +47,22 @@ export default function TacticalAdvisor() {
   const { data: claims = [] } = useQuery({
     queryKey: ['claims'],
     queryFn: fetchClaims,
+  });
+
+  const claimId = selectedClaim && selectedClaim !== 'none' ? selectedClaim : undefined;
+  const adjusterId = selectedAdjuster && selectedAdjuster !== 'none' ? selectedAdjuster : undefined;
+
+  const { data: notes = [], isLoading: notesLoading } = useQuery({
+    queryKey: ['tactical-notes', claimId, adjusterId],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (claimId) params.append('claimId', claimId);
+      if (adjusterId) params.append('adjusterId', adjusterId);
+      const res = await fetch(`/api/tactical-notes?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch notes');
+      return res.json();
+    },
+    enabled: !!(claimId || adjusterId),
   });
 
   const getAdviceMutation = useMutation({
@@ -48,12 +80,62 @@ export default function TacticalAdvisor() {
     },
   });
 
+  const createNoteMutation = useMutation({
+    mutationFn: async (noteData: { claimId?: string; adjusterId?: string; content: string; author?: string; isAiGenerated?: boolean }) => {
+      const res = await fetch('/api/tactical-notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(noteData),
+      });
+      if (!res.ok) throw new Error('Failed to create note');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tactical-notes'] });
+      setNewNote("");
+    },
+  });
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: async (noteId: string) => {
+      const res = await fetch(`/api/tactical-notes/${noteId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete note');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tactical-notes'] });
+    },
+  });
+
   const handleGetAdvice = () => {
     if (!situation.trim()) return;
     getAdviceMutation.mutate({
-      adjusterId: selectedAdjuster && selectedAdjuster !== 'none' ? selectedAdjuster : undefined,
-      claimId: selectedClaim && selectedClaim !== 'none' ? selectedClaim : undefined,
+      adjusterId,
+      claimId,
       situation,
+    });
+  };
+
+  const handleSaveAdviceAsNote = () => {
+    if (!advice || (!claimId && !adjusterId)) return;
+    
+    const noteContent = `AI Tactical Advice:\n\nStrategy: ${advice.strategy}\n\nKey Points:\n${advice.keyPoints.map(p => `• ${p}`).join('\n')}\n\nSuggested Actions:\n${advice.suggestedActions.map((a, i) => `${i + 1}. ${a}`).join('\n')}\n\nRisk Level: ${advice.riskLevel.toUpperCase()}`;
+    
+    createNoteMutation.mutate({
+      claimId,
+      adjusterId,
+      content: noteContent,
+      isAiGenerated: true,
+    });
+  };
+
+  const handleAddNote = () => {
+    if (!newNote.trim() || (!claimId && !adjusterId)) return;
+    createNoteMutation.mutate({
+      claimId,
+      adjusterId,
+      content: newNote.trim(),
+      isAiGenerated: false,
     });
   };
 
@@ -75,7 +157,7 @@ export default function TacticalAdvisor() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Tactical Advisor</h1>
-            <p className="text-muted-foreground">AI-powered claim strategy recommendations</p>
+            <p className="text-muted-foreground">AI-powered claim strategy recommendations & team notes</p>
           </div>
         </div>
 
@@ -155,74 +237,189 @@ export default function TacticalAdvisor() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="w-5 h-5" />
-                Strategic Recommendations
-              </CardTitle>
+            <CardHeader className="pb-2">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="ai-advice" className="flex items-center gap-2" data-testid="tab-ai-advice">
+                    <Lightbulb className="w-4 h-4" />
+                    AI Advice
+                  </TabsTrigger>
+                  <TabsTrigger value="team-notes" className="flex items-center gap-2" data-testid="tab-team-notes">
+                    <Users className="w-4 h-4" />
+                    Team Notes
+                    {notes.length > 0 && (
+                      <Badge variant="secondary" className="ml-1">{notes.length}</Badge>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </CardHeader>
             <CardContent>
-              {advice ? (
-                <ScrollArea className="h-[400px] pr-4">
-                  <div className="space-y-6">
-                    {advice.riskLevel && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Risk Assessment:</span>
-                        <Badge className={getRiskColor(advice.riskLevel)}>
-                          {advice.riskLevel === 'high' && <AlertTriangle className="w-3 h-3 mr-1" />}
-                          {advice.riskLevel === 'low' && <CheckCircle className="w-3 h-3 mr-1" />}
-                          {advice.riskLevel.toUpperCase()} RISK
-                        </Badge>
-                      </div>
-                    )}
-
-                    {advice.strategy && (
-                      <div>
-                        <h4 className="font-semibold mb-2 flex items-center gap-2">
-                          <Shield className="w-4 h-4" />
-                          Strategy Overview
-                        </h4>
-                        <p className="text-muted-foreground text-sm leading-relaxed">{advice.strategy}</p>
-                      </div>
-                    )}
-
-                    {advice.keyPoints && advice.keyPoints.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold mb-2">Key Points</h4>
-                        <ul className="space-y-2">
-                          {advice.keyPoints.map((point: string, i: number) => (
-                            <li key={i} className="flex items-start gap-2 text-sm">
-                              <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                              <span className="text-muted-foreground">{point}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {advice.suggestedActions && advice.suggestedActions.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold mb-2">Suggested Actions</h4>
-                        <div className="space-y-2">
-                          {advice.suggestedActions.map((action: string, i: number) => (
-                            <div key={i} className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg text-sm">
-                              <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">
-                                {i + 1}
-                              </span>
-                              <span>{action}</span>
+              {activeTab === "ai-advice" ? (
+                <>
+                  {advice ? (
+                    <ScrollArea className="h-[380px] pr-4">
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          {advice.riskLevel && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">Risk Assessment:</span>
+                              <Badge className={getRiskColor(advice.riskLevel)}>
+                                {advice.riskLevel === 'high' && <AlertTriangle className="w-3 h-3 mr-1" />}
+                                {advice.riskLevel === 'low' && <CheckCircle className="w-3 h-3 mr-1" />}
+                                {advice.riskLevel.toUpperCase()} RISK
+                              </Badge>
                             </div>
-                          ))}
+                          )}
+                          {(claimId || adjusterId) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={handleSaveAdviceAsNote}
+                              disabled={createNoteMutation.isPending}
+                              data-testid="button-save-advice"
+                            >
+                              <Save className="w-4 h-4 mr-1" />
+                              Save to Notes
+                            </Button>
+                          )}
                         </div>
+
+                        {advice.strategy && (
+                          <div>
+                            <h4 className="font-semibold mb-2 flex items-center gap-2">
+                              <Shield className="w-4 h-4" />
+                              Strategy Overview
+                            </h4>
+                            <p className="text-muted-foreground text-sm leading-relaxed">{advice.strategy}</p>
+                          </div>
+                        )}
+
+                        {advice.keyPoints && advice.keyPoints.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold mb-2">Key Points</h4>
+                            <ul className="space-y-2">
+                              {advice.keyPoints.map((point: string, i: number) => (
+                                <li key={i} className="flex items-start gap-2 text-sm">
+                                  <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                                  <span className="text-muted-foreground">{point}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {advice.suggestedActions && advice.suggestedActions.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold mb-2">Suggested Actions</h4>
+                            <div className="space-y-2">
+                              {advice.suggestedActions.map((action: string, i: number) => (
+                                <div key={i} className="flex items-start gap-2 bg-primary/5 p-3 rounded-lg text-sm">
+                                  <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">
+                                    {i + 1}
+                                  </span>
+                                  <span>{action}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </ScrollArea>
+                    </ScrollArea>
+                  ) : (
+                    <div className="h-[380px] flex items-center justify-center text-muted-foreground">
+                      <div className="text-center">
+                        <Bot className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <p>Describe your situation to get AI-powered tactical advice</p>
+                      </div>
+                    </div>
+                  )}
+                </>
               ) : (
-                <div className="h-[400px] flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <Bot className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                    <p>Describe your situation to get AI-powered tactical advice</p>
-                  </div>
+                <div className="space-y-4">
+                  {!claimId && !adjusterId ? (
+                    <div className="h-[380px] flex items-center justify-center text-muted-foreground">
+                      <div className="text-center">
+                        <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <p>Select an adjuster or claim to view and add team notes</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <Textarea
+                          placeholder="Add your tactical insights, notes, or advice for the team..."
+                          value={newNote}
+                          onChange={(e) => setNewNote(e.target.value)}
+                          className="min-h-[80px]"
+                          data-testid="input-team-note"
+                        />
+                        <Button
+                          onClick={handleAddNote}
+                          disabled={!newNote.trim() || createNoteMutation.isPending}
+                          size="sm"
+                          className="w-full"
+                          data-testid="button-add-note"
+                        >
+                          {createNoteMutation.isPending ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Plus className="w-4 h-4 mr-2" />
+                          )}
+                          Add Note
+                        </Button>
+                      </div>
+
+                      <ScrollArea className="h-[260px]">
+                        {notesLoading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : notes.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                            <p className="text-sm">No team notes yet. Add the first one!</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3 pr-4">
+                            {notes.map((note: TacticalNote) => (
+                              <div 
+                                key={note.id} 
+                                className={`p-3 rounded-lg border ${note.isAiGenerated ? 'bg-primary/5 border-primary/20' : 'bg-muted/30 border-border/50'}`}
+                                data-testid={`note-${note.id}`}
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      {note.isAiGenerated && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          <Bot className="w-3 h-3 mr-1" />
+                                          AI Generated
+                                        </Badge>
+                                      )}
+                                      <span className="text-xs text-muted-foreground">
+                                        {format(new Date(note.createdAt), 'MMM d, yyyy h:mm a')}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                                    onClick={() => deleteNoteMutation.mutate(note.id)}
+                                    data-testid={`delete-note-${note.id}`}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </ScrollArea>
+                    </>
+                  )}
                 </div>
               )}
             </CardContent>

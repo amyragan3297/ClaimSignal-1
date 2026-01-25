@@ -131,3 +131,10 @@ Preferred communication style: Simple, everyday language.
 - Supplement Approval Rate
 - Avg Interactions Per Claim
 - API: GET `/api/adjusters/:id/intelligence`
+
+### Tactical Advisor (/tactical-advisor)
+- AI-powered claim strategy recommendations
+- Team Notes: Shared notes for claims/adjusters that all team members can view and add
+- Auto-save AI advice as team notes
+- Tabbed interface: AI Advice | Team Notes
+- API: POST `/api/tactical-advice`, GET/POST/PUT/DELETE `/api/tactical-notes`
