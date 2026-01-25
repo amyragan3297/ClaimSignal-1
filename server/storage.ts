@@ -21,6 +21,8 @@ import {
   type InsertSupplement,
   type SupplementLineItem,
   type InsertSupplementLineItem,
+  type TacticalNote,
+  type InsertTacticalNote,
   adjusters,
   claims,
   claimAdjusters,
@@ -35,6 +37,7 @@ import {
   supplements,
   supplementLineItems,
   caseStudies,
+  tacticalNotes,
   type CaseStudy,
   type InsertCaseStudy
 } from "@shared/schema";
@@ -133,6 +136,12 @@ export interface IStorage {
   createCaseStudy(caseStudy: InsertCaseStudy): Promise<CaseStudy>;
   updateCaseStudy(id: string, data: Partial<InsertCaseStudy>): Promise<CaseStudy | undefined>;
   deleteCaseStudy(id: string): Promise<void>;
+  
+  // Tactical Notes methods
+  getTacticalNotes(claimId?: string, adjusterId?: string): Promise<TacticalNote[]>;
+  createTacticalNote(note: InsertTacticalNote): Promise<TacticalNote>;
+  updateTacticalNote(id: string, content: string): Promise<TacticalNote | undefined>;
+  deleteTacticalNote(id: string): Promise<void>;
   
   // Analytics methods
   getPerformanceSummary(): Promise<PerformanceSummary>;
@@ -981,6 +990,41 @@ export class DBStorage implements IStorage {
       totalReinspections: reinspectionInteractions.length,
       totalEscalations: escalationInteractions.length,
     };
+  }
+
+  // Tactical Notes methods
+  async getTacticalNotes(claimId?: string, adjusterId?: string): Promise<TacticalNote[]> {
+    let query = db.select().from(tacticalNotes);
+    
+    if (claimId && adjusterId) {
+      query = query.where(
+        sql`${tacticalNotes.claimId} = ${claimId} AND ${tacticalNotes.adjusterId} = ${adjusterId}`
+      ) as any;
+    } else if (claimId) {
+      query = query.where(eq(tacticalNotes.claimId, claimId)) as any;
+    } else if (adjusterId) {
+      query = query.where(eq(tacticalNotes.adjusterId, adjusterId)) as any;
+    }
+    
+    return query.orderBy(desc(tacticalNotes.createdAt));
+  }
+
+  async createTacticalNote(note: InsertTacticalNote): Promise<TacticalNote> {
+    const result = await db.insert(tacticalNotes).values(note).returning();
+    return result[0];
+  }
+
+  async updateTacticalNote(id: string, content: string): Promise<TacticalNote | undefined> {
+    const result = await db
+      .update(tacticalNotes)
+      .set({ content, updatedAt: new Date() })
+      .where(eq(tacticalNotes.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteTacticalNote(id: string): Promise<void> {
+    await db.delete(tacticalNotes).where(eq(tacticalNotes.id, id));
   }
 }
 

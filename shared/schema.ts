@@ -142,6 +142,18 @@ export const attachments = pgTable("attachments", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Tactical notes for sharing team insights on claims/adjusters
+export const tacticalNotes = pgTable("tactical_notes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  claimId: varchar("claim_id").references(() => claims.id, { onDelete: 'cascade' }),
+  adjusterId: varchar("adjuster_id").references(() => adjusters.id, { onDelete: 'cascade' }),
+  content: text("content").notNull(),
+  author: text("author"), // Optional: who wrote the note
+  isAiGenerated: boolean("is_ai_generated").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertAdjusterSchema = createInsertSchema(adjusters).omit({
   id: true,
@@ -172,6 +184,12 @@ export const insertAttachmentSchema = createInsertSchema(attachments).omit({
   createdAt: true,
 });
 
+export const insertTacticalNoteSchema = createInsertSchema(tacticalNotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertAdjuster = z.infer<typeof insertAdjusterSchema>;
 export type Adjuster = typeof adjusters.$inferSelect;
@@ -190,6 +208,9 @@ export type Document = typeof documents.$inferSelect;
 
 export type InsertAttachment = z.infer<typeof insertAttachmentSchema>;
 export type Attachment = typeof attachments.$inferSelect;
+
+export type InsertTacticalNote = z.infer<typeof insertTacticalNoteSchema>;
+export type TacticalNote = typeof tacticalNotes.$inferSelect;
 
 // Service requests from customers who purchased add-ons
 export const serviceRequests = pgTable("service_requests", {

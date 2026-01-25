@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema, insertServiceRequestSchema, insertSupplementSchema, insertSupplementLineItemSchema, insertCaseStudySchema } from "@shared/schema";
+import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, insertClaimSchema, insertAttachmentSchema, insertServiceRequestSchema, insertSupplementSchema, insertSupplementLineItemSchema, insertCaseStudySchema, insertTacticalNoteSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { registerDocumentAnalysisRoutes } from "./replit_integrations/document_analysis";
@@ -715,6 +715,7 @@ export async function registerRoutes(
   app.use('/api/documents', authMiddleware);
   app.use('/api/attachments', authMiddleware);
   app.use('/api/tactical-advice', authMiddleware);
+  app.use('/api/tactical-notes', authMiddleware);
   
   // Get all adjusters
   app.get("/api/adjusters", async (_req, res) => {
@@ -1152,6 +1153,81 @@ Base your advice on insurance industry best practices, policy interpretation, an
     } catch (error) {
       console.error("Error getting tactical advice:", error);
       res.status(500).json({ error: "Failed to get tactical advice" });
+    }
+  });
+
+  // Tactical Notes routes - team shared notes
+  app.get("/api/tactical-notes", async (req, res) => {
+    try {
+      const { claimId, adjusterId } = req.query;
+      const notes = await storage.getTacticalNotes(
+        claimId as string | undefined,
+        adjusterId as string | undefined
+      );
+      res.json(notes);
+    } catch (error) {
+      console.error("Error fetching tactical notes:", error);
+      res.status(500).json({ error: "Failed to fetch tactical notes" });
+    }
+  });
+
+  app.post("/api/tactical-notes", requireEditor, async (req, res) => {
+    try {
+      const parsed = insertTacticalNoteSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: fromError(parsed.error).message });
+      }
+      
+      const { claimId, adjusterId, content } = parsed.data;
+      
+      if (!claimId && !adjusterId) {
+        return res.status(400).json({ error: "Either claimId or adjusterId is required" });
+      }
+      
+      if (!content?.trim()) {
+        return res.status(400).json({ error: "Note content is required" });
+      }
+      
+      const note = await storage.createTacticalNote({
+        ...parsed.data,
+        content: content.trim(),
+      });
+      
+      res.status(201).json(note);
+    } catch (error) {
+      console.error("Error creating tactical note:", error);
+      res.status(500).json({ error: "Failed to create tactical note" });
+    }
+  });
+
+  app.put("/api/tactical-notes/:id", requireEditor, async (req, res) => {
+    try {
+      const { content } = req.body;
+      
+      if (!content?.trim()) {
+        return res.status(400).json({ error: "Note content is required" });
+      }
+      
+      const note = await storage.updateTacticalNote(req.params.id as string, content.trim());
+      
+      if (!note) {
+        return res.status(404).json({ error: "Note not found" });
+      }
+      
+      res.json(note);
+    } catch (error) {
+      console.error("Error updating tactical note:", error);
+      res.status(500).json({ error: "Failed to update tactical note" });
+    }
+  });
+
+  app.delete("/api/tactical-notes/:id", requireEditor, async (req, res) => {
+    try {
+      await storage.deleteTacticalNote(req.params.id as string);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting tactical note:", error);
+      res.status(500).json({ error: "Failed to delete tactical note" });
     }
   });
 
