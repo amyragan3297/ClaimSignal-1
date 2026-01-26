@@ -11,17 +11,17 @@ export default function Privacy() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Privacy Policy</h1>
-          <p className="text-muted-foreground mb-8">Claim Signal</p>
+          <p className="text-muted-foreground mb-8">ClaimSignal</p>
           <div className="h-1 w-24 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full mb-8" />
         </motion.div>
 
         <div className="prose prose-invert prose-amber max-w-none space-y-8">
           <Section title="1. Overview">
-            <p>Claim Signal respects user privacy and is committed to responsible data handling.</p>
+            <p>ClaimSignal respects user privacy and is committed to responsible data handling.</p>
           </Section>
 
           <Section title="2. Information Collected">
-            <p>Claim Signal may collect:</p>
+            <p>ClaimSignal may collect:</p>
             <ul>
               <li>Account information voluntarily provided</li>
               <li>Usage data and interaction metadata</li>
@@ -40,12 +40,12 @@ export default function Privacy() {
           </Section>
 
           <Section title="4. Data Aggregation">
-            <p>Claim Signal analyzes data in aggregate form.</p>
+            <p>ClaimSignal analyzes data in aggregate form.</p>
             <p>Individual claims or users are not publicly identifiable through platform outputs.</p>
           </Section>
 
           <Section title="5. Data Sharing">
-            <p className="font-medium">Claim Signal does not sell personal data.</p>
+            <p className="font-medium">ClaimSignal does not sell personal data.</p>
             <p>Information may be shared only:</p>
             <ul>
               <li>To comply with legal obligations</li>

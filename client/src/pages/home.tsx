@@ -206,7 +206,7 @@ export default function Home() {
                     <img src={logoImage} alt="ClaimSignal" className="w-12 h-12 object-contain" />
                   </div>
                 </div>
-                <h3 className="text-xl font-bold mb-2">Enter Claim Signal</h3>
+                <h3 className="text-xl font-bold mb-2">Enter ClaimSignal</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Access adjuster profiles, carrier behavior data, and escalation intelligence.
                 </p>
@@ -246,7 +246,7 @@ export default function Home() {
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">Claim Signal Risk Score</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">ClaimSignal Risk Score</h2>
                 <p className="text-muted-foreground">A weighted composite score derived from:</p>
               </motion.div>
               
@@ -504,7 +504,7 @@ export default function Home() {
               </div>
 
               <div className="text-center text-xs text-muted-foreground border-t border-border/50 pt-6 space-y-2">
-                <p>Claim Signal provides informational intelligence based on historical claim patterns. Scores and insights are not guarantees or predictions. Professional judgment remains essential. Claim Signal does not provide legal or insurance advice.</p>
+                <p>ClaimSignal provides informational intelligence based on historical claim patterns. Scores and insights are not guarantees or predictions. Professional judgment remains essential. ClaimSignal does not provide legal or insurance advice.</p>
                 <p className="mt-4">&copy; {new Date().getFullYear()} ClaimSignal. All rights reserved.</p>
               </div>
             </div>
