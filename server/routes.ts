@@ -1072,31 +1072,78 @@ export async function registerRoutes(
   // Tactical Advisor endpoint
   app.post("/api/tactical-advice", async (req, res) => {
     try {
-      const { adjusterId, claimId, situation } = req.body;
+      const { adjusterId, claimId, situation, autoGenerate } = req.body;
       
-      if (!situation) {
-        return res.status(400).json({ error: "Situation description is required" });
-      }
-
       let context = "";
+      let adjusterData: any = null;
+      let claimData: any = null;
+      let interactions: any[] = [];
       
       if (adjusterId) {
-        const adjuster = await storage.getAdjuster(adjusterId);
-        if (adjuster) {
-          context += `\nAdjuster: ${adjuster.name} (${adjuster.carrier})`;
-          if (adjuster.riskImpression) context += `\nRisk Assessment: ${adjuster.riskImpression}`;
-          if (adjuster.whatWorked) context += `\nWhat has worked before: ${adjuster.whatWorked}`;
-          if (adjuster.internalNotes) context += `\nNotes: ${adjuster.internalNotes}`;
+        adjusterData = await storage.getAdjuster(adjusterId);
+        if (adjusterData) {
+          context += `\nAdjuster: ${adjusterData.name} (${adjusterData.carrier})`;
+          if (adjusterData.riskImpression) context += `\nRisk Assessment: ${adjusterData.riskImpression}`;
+          if (adjusterData.whatWorked) context += `\nWhat has worked before: ${adjusterData.whatWorked}`;
+          if (adjusterData.internalNotes) context += `\nNotes: ${adjusterData.internalNotes}`;
+          
+          // Get interactions for this adjuster for auto-generate
+          if (autoGenerate) {
+            interactions = await storage.getInteractionsByAdjuster(adjusterId);
+            if (interactions.length > 0) {
+              context += `\n\nRecent Interactions (${interactions.length} total):`;
+              interactions.slice(0, 5).forEach((int: any) => {
+                context += `\n- ${int.type}: ${int.summary || int.outcome || 'No details'}`;
+              });
+            }
+          }
         }
       }
       
       if (claimId) {
-        const claim = await storage.getClaim(claimId);
-        if (claim) {
-          context += `\nClaim: ${claim.maskedId} (${claim.carrier})`;
-          context += `\nStatus: ${claim.status}`;
-          if (claim.notes) context += `\nClaim Notes: ${claim.notes}`;
+        claimData = await storage.getClaim(claimId);
+        if (claimData) {
+          context += `\nClaim: ${claimData.maskedId} (${claimData.carrier})`;
+          context += `\nStatus: ${claimData.status}`;
+          if (claimData.notes) context += `\nClaim Notes: ${claimData.notes}`;
+          
+          // Get interactions for this claim for auto-generate
+          if (autoGenerate) {
+            const claimInteractions = await storage.getInteractionsByClaimId(claimId);
+            if (claimInteractions.length > 0) {
+              context += `\n\nClaim Interactions (${claimInteractions.length} total):`;
+              claimInteractions.slice(0, 5).forEach((int: any) => {
+                context += `\n- ${int.type}: ${int.summary || int.outcome || 'No details'}`;
+              });
+            }
+          }
         }
+      }
+
+      // For auto-generate, we build a situation from the data
+      let finalSituation = situation || "";
+      
+      if (autoGenerate) {
+        if (!adjusterId && !claimId) {
+          return res.status(400).json({ error: "Select an adjuster or claim to auto-generate advice" });
+        }
+        
+        // Build auto-generated situation description
+        const parts = [];
+        if (adjusterData) {
+          parts.push(`Working with ${adjusterData.name} from ${adjusterData.carrier}`);
+          if (adjusterData.riskImpression) {
+            parts.push(`Risk level: ${adjusterData.riskImpression}`);
+          }
+        }
+        if (claimData) {
+          parts.push(`Claim ${claimData.maskedId} with ${claimData.carrier}`);
+          parts.push(`Current status: ${claimData.status}`);
+        }
+        
+        finalSituation = `Auto-analysis request: ${parts.join('. ')}. Provide strategic advice for handling this ${claimData ? 'claim' : 'adjuster relationship'} based on the available data and interaction history.`;
+      } else if (!situation) {
+        return res.status(400).json({ error: "Situation description is required" });
       }
 
       const OpenAI = (await import("openai")).default;
@@ -1124,7 +1171,7 @@ Base your advice on insurance industry best practices, policy interpretation, an
           },
           {
             role: "user",
-            content: `Situation: ${situation}${context ? `\n\nContext:${context}` : ''}`
+            content: `Situation: ${finalSituation}${context ? `\n\nContext:${context}` : ''}`
           }
         ],
         response_format: { type: "json_object" },
