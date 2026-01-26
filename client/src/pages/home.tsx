@@ -1,7 +1,8 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, ArrowRight, ShieldAlert, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles } from "lucide-react";
+import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles } from "lucide-react";
+import logoImage from '@assets/generated_images/modern_geometric_logo_for_claimsignal.png';
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
@@ -118,7 +119,7 @@ export default function Home() {
 
         <div className="relative z-10 w-full max-w-2xl space-y-8">
           <div className="text-center space-y-6">
-            {/* Animated Icon Container */}
+            {/* ClaimSignal Logo */}
             <motion.div 
               className="relative inline-flex items-center justify-center"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -126,18 +127,22 @@ export default function Home() {
               transition={{ duration: 0.5, type: "spring" }}
             >
               {/* Outer glow rings */}
-              <div className="absolute inset-0 w-24 h-24 -m-4">
+              <div className="absolute inset-0 w-32 h-32 -m-6">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-500/30 via-orange-500/20 to-red-500/30 blur-xl animate-pulse" />
                 <div className="absolute inset-2 rounded-full bg-gradient-to-r from-amber-400/20 to-orange-500/20 blur-lg animate-pulse" style={{ animationDelay: '0.5s' }} />
               </div>
-              {/* Main icon container */}
-              <div className="relative p-4 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-red-500/20 rounded-2xl border border-amber-500/30 backdrop-blur-sm">
+              {/* Logo container */}
+              <div className="relative p-5 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-red-500/20 rounded-2xl border border-amber-500/30 backdrop-blur-sm">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent rounded-2xl" />
-                <ShieldAlert className="relative w-10 h-10 text-amber-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]" />
+                <img 
+                  src={logoImage} 
+                  alt="ClaimSignal" 
+                  className="relative w-14 h-14 object-contain drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]" 
+                />
               </div>
             </motion.div>
             
-            {/* Animated Title */}
+            {/* Animated Title - Line 1 */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -145,7 +150,16 @@ export default function Home() {
             >
               <h1 className="text-5xl md:text-7xl font-black tracking-tight">
                 <span className="bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">Level the Field.</span>
-                <br />
+              </h1>
+            </motion.div>
+            
+            {/* Animated Title - Line 2 */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.35, duration: 0.6 }}
+            >
+              <h2 className="text-5xl md:text-7xl font-black tracking-tight">
                 <span className="relative">
                   <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
                     Claim the Advantage.
@@ -154,7 +168,7 @@ export default function Home() {
                   <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 rounded-full blur-sm opacity-60" />
                   <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 rounded-full" />
                 </span>
-              </h1>
+              </h2>
             </motion.div>
             
             {/* Subtitle with stagger animation */}
