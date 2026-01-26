@@ -1,0 +1,107 @@
+Below is a complete, production-ready Methodology page for Claim Signal. This is written to be credible, defensible, and calm. It explains enough to build trust without exposing IP or creating legal risk.
+
+You can publish this as-is.
+
+⸻
+
+Claim Signal Methodology
+
+Purpose
+
+Claim Signal is a decision-support intelligence platform designed to help claim professionals anticipate adjuster behavior and carrier response patterns. The system aggregates historical claim interactions to identify risk signals that impact negotiation strategy, timing, and escalation decisions.
+
+Claim Signal does not predict outcomes. It surfaces patterns.
+
+⸻
+
+Data Sources
+
+Claim Signal intelligence is derived from real-world claim activity, including but not limited to:
+	•	Adjuster communications and responses
+	•	Denial and partial denial outcomes
+	•	Supplement submission and approval timelines
+	•	Escalation events and resolutions
+	•	Claim handling notes and behavioral markers
+
+All data is analyzed at the pattern level. No single claim determines a score.
+
+⸻
+
+Risk Score Framework
+
+Each adjuster profile includes a proprietary Claim Signal Risk Score.
+
+The Risk Score is a weighted composite derived from multiple behavioral indicators, including:
+	•	Denial frequency trends
+	•	Supplement resistance patterns
+	•	Time-to-response behavior
+	•	Escalation outcomes
+	•	Historical negotiation behavior
+
+Scores are continuously updated as new claim data is logged.
+
+Claim Signal does not disclose scoring weights or formulas to preserve system integrity.
+
+⸻
+
+Behavioral Analysis
+
+Claim Signal focuses on observable behavior, not intent.
+
+The platform identifies repeatable tendencies such as:
+	•	Consistent denial thresholds
+	•	Delay patterns
+	•	Approval sensitivity after escalation
+	•	Documentation requirements beyond baseline norms
+	•	Carrier-specific handling tendencies
+
+These signals help users adjust strategy proactively rather than reactively.
+
+⸻
+
+AI-Assisted Intelligence
+
+AI-powered tactics are generated using historical pattern recognition across similar adjuster and carrier profiles.
+
+The system provides:
+	•	Negotiation guidance informed by prior outcomes
+	•	Escalation timing recommendations
+	•	Documentation emphasis suggestions
+
+AI output is advisory only and intended to support professional judgment.
+
+⸻
+
+Limitations and Scope
+
+Claim Signal does not:
+	•	Guarantee claim outcomes
+	•	Replace professional judgment
+	•	Provide legal advice
+	•	Override carrier or jurisdictional requirements
+
+Results may vary based on documentation quality, jurisdiction, policy language, and claim specifics.
+
+⸻
+
+Data Integrity and Updates
+	•	Scores and insights update as new data becomes available
+	•	Anomalous or incomplete data is weighted accordingly
+	•	Patterns require sufficient data volume to influence scoring
+
+Claim Signal prioritizes accuracy over speed.
+
+⸻
+
+Ethical Use
+
+Claim Signal is designed to promote informed, ethical claim handling.
+The platform does not encourage misrepresentation, improper conduct, or abuse of process.
+
+⸻
+
+Summary
+
+Claim Signal equips professionals with intelligence, not shortcuts.
+
+The goal is clarity, preparedness, and strategic efficiency in an environment where information asymmetry traditionally exists.
