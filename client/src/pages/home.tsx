@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles, BarChart3, Target, Users, Building2, BookOpen, LayoutDashboard, XCircle, ChevronRight, Shield } from "lucide-react";
+import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles, BarChart3, Target, Users, Building2, BookOpen, LayoutDashboard, XCircle, ChevronRight, Shield, FileUp, AlertCircle } from "lucide-react";
 import logoImage from '@assets/generated_images/modern_geometric_logo_for_claimsignal.png';
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -14,6 +14,21 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { useUpload } from "@/hooks/use-upload";
+
+interface SmartUploadResult {
+  fileName: string;
+  status: 'pending' | 'uploading' | 'analyzing' | 'done' | 'error';
+  message?: string;
+  extracted?: {
+    adjusterName?: string;
+    carrier?: string;
+    claimId?: string;
+    homeownerName?: string;
+    propertyAddress?: string;
+  };
+  createdAdjusterId?: string;
+  createdClaimId?: string;
+}
 
 export default function Home() {
   const [, setLocation] = useLocation();
