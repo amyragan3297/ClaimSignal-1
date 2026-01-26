@@ -66,13 +66,16 @@ export default function TacticalAdvisor() {
   });
 
   const getAdviceMutation = useMutation({
-    mutationFn: async ({ adjusterId, claimId, situation }: { adjusterId?: string; claimId?: string; situation: string }) => {
+    mutationFn: async ({ adjusterId, claimId, situation, autoGenerate }: { adjusterId?: string; claimId?: string; situation?: string; autoGenerate?: boolean }) => {
       const res = await fetch('/api/tactical-advice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adjusterId, claimId, situation }),
+        body: JSON.stringify({ adjusterId, claimId, situation, autoGenerate }),
       });
-      if (!res.ok) throw new Error('Failed to get advice');
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to get advice');
+      }
       return res.json();
     },
     onSuccess: (data) => {
@@ -113,6 +116,15 @@ export default function TacticalAdvisor() {
       adjusterId,
       claimId,
       situation,
+    });
+  };
+
+  const handleAutoGenerate = () => {
+    if (!adjusterId && !claimId) return;
+    getAdviceMutation.mutate({
+      adjusterId,
+      claimId,
+      autoGenerate: true,
     });
   };
 
@@ -215,24 +227,45 @@ export default function TacticalAdvisor() {
                 />
               </div>
 
-              <Button 
-                onClick={handleGetAdvice} 
-                disabled={!situation.trim() || getAdviceMutation.isPending}
-                className="w-full"
-                data-testid="button-get-advice"
-              >
-                {getAdviceMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-4 h-4 mr-2" />
-                    Get Tactical Advice
-                  </>
-                )}
-              </Button>
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  onClick={handleGetAdvice} 
+                  disabled={!situation.trim() || getAdviceMutation.isPending}
+                  className="w-full"
+                  data-testid="button-get-advice"
+                >
+                  {getAdviceMutation.isPending && situation.trim() ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Get Tactical Advice
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={handleAutoGenerate}
+                  disabled={(!adjusterId && !claimId) || getAdviceMutation.isPending}
+                  variant="secondary"
+                  className="w-full"
+                  data-testid="button-auto-generate"
+                >
+                  {getAdviceMutation.isPending && !situation.trim() ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Bot className="w-4 h-4 mr-2" />
+                      Auto-Generate
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
