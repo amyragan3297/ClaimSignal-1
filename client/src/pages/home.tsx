@@ -117,27 +117,60 @@ export default function Home() {
         {/* Top fade */}
         <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-background to-transparent z-0 pointer-events-none" />
 
-        <div className="relative z-10 w-full max-w-2xl space-y-8">
+        <div className="relative z-10 w-full max-w-3xl space-y-8">
           <div className="text-center space-y-6">
-            {/* ClaimSignal Logo */}
+            {/* ClaimSignal Logo with Feature Badges */}
             <motion.div 
               className="relative inline-flex items-center justify-center"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5, type: "spring" }}
             >
-              {/* Outer glow rings */}
-              <div className="absolute inset-0 w-32 h-32 -m-6">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-500/30 via-orange-500/20 to-red-500/30 blur-xl animate-pulse" />
-                <div className="absolute inset-2 rounded-full bg-gradient-to-r from-amber-400/20 to-orange-500/20 blur-lg animate-pulse" style={{ animationDelay: '0.5s' }} />
+              {/* Floating Feature Badges */}
+              <motion.div 
+                className="absolute -left-32 md:-left-44 top-1/2 -translate-y-1/2"
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+              >
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl px-4 py-3 shadow-xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-xs font-medium text-muted-foreground">Live Intel</span>
+                  </div>
+                  <p className="text-lg font-bold text-foreground mt-1">Risk Scores</p>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                className="absolute -right-32 md:-right-44 top-1/2 -translate-y-1/2"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+              >
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl px-4 py-3 shadow-xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    <span className="text-xs font-medium text-muted-foreground">AI-Powered</span>
+                  </div>
+                  <p className="text-lg font-bold text-foreground mt-1">Tactics</p>
+                </div>
+              </motion.div>
+
+              {/* Outer glow rings - larger */}
+              <div className="absolute w-48 h-48 -m-8">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-500/40 via-orange-500/30 to-red-500/40 blur-2xl animate-pulse" />
+                <div className="absolute inset-4 rounded-full bg-gradient-to-r from-amber-400/30 to-orange-500/30 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+                <div className="absolute inset-8 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-400/20 blur-lg animate-pulse" style={{ animationDelay: '1s' }} />
               </div>
-              {/* Logo container */}
-              <div className="relative p-5 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-red-500/20 rounded-2xl border border-amber-500/30 backdrop-blur-sm">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent rounded-2xl" />
+              
+              {/* Logo container - bigger */}
+              <div className="relative p-6 bg-gradient-to-br from-amber-500/30 via-orange-500/20 to-red-500/30 rounded-3xl border-2 border-amber-500/40 backdrop-blur-sm shadow-2xl shadow-amber-500/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-transparent rounded-3xl" />
                 <img 
                   src={logoImage} 
                   alt="ClaimSignal" 
-                  className="relative w-14 h-14 object-contain drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]" 
+                  className="relative w-20 h-20 object-contain drop-shadow-[0_0_25px_rgba(251,191,36,0.6)]" 
                 />
               </div>
             </motion.div>
@@ -181,6 +214,35 @@ export default function Home() {
               <span className="text-foreground/90 font-medium">Intelligence on insurance adjusters.</span>{" "}
               Search by name or carrier to see risk profiles, denial patterns, and negotiation history.
             </motion.p>
+            
+            {/* Stats Row */}
+            <motion.div 
+              className="flex flex-wrap justify-center gap-6 md:gap-10 pt-4"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+            >
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                  {adjusters.length || '—'}
+                </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Adjusters Tracked</div>
+              </div>
+              <div className="w-px h-12 bg-border/50 hidden md:block" />
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                  {new Set(adjusters.map(a => a.carrier)).size || '—'}
+                </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Carriers Monitored</div>
+              </div>
+              <div className="w-px h-12 bg-border/50 hidden md:block" />
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+                  AI
+                </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Powered Insights</div>
+              </div>
+            </motion.div>
           </div>
 
           <div className="space-y-4">
