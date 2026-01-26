@@ -5,6 +5,7 @@ import { insertInteractionSchema, insertAdjusterSchema, insertDocumentSchema, in
 import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { registerDocumentAnalysisRoutes } from "./replit_integrations/document_analysis";
+import { speechToText, convertWebmToWav } from "./replit_integrations/audio/client";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { z } from "zod";
 
@@ -81,6 +82,33 @@ export async function registerRoutes(
   
   // Register document analysis routes for AI-powered extraction
   registerDocumentAnalysisRoutes(app);
+
+  // ========== AUDIO TRANSCRIPTION ROUTE ==========
+  app.post("/api/transcribe", authMiddleware, async (req, res) => {
+    try {
+      const { audio, format } = req.body;
+      
+      if (!audio) {
+        return res.status(400).json({ error: "Audio data is required" });
+      }
+
+      let audioBuffer = Buffer.from(audio, "base64");
+      let audioFormat = format || "wav";
+      
+      // Convert m4a/webm/mp4 to wav if needed
+      if (format === "m4a" || format === "webm" || format === "mp4" || format === "ogg") {
+        audioBuffer = await convertWebmToWav(audioBuffer);
+        audioFormat = "wav";
+      }
+      
+      const transcript = await speechToText(audioBuffer, audioFormat);
+      
+      res.json({ success: true, transcript });
+    } catch (error) {
+      console.error("Error transcribing audio:", error);
+      res.status(500).json({ error: "Failed to transcribe audio" });
+    }
+  });
 
   // ========== AUTH ROUTES ==========
   

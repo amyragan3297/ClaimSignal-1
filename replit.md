@@ -8,6 +8,14 @@ ClaimSignal is a private adjuster risk analysis and claim intelligence dashboard
 
 Preferred communication style: Simple, everyday language.
 
+### Document Processing Rules
+- **Always check for duplicates** before adding new claims, adjusters, or interactions from uploaded documents
+- Check by: claim number, adjuster name, property address, homeowner name
+- If duplicate found: Do not add again, inform user it already exists
+- If not duplicate: Add new adjuster/claim/interaction to the database
+- Link adjusters to claims via claim_adjusters junction table
+- Log interactions with dates and outcomes from document content
+
 ## System Architecture
 
 ### Frontend Architecture
