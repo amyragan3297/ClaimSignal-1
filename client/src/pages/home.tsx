@@ -144,11 +144,11 @@ export default function Home() {
               transition={{ delay: 0.2, duration: 0.6 }}
             >
               <h1 className="text-5xl md:text-7xl font-black tracking-tight">
-                <span className="bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">Know Your</span>
+                <span className="bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">Level the Field.</span>
                 <br />
                 <span className="relative">
                   <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                    Opponent
+                    Claim the Advantage.
                   </span>
                   {/* Underline glow effect */}
                   <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 rounded-full blur-sm opacity-60" />
