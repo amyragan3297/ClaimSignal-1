@@ -1,8 +1,9 @@
 import { Layout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, TrendingUp, TrendingDown, Users, FileText, Building2, Clock, AlertTriangle, CheckCircle, BarChart3, FileCheck, RefreshCw, ArrowUpRight, Loader2 } from "lucide-react";
+import { LayoutDashboard, TrendingUp, TrendingDown, Users, FileText, Building2, Clock, AlertTriangle, CheckCircle, BarChart3, FileCheck, RefreshCw, ArrowUpRight, Loader2, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { fetchAdjusters, fetchClaims } from "@/lib/api";
 
 interface PerformanceSummary {
@@ -16,6 +17,8 @@ interface PerformanceSummary {
 }
 
 export default function Analytics() {
+  const [, setLocation] = useLocation();
+  
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
     queryFn: fetchAdjusters,
@@ -274,20 +277,26 @@ export default function Analytics() {
             <CardContent>
               <div className="space-y-3">
                 {carrierStats.slice(0, 5).map((carrier, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div 
+                    key={i} 
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted/70 transition-colors group"
+                    onClick={() => setLocation(`/carriers/${encodeURIComponent(carrier.name)}`)}
+                    data-testid={`carrier-card-${carrier.name.replace(/\s+/g, '-').toLowerCase()}`}
+                  >
                     <div>
                       <p className="font-medium">{carrier.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {carrier.adjusters} adjusters • {carrier.claims} claims
                       </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-blue-500 border-blue-500/30">
                         {carrier.open} open
                       </Badge>
                       <Badge variant="outline" className="text-emerald-500 border-emerald-500/30">
                         {carrier.resolved} resolved
                       </Badge>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                     </div>
                   </div>
                 ))}
