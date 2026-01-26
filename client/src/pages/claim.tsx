@@ -490,13 +490,14 @@ export default function ClaimDetail() {
                         </TabsList>
                         <TabsContent value="file" className="space-y-4 mt-4">
                           <div className="space-y-2">
-                            <Label>Date</Label>
+                            <Label>Document Date</Label>
                             <Input 
                               type="date" 
                               value={newAttachment.date}
                               onChange={(e) => setNewAttachment({...newAttachment, date: e.target.value})}
                               data-testid="input-file-date"
                             />
+                            <p className="text-xs text-muted-foreground">Enter the date on the document (not today's date)</p>
                           </div>
                           <div className="space-y-2">
                             <Label>Description (optional)</Label>
@@ -544,13 +545,14 @@ export default function ClaimDetail() {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label>Date</Label>
+                              <Label>Email Date</Label>
                               <Input 
                                 type="date" 
                                 value={newAttachment.date}
                                 onChange={(e) => setNewAttachment({...newAttachment, date: e.target.value})}
                                 data-testid="input-email-date"
                               />
+                              <p className="text-xs text-muted-foreground">Date the email was sent/received</p>
                             </div>
                           </div>
                           <div className="space-y-2">
