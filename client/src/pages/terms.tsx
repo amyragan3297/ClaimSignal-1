@@ -11,23 +11,23 @@ export default function Terms() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Terms of Service</h1>
-          <p className="text-muted-foreground mb-8">Claim Signal</p>
+          <p className="text-muted-foreground mb-8">ClaimSignal</p>
           <div className="h-1 w-24 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full mb-8" />
         </motion.div>
 
         <div className="prose prose-invert prose-amber max-w-none space-y-8">
           <Section title="1. Acceptance of Terms">
-            <p>By accessing or using Claim Signal, you agree to be bound by these Terms of Service. If you do not agree, do not use the platform.</p>
+            <p>By accessing or using ClaimSignal, you agree to be bound by these Terms of Service. If you do not agree, do not use the platform.</p>
           </Section>
 
           <Section title="2. Description of Service">
-            <p>Claim Signal is an informational intelligence platform providing aggregated insights, risk indicators, and decision-support tools related to insurance claim handling patterns.</p>
-            <p className="font-medium">Claim Signal does not act as a public adjuster, legal representative, insurer, or third-party negotiator.</p>
+            <p>ClaimSignal is an informational intelligence platform providing aggregated insights, risk indicators, and decision-support tools related to insurance claim handling patterns.</p>
+            <p className="font-medium">ClaimSignal does not act as a public adjuster, legal representative, insurer, or third-party negotiator.</p>
           </Section>
 
           <Section title="3. Informational Use Only">
             <p>All content is provided for informational and decision-support purposes only.</p>
-            <p>Claim Signal does not provide:</p>
+            <p>ClaimSignal does not provide:</p>
             <ul>
               <li>Legal advice</li>
               <li>Insurance advice</li>
@@ -58,7 +58,7 @@ export default function Terms() {
           </Section>
 
           <Section title="6. Limitation of Liability">
-            <p>To the maximum extent permitted by law, Claim Signal shall not be liable for:</p>
+            <p>To the maximum extent permitted by law, ClaimSignal shall not be liable for:</p>
             <ul>
               <li>Claim denials or delays</li>
               <li>Financial losses</li>
@@ -69,12 +69,12 @@ export default function Terms() {
           </Section>
 
           <Section title="7. Intellectual Property">
-            <p>All content, methodologies, scoring frameworks, and platform features are proprietary to Claim Signal.</p>
+            <p>All content, methodologies, scoring frameworks, and platform features are proprietary to ClaimSignal.</p>
             <p>Unauthorized copying, reverse engineering, or redistribution is prohibited.</p>
           </Section>
 
           <Section title="8. Termination">
-            <p>Claim Signal reserves the right to suspend or terminate access for violations of these terms.</p>
+            <p>ClaimSignal reserves the right to suspend or terminate access for violations of these terms.</p>
           </Section>
 
           <Section title="9. Modifications">

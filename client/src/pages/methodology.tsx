@@ -11,7 +11,7 @@ export default function Methodology() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Claim Signal Methodology</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">ClaimSignal Methodology</h1>
           <div className="h-1 w-24 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full mb-8" />
         </motion.div>
 
@@ -21,10 +21,10 @@ export default function Methodology() {
             title="Purpose"
           >
             <p className="text-muted-foreground leading-relaxed">
-              Claim Signal is a decision-support intelligence platform designed to help claim professionals anticipate adjuster behavior and carrier response patterns. The system aggregates historical claim interactions to identify risk signals that impact negotiation strategy, timing, and escalation decisions.
+              ClaimSignal is a decision-support intelligence platform designed to help claim professionals anticipate adjuster behavior and carrier response patterns. The system aggregates historical claim interactions to identify risk signals that impact negotiation strategy, timing, and escalation decisions.
             </p>
             <p className="text-foreground font-medium mt-4">
-              Claim Signal does not predict outcomes. It surfaces patterns.
+              ClaimSignal does not predict outcomes. It surfaces patterns.
             </p>
           </Section>
 
@@ -33,7 +33,7 @@ export default function Methodology() {
             title="Data Sources"
           >
             <p className="text-muted-foreground leading-relaxed mb-4">
-              Claim Signal intelligence is derived from real-world claim activity, including but not limited to:
+              ClaimSignal intelligence is derived from real-world claim activity, including but not limited to:
             </p>
             <ul className="space-y-2 text-muted-foreground">
               <li className="flex items-start gap-3">
@@ -67,7 +67,7 @@ export default function Methodology() {
             title="Risk Score Framework"
           >
             <p className="text-muted-foreground leading-relaxed mb-4">
-              Each adjuster profile includes a proprietary Claim Signal Risk Score.
+              Each adjuster profile includes a proprietary ClaimSignal Risk Score.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-4">
               The Risk Score is a weighted composite derived from multiple behavioral indicators, including:
@@ -98,7 +98,7 @@ export default function Methodology() {
               Scores are continuously updated as new claim data is logged.
             </p>
             <p className="text-foreground font-medium mt-4">
-              Claim Signal does not disclose scoring weights or formulas to preserve system integrity.
+              ClaimSignal does not disclose scoring weights or formulas to preserve system integrity.
             </p>
           </Section>
 
@@ -107,7 +107,7 @@ export default function Methodology() {
             title="Behavioral Analysis"
           >
             <p className="text-foreground font-medium mb-4">
-              Claim Signal focuses on observable behavior, not intent.
+              ClaimSignal focuses on observable behavior, not intent.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-4">
               The platform identifies repeatable tendencies such as:
@@ -173,7 +173,7 @@ export default function Methodology() {
             title="Limitations and Scope"
           >
             <p className="text-muted-foreground leading-relaxed mb-4">
-              Claim Signal does not:
+              ClaimSignal does not:
             </p>
             <ul className="space-y-2 text-muted-foreground">
               <li className="flex items-start gap-3">
@@ -217,7 +217,7 @@ export default function Methodology() {
               </li>
             </ul>
             <p className="text-foreground font-medium mt-4">
-              Claim Signal prioritizes accuracy over speed.
+              ClaimSignal prioritizes accuracy over speed.
             </p>
           </Section>
 
@@ -226,7 +226,7 @@ export default function Methodology() {
             title="Ethical Use"
           >
             <p className="text-muted-foreground leading-relaxed">
-              Claim Signal is designed to promote informed, ethical claim handling. The platform does not encourage misrepresentation, improper conduct, or abuse of process.
+              ClaimSignal is designed to promote informed, ethical claim handling. The platform does not encourage misrepresentation, improper conduct, or abuse of process.
             </p>
           </Section>
 
@@ -235,7 +235,7 @@ export default function Methodology() {
             title="Summary"
           >
             <p className="text-foreground font-medium text-lg mb-4">
-              Claim Signal equips professionals with intelligence, not shortcuts.
+              ClaimSignal equips professionals with intelligence, not shortcuts.
             </p>
             <p className="text-muted-foreground leading-relaxed">
               The goal is clarity, preparedness, and strategic efficiency in an environment where information asymmetry traditionally exists.

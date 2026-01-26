@@ -13,14 +13,14 @@ export default function Legal() {
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Legal Disclosure</h1>
           <p className="text-muted-foreground mb-2">Use Restrictions and Protective Notice</p>
-          <p className="text-sm text-muted-foreground mb-8">Claim Signal</p>
+          <p className="text-sm text-muted-foreground mb-8">ClaimSignal</p>
           <div className="h-1 w-24 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full mb-8" />
         </motion.div>
 
         <div className="space-y-10">
           <Section icon={<FileText className="w-5 h-5" />} title="1. Informational Platform Only">
-            <p className="font-medium text-foreground mb-3">Claim Signal is an informational and decision-support platform.</p>
-            <p className="mb-3">Claim Signal does not:</p>
+            <p className="font-medium text-foreground mb-3">ClaimSignal is an informational and decision-support platform.</p>
+            <p className="mb-3">ClaimSignal does not:</p>
             <ul>
               <li>Provide legal advice</li>
               <li>Provide insurance advice</li>
@@ -39,22 +39,22 @@ export default function Legal() {
               <li>Reflect trends, not facts or predictions</li>
               <li>May be incomplete, delayed, or subject to change</li>
             </ul>
-            <p className="mt-3 font-medium text-foreground">Claim Signal makes no warranties, express or implied, regarding accuracy, completeness, or suitability for any purpose.</p>
+            <p className="mt-3 font-medium text-foreground">ClaimSignal makes no warranties, express or implied, regarding accuracy, completeness, or suitability for any purpose.</p>
           </Section>
 
           <Section icon={<Brain className="w-5 h-5" />} title="3. Professional Judgment Required">
-            <p className="font-medium text-foreground mb-3">Use of Claim Signal does not replace independent professional judgment.</p>
+            <p className="font-medium text-foreground mb-3">Use of ClaimSignal does not replace independent professional judgment.</p>
             <p className="mb-3">Users are expected to:</p>
             <ul>
               <li>Comply with all applicable laws and regulations</li>
               <li>Follow carrier, policy, and jurisdictional requirements</li>
               <li>Seek licensed professionals where appropriate</li>
             </ul>
-            <p className="mt-3">Claim Signal is a support tool, not a substitute for expertise.</p>
+            <p className="mt-3">ClaimSignal is a support tool, not a substitute for expertise.</p>
           </Section>
 
           <Section icon={<Ban className="w-5 h-5" />} title="4. No Assertion of Intent or Misconduct">
-            <p className="mb-3">Claim Signal does not assert, imply, or allege:</p>
+            <p className="mb-3">ClaimSignal does not assert, imply, or allege:</p>
             <ul>
               <li>Bad faith</li>
               <li>Improper conduct</li>
@@ -66,7 +66,7 @@ export default function Legal() {
           </Section>
 
           <Section icon={<Lock className="w-5 h-5" />} title="5. Data Privacy and Aggregation">
-            <p className="mb-3">Claim Signal:</p>
+            <p className="mb-3">ClaimSignal:</p>
             <ul>
               <li>Analyzes data in aggregated and de-identified form</li>
               <li>Does not require consumer policyholder personal information for core functionality</li>
@@ -77,7 +77,7 @@ export default function Legal() {
           </Section>
 
           <Section icon={<Shield className="w-5 h-5" />} title="6. Limitation of Liability">
-            <p className="mb-3">To the fullest extent permitted by law, Claim Signal and its operators shall not be liable for:</p>
+            <p className="mb-3">To the fullest extent permitted by law, ClaimSignal and its operators shall not be liable for:</p>
             <ul>
               <li>Claim denials or delays</li>
               <li>Financial or business losses</li>
@@ -88,23 +88,23 @@ export default function Legal() {
           </Section>
 
           <Section icon={<Scale className="w-5 h-5" />} title="7. Ethical and Lawful Use">
-            <p className="mb-3">Users agree not to use Claim Signal to:</p>
+            <p className="mb-3">Users agree not to use ClaimSignal to:</p>
             <ul>
               <li>Misrepresent facts</li>
               <li>Engage in deceptive or unlawful conduct</li>
               <li>Harass or intimidate any party</li>
               <li>Circumvent laws, regulations, or contractual obligations</li>
             </ul>
-            <p className="mt-3">Claim Signal reserves the right to restrict or terminate access for misuse.</p>
+            <p className="mt-3">ClaimSignal reserves the right to restrict or terminate access for misuse.</p>
           </Section>
 
           <Section icon={<Building2 className="w-5 h-5" />} title="8. Non-Affiliation Statement">
-            <p>Claim Signal is not affiliated with, endorsed by, or sponsored by any insurance carrier, adjusting firm, regulator, or governmental entity.</p>
+            <p>ClaimSignal is not affiliated with, endorsed by, or sponsored by any insurance carrier, adjusting firm, regulator, or governmental entity.</p>
             <p className="mt-3">All names are used for identification purposes only.</p>
           </Section>
 
           <Section title="9. Intellectual Property Protection">
-            <p className="mb-3">All content, methodologies, scoring frameworks, analytics, and platform elements are proprietary to Claim Signal.</p>
+            <p className="mb-3">All content, methodologies, scoring frameworks, analytics, and platform elements are proprietary to ClaimSignal.</p>
             <p className="mb-3">Users may not:</p>
             <ul>
               <li>Copy, scrape, reverse engineer, or redistribute content</li>
@@ -115,13 +115,13 @@ export default function Legal() {
           </Section>
 
           <Section title="10. Non-Compete and Non-Circumvention Notice">
-            <p className="mb-3">By accessing Claim Signal, users acknowledge that:</p>
+            <p className="mb-3">By accessing ClaimSignal, users acknowledge that:</p>
             <ul>
               <li>Platform methodologies, scoring logic, and intelligence frameworks are proprietary</li>
-              <li>Use of the platform does not grant rights to replicate, commercialize, or compete using Claim Signal concepts</li>
-              <li>Users may not use Claim Signal outputs to build or assist competing intelligence, analytics, or claim-profiling systems</li>
+              <li>Use of the platform does not grant rights to replicate, commercialize, or compete using ClaimSignal concepts</li>
+              <li>Users may not use ClaimSignal outputs to build or assist competing intelligence, analytics, or claim-profiling systems</li>
             </ul>
-            <p className="mt-3">Nothing in this platform authorizes circumvention of Claim Signal for competitive purposes.</p>
+            <p className="mt-3">Nothing in this platform authorizes circumvention of ClaimSignal for competitive purposes.</p>
           </Section>
 
           <Section title="11. Governing Law">
@@ -130,7 +130,7 @@ export default function Legal() {
 
           <div className="bg-card/50 border border-amber-500/30 rounded-xl p-6 mt-10">
             <h3 className="text-lg font-bold mb-3">Acceptance</h3>
-            <p className="text-muted-foreground">By continuing to use Claim Signal, you acknowledge that you have read, understood, and agreed to these terms.</p>
+            <p className="text-muted-foreground">By continuing to use ClaimSignal, you acknowledge that you have read, understood, and agreed to these terms.</p>
           </div>
         </div>
       </div>
