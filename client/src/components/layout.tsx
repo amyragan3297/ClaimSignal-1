@@ -99,6 +99,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             Methodology
           </Button>
         </Link>
+        <Link href="/legal">
+          <Button variant={location === "/legal" || location === "/terms" || location === "/privacy" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <Shield className="w-4 h-4" />
+            Legal
+          </Button>
+        </Link>
 
         {accessLevel === 'admin' && (
           <>

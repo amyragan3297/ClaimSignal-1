@@ -28,6 +28,9 @@ import CaseStudiesPage from "@/pages/case-studies";
 import RiskAlertsPage from "@/pages/risk-alerts";
 import Adjusters from "@/pages/adjusters";
 import Methodology from "@/pages/methodology";
+import Terms from "@/pages/terms";
+import Privacy from "@/pages/privacy";
+import Legal from "@/pages/legal";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -115,6 +118,15 @@ function Router() {
       </Route>
       <Route path="/methodology">
         <ProtectedRoute component={Methodology} />
+      </Route>
+      <Route path="/terms">
+        <ProtectedRoute component={Terms} />
+      </Route>
+      <Route path="/privacy">
+        <ProtectedRoute component={Privacy} />
+      </Route>
+      <Route path="/legal">
+        <ProtectedRoute component={Legal} />
       </Route>
       <Route path="/submit-request" component={SubmitRequest} />
       <Route component={NotFound} />

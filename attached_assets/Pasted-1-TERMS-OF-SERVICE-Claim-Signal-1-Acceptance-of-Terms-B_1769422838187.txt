@@ -1,0 +1,353 @@
+1. TERMS OF SERVICE
+
+Claim Signal
+
+1. Acceptance of Terms
+
+By accessing or using Claim Signal, you agree to be bound by these Terms of Service. If you do not agree, do not use the platform.
+
+⸻
+
+2. Description of Service
+
+Claim Signal is an informational intelligence platform providing aggregated insights, risk indicators, and decision-support tools related to insurance claim handling patterns.
+
+Claim Signal does not act as a public adjuster, legal representative, insurer, or third-party negotiator.
+
+⸻
+
+3. Informational Use Only
+
+All content is provided for informational and decision-support purposes only.
+
+Claim Signal does not provide:
+	•	Legal advice
+	•	Insurance advice
+	•	Claim representation
+	•	Outcome guarantees
+
+Users remain solely responsible for all decisions and actions.
+
+⸻
+
+4. Risk Scores and Analytics
+
+Risk Scores and intelligence outputs:
+	•	Are derived from historical behavioral patterns
+	•	Reflect trends, not facts or predictions
+	•	Do not assert intent, fault, or misconduct
+
+Scores are subject to data limitations and continuous updates.
+
+⸻
+
+5. User Responsibilities
+
+Users agree to:
+	•	Use the platform lawfully and ethically
+	•	Maintain accurate information where provided
+	•	Exercise independent professional judgment
+
+Users agree not to misuse platform intelligence for harassment, deception, or unlawful conduct.
+
+⸻
+
+6. Limitation of Liability
+
+To the maximum extent permitted by law, Claim Signal shall not be liable for:
+	•	Claim denials or delays
+	•	Financial losses
+	•	Business interruptions
+	•	Indirect or consequential damages
+
+Use of the platform is at the user’s own risk.
+
+⸻
+
+7. Intellectual Property
+
+All content, methodologies, scoring frameworks, and platform features are proprietary to Claim Signal.
+
+Unauthorized copying, reverse engineering, or redistribution is prohibited.
+
+⸻
+
+8. Termination
+
+Claim Signal reserves the right to suspend or terminate access for violations of these terms.
+
+⸻
+
+9. Modifications
+
+Terms may be updated periodically. Continued use constitutes acceptance of the current version.
+
+⸻
+
+10. Governing Law
+
+These Terms are governed by applicable state law without regard to conflict-of-law principles.
+
+⸻
+
+2. PRIVACY POLICY
+
+Claim Signal
+
+1. Overview
+
+Claim Signal respects user privacy and is committed to responsible data handling.
+
+⸻
+
+2. Information Collected
+
+Claim Signal may collect:
+	•	Account information voluntarily provided
+	•	Usage data and interaction metadata
+	•	Aggregated claim behavior data
+
+No personal consumer insurance data is required to use core intelligence features.
+
+⸻
+
+3. Use of Information
+
+Information is used to:
+	•	Operate and improve platform functionality
+	•	Generate aggregated intelligence and analytics
+	•	Maintain system integrity and security
+
+⸻
+
+4. Data Aggregation
+
+Claim Signal analyzes data in aggregate form.
+Individual claims or users are not publicly identifiable through platform outputs.
+
+⸻
+
+5. Data Sharing
+
+Claim Signal does not sell personal data.
+
+Information may be shared only:
+	•	To comply with legal obligations
+	•	To protect platform integrity
+	•	With service providers necessary for operation
+
+⸻
+
+6. Data Security
+
+Reasonable administrative and technical safeguards are used to protect information.
+
+No system is completely secure. Users acknowledge inherent risks.
+
+⸻
+
+7. User Choices
+
+Users may request account access, correction, or deletion where applicable.
+
+⸻
+
+8. Policy Updates
+
+Privacy practices may change over time. Continued use constitutes acceptance.
+
+⸻
+
+3. IN-APP CONDENSED LEGAL DISCLOSURE
+
+(Use this verbatim in footer, modal, or onboarding)
+
+Claim Signal provides informational intelligence based on historical claim patterns.
+Scores and insights are not guarantees or predictions.
+Professional judgment remains essential.
+Claim Signal does not provide legal or insurance advice.
+
+Short. Defensive. Clean.
+
+⸻
+
+4. ALABAMA-SPECIFIC LEGAL ALIGNMENT NOTES
+
+(Internal reference or attorney handoff)
+	•	Alabama recognizes at-will employment but enforces written contracts.
+	•	Claim Signal avoids regulated public adjuster activity by:
+	•	Not negotiating claims
+	•	Not representing insureds
+	•	Not directing claim communications
+	•	Platform language avoids “advice,” “recommendation,” or “representation” claims
+	•	Intelligence framed as behavioral trend analysis, not outcome prediction
+	•	No consumer-facing policy interpretation
+
+This positioning materially reduces regulatory exposure under Alabama law.
+Below is a single, comprehensive in-app legal protection module you can deploy immediately.
+It is written to be maximally defensive, internally consistent, and practical.
+This is not marketing copy. This is protection language.
+
+You can place this as:
+	•	A required acceptance screen on first login
+	•	A persistent footer link labeled “Legal”
+	•	A modal that must be acknowledged to continue
+
+⸻
+
+Legal Disclosure, Use Restrictions, and Protective Notice
+
+Claim Signal
+
+1. Informational Platform Only
+
+Claim Signal is an informational and decision-support platform.
+
+Claim Signal does not:
+	•	Provide legal advice
+	•	Provide insurance advice
+	•	Act as a public adjuster
+	•	Represent insureds or carriers
+	•	Negotiate or direct claim handling
+	•	Predict or guarantee claim outcomes
+
+All information is provided for general informational purposes only. Users remain solely responsible for their professional decisions.
+
+⸻
+
+2. No Reliance or Guarantee
+
+Any scores, insights, analytics, or AI-assisted outputs:
+	•	Are based on aggregated historical patterns
+	•	Reflect trends, not facts or predictions
+	•	May be incomplete, delayed, or subject to change
+
+Claim Signal makes no warranties, express or implied, regarding accuracy, completeness, or suitability for any purpose.
+
+⸻
+
+3. Professional Judgment Required
+
+Use of Claim Signal does not replace independent professional judgment.
+
+Users are expected to:
+	•	Comply with all applicable laws and regulations
+	•	Follow carrier, policy, and jurisdictional requirements
+	•	Seek licensed professionals where appropriate
+
+Claim Signal is a support tool, not a substitute for expertise.
+
+⸻
+
+4. No Assertion of Intent or Misconduct
+
+Claim Signal does not assert, imply, or allege:
+	•	Bad faith
+	•	Improper conduct
+	•	Negligence
+	•	Intentional delay
+	•	Regulatory violations
+
+All references to adjusters, carriers, or entities are contextual and informational only.
+
+⸻
+
+5. Data Privacy and Aggregation
+
+Claim Signal:
+	•	Analyzes data in aggregated and de-identified form
+	•	Does not require consumer policyholder personal information for core functionality
+	•	Does not sell personal data
+
+Outputs do not identify individual policyholders or expose protected personal information.
+
+No system is completely secure. Users acknowledge inherent risks associated with digital platforms.
+
+⸻
+
+6. Limitation of Liability
+
+To the fullest extent permitted by law, Claim Signal and its operators shall not be liable for:
+	•	Claim denials or delays
+	•	Financial or business losses
+	•	Indirect, incidental, or consequential damages
+	•	Reliance on platform outputs
+
+Use of the platform is at the user’s own risk.
+
+⸻
+
+7. Ethical and Lawful Use
+
+Users agree not to use Claim Signal to:
+	•	Misrepresent facts
+	•	Engage in deceptive or unlawful conduct
+	•	Harass or intimidate any party
+	•	Circumvent laws, regulations, or contractual obligations
+
+Claim Signal reserves the right to restrict or terminate access for misuse.
+
+⸻
+
+8. Non-Affiliation Statement
+
+Claim Signal is not affiliated with, endorsed by, or sponsored by any insurance carrier, adjusting firm, regulator, or governmental entity.
+
+All names are used for identification purposes only.
+
+⸻
+
+9. Intellectual Property Protection
+
+All content, methodologies, scoring frameworks, analytics, and platform elements are proprietary to Claim Signal.
+
+Users may not:
+	•	Copy, scrape, reverse engineer, or redistribute content
+	•	Use outputs to create competing products
+	•	Share access credentials or proprietary materials
+
+Unauthorized use may result in legal action.
+
+⸻
+
+10. Non-Compete and Non-Circumvention Notice
+
+By accessing Claim Signal, users acknowledge that:
+	•	Platform methodologies, scoring logic, and intelligence frameworks are proprietary
+	•	Use of the platform does not grant rights to replicate, commercialize, or compete using Claim Signal concepts
+	•	Users may not use Claim Signal outputs to build or assist competing intelligence, analytics, or claim-profiling systems
+
+Nothing in this platform authorizes circumvention of Claim Signal for competitive purposes.
+
+⸻
+
+11. Governing Law
+
+This agreement is governed by applicable state law, without regard to conflict-of-law principles.
+
+⸻
+
+Acceptance
+
+By continuing to use Claim Signal, you acknowledge that you have read, understood, and agreed to these terms.
+In-App Acceptance Statement
+
+(Display above or below the Mintroid “Accept” button)
+
+Access to Claim Signal requires affirmative acceptance of the Legal Disclosure, Terms of Use, and Privacy Notice.
+By clicking “Accept,” you acknowledge and agree that Claim Signal is an informational, decision-support platform and that all use is at your own discretion and risk.
+
+Button text should be:
+Accept and Continue
+
+Do not soften it. Do not rephrase it.
+
+⸻
+
+Internal Compliance Note
+
+(For your records or attorney review)
+
+Claim Signal uses a mandatory click-to-accept screen at initial login. Acceptance is required prior to platform access and is logged per user session. Continued use is conditioned on acceptance of the current version of the Legal Disclosure and Terms.
+
+This is the sentence lawyers love to see.

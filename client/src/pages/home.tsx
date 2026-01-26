@@ -490,12 +490,22 @@ export default function Home() {
                   <button onClick={() => setLocation('/carriers')} className="hover:text-foreground transition-colors">Carrier Profiles</button>
                   <button onClick={() => setLocation('/tactical-advisor')} className="hover:text-foreground transition-colors">Tactics Library</button>
                   <button onClick={() => setLocation('/analytics')} className="hover:text-foreground transition-colors">Dashboard</button>
-                  <button onClick={() => setLocation('/methodology')} className="hover:text-foreground transition-colors">Methodology</button>
                 </div>
               </div>
-              <div className="text-center text-xs text-muted-foreground border-t border-border/50 pt-6">
-                <p>Claim Signal provides decision-support intelligence based on historical data. Outcomes may vary by claim, jurisdiction, and documentation.</p>
-                <p className="mt-2">&copy; {new Date().getFullYear()} ClaimSignal. All rights reserved.</p>
+              
+              <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground mb-6">
+                <button onClick={() => setLocation('/methodology')} className="hover:text-foreground transition-colors">Methodology</button>
+                <span className="text-border">|</span>
+                <button onClick={() => setLocation('/legal')} className="hover:text-foreground transition-colors">Legal</button>
+                <span className="text-border">|</span>
+                <button onClick={() => setLocation('/terms')} className="hover:text-foreground transition-colors">Terms of Service</button>
+                <span className="text-border">|</span>
+                <button onClick={() => setLocation('/privacy')} className="hover:text-foreground transition-colors">Privacy Policy</button>
+              </div>
+
+              <div className="text-center text-xs text-muted-foreground border-t border-border/50 pt-6 space-y-2">
+                <p>Claim Signal provides informational intelligence based on historical claim patterns. Scores and insights are not guarantees or predictions. Professional judgment remains essential. Claim Signal does not provide legal or insurance advice.</p>
+                <p className="mt-4">&copy; {new Date().getFullYear()} ClaimSignal. All rights reserved.</p>
               </div>
             </div>
           </footer>
