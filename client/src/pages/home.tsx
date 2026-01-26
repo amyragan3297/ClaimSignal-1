@@ -90,18 +90,31 @@ export default function Home() {
   return (
     <Layout>
       <div className="relative min-h-[calc(100vh-4rem)] md:min-h-screen flex flex-col justify-center items-center p-6 overflow-hidden">
-        {/* Background Texture */}
+        {/* Animated Gradient Orbs */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          {/* Large ambient orb - top right */}
+          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-transparent blur-3xl animate-float" />
+          {/* Medium orb - bottom left */}
+          <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-red-500/15 via-orange-500/10 to-transparent blur-3xl animate-float-delayed" />
+          {/* Small accent orb - center */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-radial from-amber-500/5 via-transparent to-transparent blur-2xl" />
+        </div>
+
+        {/* Grid Pattern */}
         <div 
-          className="absolute inset-0 z-0 opacity-20 pointer-events-none" 
+          className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" 
           style={{ 
-            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`, 
-            backgroundSize: '30px 30px',
+            backgroundImage: `linear-gradient(rgba(255, 255, 255, 1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 1) 1px, transparent 1px)`, 
+            backgroundSize: '60px 60px',
             backgroundPosition: 'center'
           }} 
         />
         
         {/* Radial Gradient Overlay */}
-        <div className="absolute inset-0 z-0 bg-radial-[at_center_center] from-transparent to-background to-90% pointer-events-none" />
+        <div className="absolute inset-0 z-0 bg-gradient-radial from-transparent via-background/50 to-background pointer-events-none" />
+        
+        {/* Top fade */}
+        <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-background to-transparent z-0 pointer-events-none" />
 
         <div className="relative z-10 w-full max-w-2xl space-y-8">
           <div className="text-center space-y-6">
