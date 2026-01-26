@@ -104,16 +104,56 @@ export default function Home() {
         <div className="absolute inset-0 z-0 bg-radial-[at_center_center] from-transparent to-background to-90% pointer-events-none" />
 
         <div className="relative z-10 w-full max-w-2xl space-y-8">
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-4">
-              <ShieldAlert className="w-8 h-8 text-primary" />
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Know Your <span className="text-primary">Opponent</span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-lg mx-auto">
-              Intelligence on insurance adjusters. Search by name or carrier to see risk profiles, denial patterns, and negotiation history.
-            </p>
+          <div className="text-center space-y-6">
+            {/* Animated Icon Container */}
+            <motion.div 
+              className="relative inline-flex items-center justify-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, type: "spring" }}
+            >
+              {/* Outer glow rings */}
+              <div className="absolute inset-0 w-24 h-24 -m-4">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-500/30 via-orange-500/20 to-red-500/30 blur-xl animate-pulse" />
+                <div className="absolute inset-2 rounded-full bg-gradient-to-r from-amber-400/20 to-orange-500/20 blur-lg animate-pulse" style={{ animationDelay: '0.5s' }} />
+              </div>
+              {/* Main icon container */}
+              <div className="relative p-4 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-red-500/20 rounded-2xl border border-amber-500/30 backdrop-blur-sm">
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent rounded-2xl" />
+                <ShieldAlert className="relative w-10 h-10 text-amber-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]" />
+              </div>
+            </motion.div>
+            
+            {/* Animated Title */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+            >
+              <h1 className="text-5xl md:text-7xl font-black tracking-tight">
+                <span className="bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">Know Your</span>
+                <br />
+                <span className="relative">
+                  <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
+                    Opponent
+                  </span>
+                  {/* Underline glow effect */}
+                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 rounded-full blur-sm opacity-60" />
+                  <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 rounded-full" />
+                </span>
+              </h1>
+            </motion.div>
+            
+            {/* Subtitle with stagger animation */}
+            <motion.p 
+              className="text-lg md:text-xl text-muted-foreground max-w-lg mx-auto leading-relaxed"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
+              <span className="text-foreground/90 font-medium">Intelligence on insurance adjusters.</span>{" "}
+              Search by name or carrier to see risk profiles, denial patterns, and negotiation history.
+            </motion.p>
           </div>
 
           <div className="space-y-4">
