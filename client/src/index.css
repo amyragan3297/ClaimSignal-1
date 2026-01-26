@@ -209,3 +209,23 @@
 .bg-gradient-radial {
   background: radial-gradient(circle at center, var(--tw-gradient-stops));
 }
+
+/* Mobile UX Improvements */
+@media (max-width: 768px) {
+  body {
+    line-height: 1.6;
+  }
+  
+  p, .text-muted-foreground {
+    color: hsl(215 25% 70%);
+  }
+  
+  .animate-pulse {
+    animation-duration: 3s;
+  }
+  
+  section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

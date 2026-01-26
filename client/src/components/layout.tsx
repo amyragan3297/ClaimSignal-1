@@ -33,15 +33,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </Link>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
-        <Link href="/">
-          <Button variant={location === "/" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+      <nav className="flex-1 p-4 space-y-1">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 py-2 font-medium">Primary</p>
+        <Link href="/adjusters">
+          <Button variant={location === "/adjusters" || location.startsWith("/adjuster/") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
             <Search className="w-4 h-4" />
-            Adjuster Search
+            Adjuster Intel
           </Button>
         </Link>
+        <Link href="/carriers">
+          <Button variant={location === "/carriers" || location.startsWith("/carrier/") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <Building2 className="w-4 h-4" />
+            Carrier Profiles
+          </Button>
+        </Link>
+        <Link href="/tactical-advisor">
+          <Button variant={location === "/tactical-advisor" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <Bot className="w-4 h-4" />
+            Tactics Library
+          </Button>
+        </Link>
+        <Link href="/analytics">
+          <Button variant={location === "/analytics" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <LayoutDashboard className="w-4 h-4" />
+            Dashboard
+          </Button>
+        </Link>
+
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 py-2 pt-4 font-medium">Claims</p>
         <Link href="/claims">
-          <Button variant={location.startsWith("/claims") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+          <Button variant={location.startsWith("/claims") || location.startsWith("/claim/") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
             <ClipboardList className="w-4 h-4" />
             Claims
           </Button>
@@ -64,45 +85,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
             Risk Alerts
           </Button>
         </Link>
-        <Link href="/carriers">
-          <Button variant={location === "/carriers" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
-            <Building2 className="w-4 h-4" />
-            Carrier Intelligence
-          </Button>
-        </Link>
-        <Link href="/tactical-advisor">
-          <Button variant={location === "/tactical-advisor" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
-            <Bot className="w-4 h-4" />
-            Tactical Advisor
-          </Button>
-        </Link>
-        <Link href="/analytics">
-          <Button variant={location === "/analytics" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
-            <LayoutDashboard className="w-4 h-4" />
-            Analytics
-          </Button>
-        </Link>
         <Link href="/reports">
           <Button variant={location === "/reports" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
             <FileText className="w-4 h-4" />
             Reports
           </Button>
         </Link>
+
         {accessLevel === 'admin' && (
-          <Link href="/admin/team">
-            <Button variant={location.startsWith("/admin") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
-              <Users className="w-4 h-4" />
-              Team Management
-            </Button>
-          </Link>
-        )}
-        {accessLevel === 'admin' && (
-          <Link href="/settings">
-            <Button variant={location === "/settings" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
-              <Settings className="w-4 h-4" />
-              Settings
-            </Button>
-          </Link>
+          <>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 py-2 pt-4 font-medium">Admin</p>
+            <Link href="/admin/team">
+              <Button variant={location.startsWith("/admin") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+                <Users className="w-4 h-4" />
+                Team Management
+              </Button>
+            </Link>
+            <Link href="/settings">
+              <Button variant={location === "/settings" ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+                <Settings className="w-4 h-4" />
+                Settings
+              </Button>
+            </Link>
+          </>
         )}
       </nav>
 

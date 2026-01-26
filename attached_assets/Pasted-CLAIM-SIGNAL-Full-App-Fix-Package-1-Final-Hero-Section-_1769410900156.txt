@@ -1,0 +1,183 @@
+CLAIM SIGNAL
+
+Full App Fix Package
+
+⸻
+
+1. Final Hero Section Copy (Exact Replacement)
+
+Headline
+
+Insurance Adjuster Intelligence.
+
+Subheadline
+
+Risk scores, denial patterns, and negotiation history built from real claim outcomes.
+
+Supporting Line
+
+Search by adjuster or carrier to anticipate resistance, escalate faster, and recover what is owed.
+
+Primary CTA
+
+Search an Adjuster
+
+Secondary CTA
+
+View a Sample Risk Profile
+
+⸻
+
+2. Audience Definition Strip (Directly Below Hero)
+
+Built for contractors, claim professionals, and property advocates.
+
+Optional small text under it:
+Used on real claims. Designed for real outcomes.
+
+⸻
+
+3. Feature Section Rewrite (Left / Center / Right)
+
+Live Intel – Risk Scores
+
+Adjuster Risk Scores
+Composite scoring based on denial frequency, supplement resistance, escalation outcomes, and response behavior across claims.
+
+⸻
+
+Center Gateway (Replace Logo Tile)
+
+Enter Claim Signal
+Access adjuster profiles, carrier behavior data, and escalation intelligence.
+
+Button:
+Open Dashboard
+
+⸻
+
+AI-Powered Tactics
+
+Negotiation Intelligence
+AI-generated claim strategies informed by historical adjuster behavior and carrier response patterns.
+
+⸻
+
+4. Risk Score Framework (Credibility Definition)
+
+Use this verbatim anywhere “Risk Score” appears.
+
+Claim Signal Risk Score
+
+A weighted composite score derived from:
+	•	Denial frequency
+	•	Supplement approval resistance
+	•	Time-to-response behavior
+	•	Escalation outcomes
+	•	Historical negotiation patterns
+
+Scores update as new claim data is logged.
+
+No percentages shown publicly. No math disclosed. This protects IP and trust.
+
+⸻
+
+5. App Navigation Structure (Top Level)
+
+Expose these immediately. Hamburger can remain but not as the only option.
+
+Primary Navigation
+	•	Adjuster Intel
+	•	Carrier Profiles
+	•	Tactics Library
+	•	Dashboard
+
+Secondary Navigation
+	•	Methodology
+	•	About Claim Signal
+	•	Contact
+
+⸻
+
+6. Core Feature Hierarchy (Internal App Map)
+
+Adjuster Intel
+	•	Adjuster Profile
+	•	Risk Score
+	•	Denial Patterns
+	•	Supplement Behavior
+	•	Escalation History
+	•	Notes and Tags
+
+Carrier Profiles
+	•	Carrier Behavior Overview
+	•	Common Denial Themes
+	•	Pricing Tendencies
+	•	Escalation Sensitivity
+
+Tactics Library
+	•	Negotiation Scripts
+	•	Escalation Playbooks
+	•	Documentation Checklists
+	•	Timing Strategies
+
+Dashboard
+	•	Recent Searches
+	•	Flagged Adjusters
+	•	Active Claims
+	•	Alerts and Updates
+
+⸻
+
+7. Trust and Proof Section (Below Features)
+
+Use one of the following now. Replace with metrics later.
+
+Built on real claim outcomes and field-tested negotiation data.
+
+Optional follow-on line:
+Designed by professionals who work claims daily.
+
+⸻
+
+8. UX Fixes for Mobile
+	•	Increase contrast on body text by ~10 percent
+	•	Reduce glow intensity behind the center gateway
+	•	Tighten paragraph line height slightly for mobile readability
+	•	Ensure CTA buttons remain visible above the fold on iPhone
+
+⸻
+
+9. Legal and Expectation Guardrails (Quiet but Important)
+
+Add this to footer or methodology page:
+
+Claim Signal provides decision-support intelligence based on historical data. Outcomes may vary by claim, jurisdiction, and documentation.
+
+This protects you without weakening the product.
+
+⸻
+
+10. Launch-Ready Landing Page Order
+	1.	Hero with CTA
+	2.	Audience Strip
+	3.	Feature Triad
+	4.	Risk Score Explanation
+	5.	Proof Statement
+	6.	CTA Repeat
+	7.	Footer with Methodology link
+
+That is the correct conversion order. Do not rearrange.
+
+⸻
+
+What Is Now Done
+	•	Messaging fixed
+	•	Positioning clarified
+	•	Trust established
+	•	Navigation defined
+	•	Feature scope controlled
+	•	Legal exposure reduced
+	•	Mobile usability improved
+
+This app is now coherent, defensible, and credible.
