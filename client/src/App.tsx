@@ -27,6 +27,7 @@ import SupplementsPage from "@/pages/supplements";
 import CaseStudiesPage from "@/pages/case-studies";
 import RiskAlertsPage from "@/pages/risk-alerts";
 import Adjusters from "@/pages/adjusters";
+import Methodology from "@/pages/methodology";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -111,6 +112,9 @@ function Router() {
       </Route>
       <Route path="/risk-alerts">
         <ProtectedRoute component={RiskAlertsPage} />
+      </Route>
+      <Route path="/methodology">
+        <ProtectedRoute component={Methodology} />
       </Route>
       <Route path="/submit-request" component={SubmitRequest} />
       <Route component={NotFound} />

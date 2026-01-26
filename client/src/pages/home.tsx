@@ -490,6 +490,7 @@ export default function Home() {
                   <button onClick={() => setLocation('/carriers')} className="hover:text-foreground transition-colors">Carrier Profiles</button>
                   <button onClick={() => setLocation('/tactical-advisor')} className="hover:text-foreground transition-colors">Tactics Library</button>
                   <button onClick={() => setLocation('/analytics')} className="hover:text-foreground transition-colors">Dashboard</button>
+                  <button onClick={() => setLocation('/methodology')} className="hover:text-foreground transition-colors">Methodology</button>
                 </div>
               </div>
               <div className="text-center text-xs text-muted-foreground border-t border-border/50 pt-6">
