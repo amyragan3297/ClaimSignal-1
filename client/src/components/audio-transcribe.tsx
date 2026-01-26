@@ -36,6 +36,7 @@ export function AudioTranscribe({ onTranscript }: AudioTranscribeProps) {
       const res = await fetch("/api/transcribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ audio: base64, format: ext }),
       });
 

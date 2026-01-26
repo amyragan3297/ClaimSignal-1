@@ -97,16 +97,27 @@ export async function registerRoutes(
       
       // Convert m4a/webm/mp4 to wav if needed
       if (format === "m4a" || format === "webm" || format === "mp4" || format === "ogg") {
-        audioBuffer = await convertWebmToWav(audioBuffer);
-        audioFormat = "wav";
+        try {
+          audioBuffer = await convertWebmToWav(audioBuffer);
+          audioFormat = "wav";
+        } catch (convErr: any) {
+          console.error("Audio conversion error:", convErr);
+          return res.status(400).json({ error: "Could not process audio file. Please try a different format (MP3 or WAV recommended)." });
+        }
       }
       
       const transcript = await speechToText(audioBuffer, audioFormat);
       
       res.json({ success: true, transcript });
-    } catch (error) {
-      console.error("Error transcribing audio:", error);
-      res.status(500).json({ error: "Failed to transcribe audio" });
+    } catch (error: any) {
+      console.error("Error transcribing audio:", error?.message || error);
+      if (error?.status === 401 || error?.message?.includes("API key")) {
+        res.status(500).json({ error: "Transcription service configuration issue. Please contact support." });
+      } else if (error?.message?.includes("model")) {
+        res.status(500).json({ error: "Transcription model unavailable. Please try again later." });
+      } else {
+        res.status(500).json({ error: "Failed to transcribe audio. Please try a different file or format." });
+      }
     }
   });
 
