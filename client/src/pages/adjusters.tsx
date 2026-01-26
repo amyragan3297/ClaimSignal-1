@@ -50,7 +50,7 @@ export default function Adjusters() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="p-4 md:p-8 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight" data-testid="page-title">Adjusters</h1>
@@ -59,13 +59,13 @@ export default function Adjusters() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative">
+            <div className="relative w-full md:w-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search adjusters..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-[250px]"
+                className="pl-9 w-full md:w-[250px]"
                 data-testid="search-input"
               />
             </div>

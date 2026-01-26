@@ -192,21 +192,21 @@ export default function CarrierDetail() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">Outcomes Distribution</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-6">
+                <div className="flex flex-wrap gap-4 md:gap-6">
                   <div className="flex items-center gap-2" data-testid="outcome-resolved">
                     <CheckCircle className="w-5 h-5 text-green-500" />
                     <span className="text-lg font-semibold">{intel.outcomesResolved}</span>
-                    <span className="text-muted-foreground">Resolved</span>
+                    <span className="text-muted-foreground text-sm md:text-base">Resolved</span>
                   </div>
                   <div className="flex items-center gap-2" data-testid="outcome-stalled">
                     <XCircle className="w-5 h-5 text-red-500" />
                     <span className="text-lg font-semibold">{intel.outcomesStalled}</span>
-                    <span className="text-muted-foreground">Stalled/Denied</span>
+                    <span className="text-muted-foreground text-sm md:text-base">Stalled/Denied</span>
                   </div>
                   <div className="flex items-center gap-2" data-testid="outcome-open">
                     <Loader2 className="w-5 h-5 text-yellow-500" />
                     <span className="text-lg font-semibold">{intel.outcomesOpen}</span>
-                    <span className="text-muted-foreground">Open</span>
+                    <span className="text-muted-foreground text-sm md:text-base">Open</span>
                   </div>
                 </div>
               </CardContent>
