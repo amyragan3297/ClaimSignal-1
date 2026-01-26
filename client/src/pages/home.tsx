@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles } from "lucide-react";
+import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles, BarChart3, Target, Users, Building2, BookOpen, LayoutDashboard, XCircle, ChevronRight, Shield } from "lucide-react";
 import logoImage from '@assets/generated_images/modern_geometric_logo_for_claimsignal.png';
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -74,7 +74,6 @@ export default function Home() {
     });
   };
 
-  // Filter adjusters based on search
   const filteredAdjusters = query.length > 1 
     ? adjusters.filter(a => 
         a.name.toLowerCase().includes(query.toLowerCase()) || 
@@ -90,478 +89,415 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="relative min-h-[calc(100vh-4rem)] md:min-h-screen flex flex-col justify-center items-center p-6 overflow-hidden">
-        {/* Animated Gradient Orbs */}
+      <div className="relative min-h-[calc(100vh-4rem)]">
+        {/* Background Elements */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          {/* Large ambient orb - top right */}
-          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-transparent blur-3xl animate-float" />
-          {/* Medium orb - bottom left */}
-          <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-red-500/15 via-orange-500/10 to-transparent blur-3xl animate-float-delayed" />
-          {/* Small accent orb - center */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-radial from-amber-500/5 via-transparent to-transparent blur-2xl" />
+          <div className="absolute -top-40 -right-40 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-amber-500/15 via-orange-500/8 to-transparent blur-3xl" />
+          <div className="absolute -bottom-32 -left-32 w-[350px] h-[350px] rounded-full bg-gradient-to-tr from-red-500/10 via-orange-500/8 to-transparent blur-3xl" />
         </div>
 
-        {/* Grid Pattern */}
-        <div 
-          className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" 
-          style={{ 
-            backgroundImage: `linear-gradient(rgba(255, 255, 255, 1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 1) 1px, transparent 1px)`, 
-            backgroundSize: '60px 60px',
-            backgroundPosition: 'center'
-          }} 
-        />
-        
-        {/* Radial Gradient Overlay */}
-        <div className="absolute inset-0 z-0 bg-gradient-radial from-transparent via-background/50 to-background pointer-events-none" />
-        
-        {/* Top fade */}
-        <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-background to-transparent z-0 pointer-events-none" />
+        <div className="relative z-10">
+          {/* HERO SECTION */}
+          <section className="px-6 py-12 md:py-20">
+            <div className="max-w-4xl mx-auto text-center space-y-6">
+              <motion.h1 
+                className="text-4xl md:text-6xl font-black tracking-tight text-foreground leading-tight"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                Insurance Adjuster Intelligence.
+              </motion.h1>
+              
+              <motion.p 
+                className="text-lg md:text-xl text-foreground/90 max-w-2xl mx-auto leading-relaxed"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.1, duration: 0.5 }}
+              >
+                Risk scores, denial patterns, and negotiation history built from real claim outcomes.
+              </motion.p>
+              
+              <motion.p 
+                className="text-base text-muted-foreground max-w-xl mx-auto"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                Search by adjuster or carrier to anticipate resistance, escalate faster, and recover what is owed.
+              </motion.p>
 
-        <div className="relative z-10 w-full max-w-3xl space-y-8">
-          <div className="text-center space-y-6">
-            {/* ClaimSignal Logo with Feature Badges */}
-            <motion.div 
-              className="relative inline-flex items-center justify-center"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, type: "spring" }}
-            >
-              {/* Floating Feature Badges */}
+              {/* CTAs */}
               <motion.div 
-                className="absolute -left-32 md:-left-44 top-1/2 -translate-y-1/2"
+                className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-8"
+                  onClick={() => document.getElementById('search-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  data-testid="button-search-adjuster"
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Search an Adjuster
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => adjusters.length > 0 && setLocation(`/adjuster/${adjusters[0].id}`)}
+                  data-testid="button-view-sample"
+                >
+                  View a Sample Risk Profile
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </motion.div>
+            </div>
+          </section>
+
+          {/* AUDIENCE STRIP */}
+          <section className="px-6 py-8 border-y border-border/50 bg-card/30">
+            <div className="max-w-4xl mx-auto text-center">
+              <p className="text-lg font-medium text-foreground">
+                Built for contractors, claim professionals, and property advocates.
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Used on real claims. Designed for real outcomes.
+              </p>
+            </div>
+          </section>
+
+          {/* FEATURE TRIAD */}
+          <section className="px-6 py-16">
+            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Left - Risk Scores */}
+              <motion.div 
+                className="bg-card/60 border border-border/50 rounded-xl p-6 hover:border-amber-500/40 transition-all"
                 initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Live Intel</span>
+                </div>
+                <div className="bg-amber-500/10 p-3 rounded-lg w-fit mb-4">
+                  <BarChart3 className="w-6 h-6 text-amber-500" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Adjuster Risk Scores</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Composite scoring based on denial frequency, supplement resistance, escalation outcomes, and response behavior across claims.
+                </p>
+              </motion.div>
+
+              {/* Center - Gateway */}
+              <motion.div 
+                className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-card border border-amber-500/30 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-amber-500/50 transition-all"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                onClick={() => setLocation('/adjusters')}
+                data-testid="button-open-dashboard"
+              >
+                <div className="relative mb-4">
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 to-orange-500/30 blur-xl rounded-full" />
+                  <div className="relative bg-gradient-to-br from-amber-500/20 to-orange-500/20 p-4 rounded-2xl border border-amber-500/30">
+                    <img src={logoImage} alt="ClaimSignal" className="w-12 h-12 object-contain" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Enter Claim Signal</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Access adjuster profiles, carrier behavior data, and escalation intelligence.
+                </p>
+                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                  Open Dashboard
+                </Button>
+              </motion.div>
+
+              {/* Right - AI Tactics */}
+              <motion.div 
+                className="bg-card/60 border border-border/50 rounded-xl p-6 hover:border-amber-500/40 transition-all"
+                initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.6, duration: 0.5 }}
               >
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl px-4 py-3 shadow-xl">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-xs font-medium text-muted-foreground">Live Intel</span>
-                  </div>
-                  <p className="text-lg font-bold text-foreground mt-1">Risk Scores</p>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">AI-Powered</span>
                 </div>
+                <div className="bg-amber-500/10 p-3 rounded-lg w-fit mb-4">
+                  <Bot className="w-6 h-6 text-amber-500" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Negotiation Intelligence</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  AI-generated claim strategies informed by historical adjuster behavior and carrier response patterns.
+                </p>
+              </motion.div>
+            </div>
+          </section>
+
+          {/* RISK SCORE FRAMEWORK */}
+          <section className="px-6 py-16 bg-card/30 border-y border-border/50">
+            <div className="max-w-3xl mx-auto">
+              <motion.div 
+                className="text-center mb-8"
+                initial={{ y: 20, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">Claim Signal Risk Score</h2>
+                <p className="text-muted-foreground">A weighted composite score derived from:</p>
               </motion.div>
               
               <motion.div 
-                className="absolute -right-32 md:-right-44 top-1/2 -translate-y-1/2"
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.7, duration: 0.5 }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                initial={{ y: 20, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
               >
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl px-4 py-3 shadow-xl">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                    <span className="text-xs font-medium text-muted-foreground">AI-Powered</span>
-                  </div>
-                  <p className="text-lg font-bold text-foreground mt-1">Tactics</p>
+                <div className="flex items-center gap-3 bg-card/60 border border-border/50 rounded-lg p-4">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  <span className="text-sm">Denial frequency</span>
+                </div>
+                <div className="flex items-center gap-3 bg-card/60 border border-border/50 rounded-lg p-4">
+                  <div className="w-2 h-2 rounded-full bg-orange-500" />
+                  <span className="text-sm">Supplement approval resistance</span>
+                </div>
+                <div className="flex items-center gap-3 bg-card/60 border border-border/50 rounded-lg p-4">
+                  <div className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span className="text-sm">Time-to-response behavior</span>
+                </div>
+                <div className="flex items-center gap-3 bg-card/60 border border-border/50 rounded-lg p-4">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                  <span className="text-sm">Escalation outcomes</span>
+                </div>
+                <div className="flex items-center gap-3 bg-card/60 border border-border/50 rounded-lg p-4 sm:col-span-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="text-sm">Historical negotiation patterns</span>
                 </div>
               </motion.div>
-
-              {/* Outer glow rings - larger */}
-              <div className="absolute w-48 h-48 -m-8">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-500/40 via-orange-500/30 to-red-500/40 blur-2xl animate-pulse" />
-                <div className="absolute inset-4 rounded-full bg-gradient-to-r from-amber-400/30 to-orange-500/30 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
-                <div className="absolute inset-8 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-400/20 blur-lg animate-pulse" style={{ animationDelay: '1s' }} />
-              </div>
               
-              {/* Logo container - bigger */}
-              <div className="relative p-6 bg-gradient-to-br from-amber-500/30 via-orange-500/20 to-red-500/30 rounded-3xl border-2 border-amber-500/40 backdrop-blur-sm shadow-2xl shadow-amber-500/20">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-transparent rounded-3xl" />
-                <img 
-                  src={logoImage} 
-                  alt="ClaimSignal" 
-                  className="relative w-20 h-20 object-contain drop-shadow-[0_0_25px_rgba(251,191,36,0.6)]" 
-                />
-              </div>
-            </motion.div>
-            
-            {/* Animated Title - Line 1 */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
-              <h1 className="text-5xl md:text-7xl font-black tracking-tight">
-                <span className="bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">Level the Field.</span>
-              </h1>
-            </motion.div>
-            
-            {/* Animated Title - Line 2 */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.35, duration: 0.6 }}
-            >
-              <h2 className="text-5xl md:text-7xl font-black tracking-tight">
-                <span className="relative">
-                  <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                    Claim the Advantage.
-                  </span>
-                  {/* Underline glow effect */}
-                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 rounded-full blur-sm opacity-60" />
-                  <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 rounded-full" />
-                </span>
-              </h2>
-            </motion.div>
-            
-            {/* Subtitle with stagger animation */}
-            <motion.p 
-              className="text-lg md:text-xl text-muted-foreground max-w-lg mx-auto leading-relaxed"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            >
-              <span className="text-foreground/90 font-medium">Intelligence on insurance adjusters.</span>{" "}
-              Search by name or carrier to see risk profiles, denial patterns, and negotiation history.
-            </motion.p>
-            
-            {/* Stats Row */}
-            <motion.div 
-              className="flex flex-wrap justify-center gap-6 md:gap-10 pt-4"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-            >
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
-                  {adjusters.length || '—'}
-                </div>
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Adjusters Tracked</div>
-              </div>
-              <div className="w-px h-12 bg-border/50 hidden md:block" />
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-                  {new Set(adjusters.map(a => a.carrier)).size || '—'}
-                </div>
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Carriers Monitored</div>
-              </div>
-              <div className="w-px h-12 bg-border/50 hidden md:block" />
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
-                  AI
-                </div>
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Powered Insights</div>
-              </div>
-            </motion.div>
-          </div>
+              <p className="text-center text-sm text-muted-foreground mt-6">
+                Scores update as new claim data is logged.
+              </p>
+            </div>
+          </section>
 
-          <div className="space-y-4">
-            {/* Add Adjuster Button */}
-            <div className="flex justify-end">
-              <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="secondary" size="sm" className="gap-2" data-testid="button-add-adjuster">
-                    <Plus className="w-4 h-4" />
-                    Add Adjuster
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add New Adjuster</DialogTitle>
-                    <DialogDescription>
-                      Enter the adjuster's basic information to start building their intelligence profile.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Name *</Label>
-                      <Input 
-                        placeholder="e.g., John Smith"
-                        value={newAdjuster.name}
-                        onChange={(e) => setNewAdjuster({...newAdjuster, name: e.target.value})}
-                        data-testid="input-adjuster-name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Carrier *</Label>
-                      <Input 
-                        placeholder="e.g., State Farm"
-                        value={newAdjuster.carrier}
-                        onChange={(e) => setNewAdjuster({...newAdjuster, carrier: e.target.value})}
-                        data-testid="input-adjuster-carrier"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Region</Label>
-                      <Input 
-                        placeholder="e.g., Southeast, Texas, National"
-                        value={newAdjuster.region}
-                        onChange={(e) => setNewAdjuster({...newAdjuster, region: e.target.value})}
-                        data-testid="input-adjuster-region"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Phone</Label>
-                        <Input 
-                          placeholder="(555) 123-4567"
-                          value={newAdjuster.phone}
-                          onChange={(e) => setNewAdjuster({...newAdjuster, phone: e.target.value})}
-                          data-testid="input-adjuster-phone"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Email</Label>
-                        <Input 
-                          placeholder="adjuster@carrier.com"
-                          value={newAdjuster.email}
-                          onChange={(e) => setNewAdjuster({...newAdjuster, email: e.target.value})}
-                          data-testid="input-adjuster-email"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Internal Notes</Label>
-                      <Textarea 
-                        placeholder="Any initial observations about this adjuster..."
-                        value={newAdjuster.internalNotes}
-                        onChange={(e) => setNewAdjuster({...newAdjuster, internalNotes: e.target.value})}
-                        data-testid="input-adjuster-notes"
-                      />
-                    </div>
-                    <Button 
-                      className="w-full" 
-                      onClick={handleAddAdjuster}
-                      disabled={!newAdjuster.name || !newAdjuster.carrier || createAdjusterMutation.isPending}
-                      data-testid="button-save-adjuster"
-                    >
-                      {createAdjusterMutation.isPending ? 'Adding...' : 'Add Adjuster'}
+          {/* SEARCH SECTION */}
+          <section id="search-section" className="px-6 py-16">
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold mb-2">Search Adjuster Database</h2>
+                <p className="text-muted-foreground">Find adjuster profiles by name or carrier</p>
+              </div>
+
+              <div className="flex justify-end mb-4">
+                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="secondary" size="sm" className="gap-2" data-testid="button-add-adjuster">
+                      <Plus className="w-4 h-4" />
+                      Add Adjuster
                     </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <div className="relative group">
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-lg group-hover:bg-primary/30 transition-all opacity-0 group-hover:opacity-100" />
-              <div className="relative flex items-center">
-                <Search className="absolute left-4 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input 
-                  className="h-16 pl-12 pr-4 text-lg bg-card/80 backdrop-blur-md border-primary/20 hover:border-primary/40 focus:border-primary shadow-2xl transition-all rounded-xl"
-                  placeholder="Search adjuster name or carrier..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  autoFocus
-                  data-testid="input-search"
-                />
-              </div>
-            </div>
-
-            {/* Live Search Results */}
-            {query.length > 1 && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-card/90 backdrop-blur-md border border-border rounded-xl shadow-2xl overflow-hidden divide-y divide-border/50"
-              >
-                {filteredAdjusters.length > 0 ? (
-                  filteredAdjusters.map((adj) => (
-                    <div 
-                      key={adj.id} 
-                      className="p-4 hover:bg-white/5 cursor-pointer flex items-center justify-between group transition-colors"
-                      onClick={() => setLocation(`/adjuster/${adj.id}`)}
-                      data-testid={`card-adjuster-${adj.id}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-2 h-12 rounded-full bg-primary/60" />
-                        <div>
-                          <h3 className="font-semibold text-lg" data-testid={`text-adjuster-name-${adj.id}`}>{adj.name}</h3>
-                          <p className="text-sm text-muted-foreground" data-testid={`text-adjuster-carrier-${adj.id}`}>{adj.carrier}</p>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New Adjuster</DialogTitle>
+                      <DialogDescription>
+                        Enter the adjuster's basic information to start building their intelligence profile.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Name *</Label>
+                        <Input 
+                          placeholder="e.g., John Smith"
+                          value={newAdjuster.name}
+                          onChange={(e) => setNewAdjuster({...newAdjuster, name: e.target.value})}
+                          data-testid="input-adjuster-name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Carrier *</Label>
+                        <Input 
+                          placeholder="e.g., State Farm"
+                          value={newAdjuster.carrier}
+                          onChange={(e) => setNewAdjuster({...newAdjuster, carrier: e.target.value})}
+                          data-testid="input-adjuster-carrier"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Region</Label>
+                        <Input 
+                          placeholder="e.g., Southeast, Texas, National"
+                          value={newAdjuster.region}
+                          onChange={(e) => setNewAdjuster({...newAdjuster, region: e.target.value})}
+                          data-testid="input-adjuster-region"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Phone</Label>
+                          <Input 
+                            placeholder="(555) 123-4567"
+                            value={newAdjuster.phone}
+                            onChange={(e) => setNewAdjuster({...newAdjuster, phone: e.target.value})}
+                            data-testid="input-adjuster-phone"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Email</Label>
+                          <Input 
+                            placeholder="adjuster@carrier.com"
+                            value={newAdjuster.email}
+                            onChange={(e) => setNewAdjuster({...newAdjuster, email: e.target.value})}
+                            data-testid="input-adjuster-email"
+                          />
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                         {adj.region && (
-                           <div className="text-right hidden sm:block">
-                              <span className="text-xs uppercase tracking-wider text-muted-foreground block">Region</span>
-                              <span className="text-sm">{adj.region}</span>
-                           </div>
-                         )}
-                         <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-1" />
+                      <div className="space-y-2">
+                        <Label>Internal Notes</Label>
+                        <Textarea 
+                          placeholder="Any initial observations about this adjuster..."
+                          value={newAdjuster.internalNotes}
+                          onChange={(e) => setNewAdjuster({...newAdjuster, internalNotes: e.target.value})}
+                          data-testid="input-adjuster-notes"
+                        />
                       </div>
+                      <Button 
+                        className="w-full" 
+                        onClick={handleAddAdjuster}
+                        disabled={!newAdjuster.name || !newAdjuster.carrier || createAdjusterMutation.isPending}
+                        data-testid="button-save-adjuster"
+                      >
+                        {createAdjusterMutation.isPending ? 'Adding...' : 'Add Adjuster'}
+                      </Button>
                     </div>
-                  ))
-                ) : (
-                  <div className="p-8 text-center text-muted-foreground">
-                    <FileSearch className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                    <p>No adjusters found matching "{query}"</p>
-                    <p className="text-sm mt-2">Try searching by carrier name (e.g., "State Farm")</p>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </div>
-
-          {!query && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-4"
-            >
-              <div 
-                className="bg-card/50 border border-border/50 p-6 rounded-xl cursor-pointer hover:bg-card/70 hover:border-amber-500/30 transition-all"
-                data-testid="button-tactical-advisor"
-                onClick={() => setLocation("/tactical-advisor")}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="bg-amber-500/20 p-2.5 rounded-lg">
-                    <Bot className="w-6 h-6 text-amber-500" />
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Tactical Advisor</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Get AI-powered strategy recommendations for your current claims.
-                </p>
+                  </DialogContent>
+                </Dialog>
               </div>
 
-              <div 
-                className="bg-card/50 border border-border/50 p-6 rounded-xl cursor-pointer hover:bg-card/70 hover:border-amber-500/30 transition-all"
-                onClick={() => setLocation("/analytics")}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="bg-amber-500/20 p-2.5 rounded-lg">
-                    <FileSearch className="w-6 h-6 text-amber-500" />
-                  </div>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-lg group-hover:bg-primary/30 transition-all opacity-0 group-hover:opacity-100" />
+                <div className="relative flex items-center">
+                  <Search className="absolute left-4 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input 
+                    className="h-14 pl-12 pr-4 text-lg bg-card/80 backdrop-blur-md border-primary/20 hover:border-primary/40 focus:border-primary shadow-lg transition-all rounded-xl"
+                    placeholder="Search adjuster name or carrier..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    data-testid="input-search"
+                  />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Pattern Analysis</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Deep dive analytics into carrier denial trends.
-                </p>
               </div>
 
-              <ObjectUploader
-                onGetUploadParameters={getUploadParameters}
-                onComplete={async (result) => {
-                  const files = result.successful || [];
-                  if (files.length === 0) return;
-                  
-                  setIsAnalyzing(true);
-                  setAnalysisResults(files.map(f => ({ name: f.name, status: 'pending' as const })));
-                  
-                  let successCount = 0;
-                  let errorCount = 0;
-                  
-                  for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    setAnalysisResults(prev => prev.map((r, idx) => 
-                      idx === i ? { ...r, status: 'analyzing' as const } : r
-                    ));
-                    
-                    try {
-                      // Get objectPath from file meta (set during getUploadParameters)
-                      const objectPath = file.meta?.objectPath as string | undefined;
-                      
-                      if (!objectPath) {
-                        throw new Error('File path not available');
-                      }
-                      
-                      const response = await fetch('/api/analyze-and-save', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          documentUrl: objectPath,
-                          documentName: file.name,
-                        }),
-                      });
-                      
-                      const data = await response.json();
-                      
-                      if (data.success) {
-                        successCount++;
-                        setAnalysisResults(prev => prev.map((r, idx) => 
-                          idx === i ? { ...r, status: 'done' as const, message: data.message } : r
-                        ));
-                      } else {
-                        errorCount++;
-                        setAnalysisResults(prev => prev.map((r, idx) => 
-                          idx === i ? { ...r, status: 'error' as const, message: data.error } : r
-                        ));
-                      }
-                    } catch (error) {
-                      errorCount++;
-                      setAnalysisResults(prev => prev.map((r, idx) => 
-                        idx === i ? { ...r, status: 'error' as const, message: error instanceof Error ? error.message : 'Analysis failed' } : r
-                      ));
-                    }
-                  }
-                  
-                  queryClient.invalidateQueries({ queryKey: ['adjusters'] });
-                  queryClient.invalidateQueries({ queryKey: ['claims'] });
-                  
-                  if (errorCount === 0) {
-                    toast({
-                      title: "Documents processed",
-                      description: `AI analyzed ${successCount} document(s) and sorted them into claims`,
-                    });
-                  } else if (successCount > 0) {
-                    toast({
-                      title: "Partial success",
-                      description: `Processed ${successCount} file(s), ${errorCount} failed`,
-                      variant: "destructive",
-                    });
-                  } else {
-                    toast({
-                      title: "Analysis failed",
-                      description: `Could not process ${errorCount} file(s)`,
-                      variant: "destructive",
-                    });
-                  }
-                  
-                  setTimeout(() => {
-                    setIsAnalyzing(false);
-                    setAnalysisResults([]);
-                  }, 5000);
-                }}
-                maxNumberOfFiles={10}
-                maxFileSize={50 * 1024 * 1024}
-                buttonClassName="bg-card/50 border border-border/50 p-6 rounded-xl cursor-pointer hover:bg-card/70 hover:border-amber-500/30 transition-all h-auto flex flex-col items-start text-left w-full"
-              >
-                <div className="flex items-start justify-between mb-4 w-full">
-                  <div className="bg-amber-500/20 p-2.5 rounded-lg">
-                    {isAnalyzing ? (
-                      <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
-                    ) : (
-                      <Upload className="w-6 h-6 text-amber-500" />
-                    )}
-                  </div>
-                  {isAnalyzing && (
-                    <div className="flex items-center gap-1 text-xs text-amber-500">
-                      <Sparkles className="w-3 h-3" />
-                      AI Processing
+              {query.length > 1 && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-card/90 backdrop-blur-md border border-border rounded-xl shadow-xl overflow-hidden divide-y divide-border/50"
+                >
+                  {filteredAdjusters.length > 0 ? (
+                    filteredAdjusters.map((adj) => (
+                      <div 
+                        key={adj.id} 
+                        className="p-4 hover:bg-white/5 cursor-pointer flex items-center justify-between group transition-colors"
+                        onClick={() => setLocation(`/adjuster/${adj.id}`)}
+                        data-testid={`card-adjuster-${adj.id}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-2 h-12 rounded-full bg-primary/60" />
+                          <div>
+                            <h3 className="font-semibold text-lg" data-testid={`text-adjuster-name-${adj.id}`}>{adj.name}</h3>
+                            <p className="text-sm text-muted-foreground" data-testid={`text-adjuster-carrier-${adj.id}`}>{adj.carrier}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                           {adj.region && (
+                             <div className="text-right hidden sm:block">
+                                <span className="text-xs uppercase tracking-wider text-muted-foreground block">Region</span>
+                                <span className="text-sm">{adj.region}</span>
+                             </div>
+                           )}
+                           <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-1" />
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-muted-foreground">
+                      <FileSearch className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                      <p>No adjusters found matching "{query}"</p>
+                      <p className="text-sm mt-2">Try searching by carrier name (e.g., "State Farm")</p>
                     </div>
                   )}
+                </motion.div>
+              )}
+            </div>
+          </section>
+
+          {/* TRUST SECTION */}
+          <section className="px-6 py-12 bg-card/30 border-t border-border/50">
+            <div className="max-w-3xl mx-auto text-center">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Shield className="w-6 h-6 text-amber-500" />
+              </div>
+              <p className="text-lg font-medium text-foreground">
+                Built on real claim outcomes and field-tested negotiation data.
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Designed by professionals who work claims daily.
+              </p>
+            </div>
+          </section>
+
+          {/* CTA REPEAT */}
+          <section className="px-6 py-16">
+            <div className="max-w-2xl mx-auto text-center space-y-6">
+              <h2 className="text-2xl font-bold">Ready to level the field?</h2>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-8"
+                  onClick={() => setLocation('/adjusters')}
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Search an Adjuster
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => setLocation('/tactical-advisor')}
+                >
+                  <Bot className="w-5 h-5 mr-2" />
+                  Try Tactical Advisor
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          {/* FOOTER */}
+          <footer className="px-6 py-8 border-t border-border/50 bg-card/20">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                <div className="flex items-center gap-2">
+                  <img src={logoImage} alt="ClaimSignal" className="w-6 h-6" />
+                  <span className="font-bold">CLAIM<span className="text-primary">SIGNAL</span></span>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">
-                  {isAnalyzing ? 'Processing...' : 'Smart Upload'}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4 font-normal">
-                  {isAnalyzing 
-                    ? 'AI is extracting claim info and sorting documents...' 
-                    : 'AI automatically extracts claim data and sorts into the right claim'}
-                </p>
-                {analysisResults.length > 0 && (
-                  <div className="w-full space-y-1 text-xs">
-                    {analysisResults.map((result, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        {result.status === 'pending' && <div className="w-3 h-3 rounded-full bg-muted" />}
-                        {result.status === 'analyzing' && <Loader2 className="w-3 h-3 animate-spin text-amber-500" />}
-                        {result.status === 'done' && <CheckCircle className="w-3 h-3 text-green-500" />}
-                        {result.status === 'error' && <div className="w-3 h-3 rounded-full bg-red-500" />}
-                        <span className="truncate flex-1">{result.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </ObjectUploader>
-            </motion.div>
-          )}
-          
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground/50 uppercase tracking-widest font-mono">
-              Confidential Internal System • Version 1.0
-            </p>
-          </div>
+                <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
+                  <button onClick={() => setLocation('/adjusters')} className="hover:text-foreground transition-colors">Adjuster Intel</button>
+                  <button onClick={() => setLocation('/carriers')} className="hover:text-foreground transition-colors">Carrier Profiles</button>
+                  <button onClick={() => setLocation('/tactical-advisor')} className="hover:text-foreground transition-colors">Tactics Library</button>
+                  <button onClick={() => setLocation('/analytics')} className="hover:text-foreground transition-colors">Dashboard</button>
+                </div>
+              </div>
+              <div className="text-center text-xs text-muted-foreground border-t border-border/50 pt-6">
+                <p>Claim Signal provides decision-support intelligence based on historical data. Outcomes may vary by claim, jurisdiction, and documentation.</p>
+                <p className="mt-2">&copy; {new Date().getFullYear()} ClaimSignal. All rights reserved.</p>
+              </div>
+            </div>
+          </footer>
         </div>
       </div>
     </Layout>
