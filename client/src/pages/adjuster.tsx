@@ -17,6 +17,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAdjuster, createInteraction, updateAdjuster, fetchClaims, fetchAdjusterIntelligence } from "@/lib/api";
 import { useUpload } from "@/hooks/use-upload";
 import { useToast } from "@/hooks/use-toast";
+import { AudioTranscribe } from "@/components/audio-transcribe";
 
 export default function AdjusterProfile() {
   const { id } = useParams();
@@ -378,7 +379,12 @@ export default function AdjusterProfile() {
                      </Select>
                    </div>
                    <div className="space-y-2">
-                     <Label>Notes</Label>
+                     <div className="flex items-center justify-between">
+                       <Label>Notes</Label>
+                       <AudioTranscribe 
+                         onTranscript={(text) => setNewLog({...newLog, description: newLog.description ? newLog.description + '\n\n' + text : text})}
+                       />
+                     </div>
                      <Textarea 
                       placeholder="What happened?" 
                       value={newLog.description}

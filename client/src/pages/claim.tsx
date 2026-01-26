@@ -18,6 +18,7 @@ import { differenceInDays, differenceInMonths, format } from "date-fns";
 import { useState } from "react";
 import { useUpload } from "@/hooks/use-upload";
 import type { Attachment } from "@shared/schema";
+import { AudioTranscribe } from "@/components/audio-transcribe";
 
 export default function ClaimDetail() {
   const { id } = useParams();
@@ -354,6 +355,11 @@ export default function ClaimDetail() {
               <CardContent>
                 {isEditingNotes ? (
                   <div className="space-y-3">
+                    <div className="flex justify-end">
+                      <AudioTranscribe 
+                        onTranscript={(text) => setEditNotes(editNotes ? editNotes + '\n\n' + text : text)}
+                      />
+                    </div>
                     <Textarea 
                       value={editNotes}
                       onChange={(e) => setEditNotes(e.target.value)}
