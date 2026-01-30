@@ -1,0 +1,100 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
+
+const app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static("public"));
+
+const db = new sqlite3.Database("supplements.db");
+
+// Create table if not exists
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS supplements (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      timestamp TEXT,
+      claimNumber TEXT,
+      carrier TEXT,
+      insured TEXT,
+      adjuster TEXT,
+      originalRCV REAL,
+      revisedRCV REAL,
+      rcvIncrease REAL,
+      originalACV REAL,
+      revisedACV REAL,
+      acvIncrease REAL,
+      opStatus TEXT,
+      scopeDrivers TEXT,
+      notes TEXT
+    )
+  `);
+});
+
+// Form submission
+app.post("/submit", (req, res) => {
+  const {
+    claimNumber,
+    carrier,
+    insured,
+    adjuster,
+    originalRCV,
+    revisedRCV,
+    originalACV,
+    revisedACV,
+    opStatus,
+    notes
+  } = req.body;
+
+  const scopeDrivers = Array.isArray(req.body.scopeDrivers)
+    ? req.body.scopeDrivers.join(", ")
+    : req.body.scopeDrivers || "";
+
+  const rcvIncrease = Number(revisedRCV) - Number(originalRCV);
+  const acvIncrease = Number(revisedACV) - Number(originalACV);
+
+  db.run(
+    `
+    INSERT INTO supplements (
+      timestamp,
+      claimNumber,
+      carrier,
+      insured,
+      adjuster,
+      originalRCV,
+      revisedRCV,
+      rcvIncrease,
+      originalACV,
+      revisedACV,
+      acvIncrease,
+      opStatus,
+      scopeDrivers,
+      notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+    [
+      new Date().toISOString(),
+      claimNumber,
+      carrier,
+      insured,
+      adjuster,
+      originalRCV,
+      revisedRCV,
+      rcvIncrease,
+      originalACV,
+      revisedACV,
+      acvIncrease,
+      opStatus,
+      scopeDrivers,
+      notes
+    ],
+    () => {
+      res.send("Supplement logged successfully.");
+    }
+  );
+});
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
