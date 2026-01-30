@@ -360,28 +360,5 @@ export const insertCaseStudySchema = createInsertSchema(caseStudies).omit({
 export type InsertCaseStudy = z.infer<typeof insertCaseStudySchema>;
 export type CaseStudy = typeof caseStudies.$inferSelect;
 
-// Follow-up Tasks/Reminders
-export const tasks = pgTable("tasks", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: text("title").notNull(),
-  description: text("description"),
-  dueDate: text("due_date"),
-  priority: text("priority").notNull().default('medium'), // 'low', 'medium', 'high'
-  status: text("status").notNull().default('pending'), // 'pending', 'completed', 'cancelled'
-  claimId: varchar("claim_id").references(() => claims.id, { onDelete: 'set null' }),
-  adjusterId: varchar("adjuster_id").references(() => adjusters.id, { onDelete: 'set null' }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  completedAt: timestamp("completed_at"),
-});
-
-export const insertTaskSchema = createInsertSchema(tasks).omit({
-  id: true,
-  createdAt: true,
-  completedAt: true,
-});
-
-export type InsertTask = z.infer<typeof insertTaskSchema>;
-export type Task = typeof tasks.$inferSelect;
-
 // Re-export chat models for AI integrations
 export * from "./models/chat";
