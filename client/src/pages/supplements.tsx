@@ -16,17 +16,17 @@ import { Link } from "wouter";
 import type { Supplement, Claim } from "@shared/schema";
 
 const SCOPE_DRIVERS = [
-  "Quantity Correction",
-  "Hip and Ridge",
-  "Ventilation",
-  "Drip Edge",
-  "Starter Strip",
-  "Code Upgrade",
-  "Decking Replacement",
+  "Shingle quantity",
+  "Tear-off",
+  "Hip and ridge",
+  "Starter course",
+  "Drip edge",
+  "Ridge vent",
+  "Decking replacement",
   "Flashing",
-  "Ice & Water Shield",
-  "Gutter Damage",
-  "Interior Damage",
+  "Ice & water shield",
+  "Gutter damage",
+  "Interior damage",
   "Other"
 ];
 
