@@ -265,9 +265,18 @@ export const supplements = pgTable("supplements", {
   title: text("title").notNull(),
   description: text("description"),
   status: text("status").notNull().default('pending'), // 'pending', 'submitted', 'approved', 'denied', 'negotiating'
-  // Amounts
+  // Original vs Revised Amounts (in cents)
+  originalRcv: integer("original_rcv"), // Original Replacement Cost Value
+  revisedRcv: integer("revised_rcv"), // Revised RCV after supplement
+  originalAcv: integer("original_acv"), // Original Actual Cash Value
+  revisedAcv: integer("revised_acv"), // Revised ACV after supplement
+  // Legacy amount fields (for backwards compatibility)
   requestedAmount: integer("requested_amount"), // in cents
   approvedAmount: integer("approved_amount"), // in cents
+  // Scope drivers - reasons for supplement increase
+  scopeDrivers: text("scope_drivers").array(), // ['Quantity Correction', 'Hip and Ridge', 'Ventilation', etc]
+  // O&P Status
+  opStatus: text("op_status").default('Not Addressed'), // 'Not Addressed', 'Deferred', 'Denied', 'Applied'
   // AI-extracted data from documents
   extractedData: jsonb("extracted_data"), // { lineItems: [...], damageDescriptions: [...], etc }
   // Document references
