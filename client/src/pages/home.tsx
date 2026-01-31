@@ -112,46 +112,14 @@ export default function Home() {
         </div>
 
         <div className="relative z-10">
-          {/* HERO SECTION */}
-          <section className="px-6 py-10 md:py-16">
-            <div className="max-w-3xl mx-auto text-center space-y-5">
-              <motion.h1 
-                className="text-3xl md:text-5xl font-black tracking-tight text-foreground leading-tight"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                Insurance Adjuster Intelligence.
-              </motion.h1>
-              
-              <motion.p 
-                className="text-base md:text-lg text-foreground/90 max-w-xl mx-auto leading-relaxed"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-              >
-                Risk scores, denial patterns, and negotiation history built from real claim outcomes.
-              </motion.p>
-
-              <motion.p
-                className="text-lg font-semibold text-amber-500"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                Level the playing field.
-              </motion.p>
-            </div>
-          </section>
-
-          {/* ENTER CLAIMSIGNAL - Main CTA */}
-          <section className="px-6 py-10">
+          {/* ENTER CLAIMSIGNAL - Main CTA First */}
+          <section className="px-6 pt-10 pb-6">
             <div className="max-w-md mx-auto">
               <motion.div 
                 className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-card border border-amber-500/30 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-amber-500/50 transition-all"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
+                transition={{ duration: 0.5 }}
                 onClick={() => setLocation('/adjusters')}
                 data-testid="button-open-dashboard"
               >
@@ -169,6 +137,69 @@ export default function Home() {
                   Open Dashboard
                 </Button>
               </motion.div>
+            </div>
+          </section>
+
+          {/* LOGIN OPTIONS */}
+          <section className="px-6 py-4">
+            <div className="max-w-md mx-auto">
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-3 justify-center"
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+              >
+                <Button 
+                  variant="outline" 
+                  className="flex-1 gap-2"
+                  onClick={() => setLocation('/login?type=team')}
+                  data-testid="button-team-login"
+                >
+                  <Users className="w-4 h-4" />
+                  Team Login
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex-1 gap-2"
+                  onClick={() => setLocation('/login?type=individual')}
+                  data-testid="button-individual-login"
+                >
+                  <Shield className="w-4 h-4" />
+                  Individual Login
+                </Button>
+              </motion.div>
+            </div>
+          </section>
+
+          {/* HERO SECTION */}
+          <section className="px-6 py-8">
+            <div className="max-w-3xl mx-auto text-center space-y-4">
+              <motion.h1 
+                className="text-2xl md:text-4xl font-black tracking-tight text-foreground leading-tight"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                Insurance Adjuster Intelligence.
+              </motion.h1>
+              
+              <motion.p 
+                className="text-sm md:text-base text-foreground/90 max-w-xl mx-auto leading-relaxed"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+              >
+                Risk scores, denial patterns, and negotiation history built from real claim outcomes.
+              </motion.p>
+
+              <motion.p
+                className="text-base font-semibold text-amber-500"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+              >
+                Level the playing field.
+              </motion.p>
             </div>
           </section>
 
