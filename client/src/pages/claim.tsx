@@ -641,65 +641,81 @@ export default function ClaimDetail() {
                       );
                     }
                     
+                    const getInteractionColor = (type: string) => {
+                      switch (type) {
+                        case 'Inspection': return 'bg-purple-500';
+                        case 'Reinspection': return 'bg-violet-500';
+                        case 'Call': return 'bg-blue-500';
+                        case 'Email': return 'bg-sky-500';
+                        case 'Escalation': return 'bg-red-500';
+                        case 'Supplement': return 'bg-green-500';
+                        case 'correspondence': return 'bg-slate-500';
+                        default: return 'bg-primary';
+                      }
+                    };
+
+                    const formatDate = (dateStr: string) => {
+                      try {
+                        const date = new Date(dateStr);
+                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                      } catch {
+                        return dateStr;
+                      }
+                    };
+
                     return (
-                      <div className="relative">
-                        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
-                        <div className="space-y-4 pl-10">
-                          {allItems.map((item) => (
-                            <div key={item.id} className="relative" data-testid={`timeline-${item.id}`}>
-                              <div className={`absolute -left-[26px] top-3 w-3 h-3 rounded-full border-2 border-background ${
-                                item.itemType === 'attachment' ? 'bg-amber-500' : 'bg-primary'
-                              }`} />
-                              {item.itemType === 'interaction' ? (
-                                <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
-                                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                    <div className="bg-primary/10 p-1.5 rounded">
-                                      {getInteractionIcon(item.type)}
-                                    </div>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {item.type}
-                                    </Badge>
-                                    <span className="text-sm font-mono text-muted-foreground">
-                                      {item.date}
+                      <div className="space-y-1">
+                        {allItems.map((item) => (
+                          <div 
+                            key={item.id} 
+                            className="py-4 border-b border-border/50 last:border-b-0"
+                            data-testid={`timeline-${item.id}`}
+                          >
+                            {item.itemType === 'interaction' ? (
+                              <div>
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-2.5 h-2.5 rounded-full ${getInteractionColor(item.type)}`} />
+                                    <span className="font-medium">{item.type}</span>
+                                  </div>
+                                  <span className="text-sm text-muted-foreground font-mono">
+                                    {formatDate(item.date)}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-muted-foreground pl-5">{item.description}</p>
+                                {item.outcome && (
+                                  <p className="text-sm text-muted-foreground pl-5 mt-1 italic">
+                                    Outcome: {item.outcome}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <div 
+                                className="cursor-pointer hover:bg-muted/30 -mx-2 px-2 py-1 rounded transition-colors"
+                                onClick={() => setViewingAttachment(item)}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                                    <span className="font-medium">
+                                      {item.type === 'email' 
+                                        ? (item.direction === 'sent' ? 'Email Sent' : 'correspondence') 
+                                        : 'Document'}
                                     </span>
                                   </div>
-                                  <p className="text-sm">{item.description}</p>
-                                  {item.outcome && (
-                                    <p className="text-sm text-muted-foreground mt-2 italic">
-                                      Outcome: {item.outcome}
-                                    </p>
-                                  )}
+                                  <span className="text-sm text-muted-foreground font-mono">
+                                    {formatDate(item.date)}
+                                  </span>
                                 </div>
-                              ) : (
-                                <div 
-                                  className="bg-amber-500/5 rounded-lg p-4 border border-amber-500/20 cursor-pointer hover:bg-amber-500/10 transition-colors"
-                                  onClick={() => setViewingAttachment(item)}
-                                >
-                                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                    <div className="bg-amber-500/20 p-1.5 rounded">
-                                      {item.type === 'email' ? (
-                                        item.direction === 'sent' ? <Send className="w-4 h-4 text-amber-600" /> : <Inbox className="w-4 h-4 text-amber-600" />
-                                      ) : (
-                                        <FileText className="w-4 h-4 text-amber-600" />
-                                      )}
-                                    </div>
-                                    <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-600">
-                                      {item.type === 'email' ? (item.direction === 'sent' ? 'Email Sent' : 'Email Received') : 'File'}
-                                    </Badge>
-                                    <span className="text-sm font-mono text-muted-foreground">
-                                      {item.date}
-                                    </span>
-                                  </div>
-                                  {item.type === 'email' ? (
-                                    <p className="text-sm font-medium">{item.subject}</p>
-                                  ) : (
-                                    <p className="text-sm">{item.filename}{item.description && ` - ${item.description}`}</p>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                                <p className="text-sm text-muted-foreground pl-5">
+                                  {item.type === 'email' 
+                                    ? item.subject 
+                                    : (item.filename + (item.description ? ` - ${item.description}` : ''))}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     );
                   })()}
