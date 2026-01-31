@@ -1,5 +1,7 @@
 import { Layout } from "@/components/layout";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
+import { ArrowRight } from "lucide-react";
 
 export default function Privacy() {
   return (
@@ -66,6 +68,15 @@ export default function Privacy() {
           <Section title="8. Policy Updates">
             <p>Privacy practices may change over time. Continued use constitutes acceptance.</p>
           </Section>
+
+          <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-border/50">
+            <Link href="/legal" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Legal Disclosure <ArrowRight className="w-3 h-3" />
+            </Link>
+            <Link href="/terms" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Terms of Service <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
         </div>
       </div>
     </Layout>
