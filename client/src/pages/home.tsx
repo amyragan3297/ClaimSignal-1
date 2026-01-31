@@ -230,20 +230,25 @@ export default function Home() {
                   <Shield className="w-4 h-4" />
                   Individual Login
                 </Button>
-                <Button 
-                  variant="secondary" 
-                  className="gap-2 bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
-                  onClick={handleStartTrial}
-                  disabled={isStartingTrial}
-                  data-testid="button-start-trial"
-                >
-                  {isStartingTrial ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Clock className="w-4 h-4" />
-                  )}
-                  {isStartingTrial ? "Starting..." : "12-Hour Free Trial"}
-                </Button>
+                <div className="flex flex-col items-center gap-1">
+                  <Button 
+                    variant="secondary" 
+                    className="gap-2 bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+                    onClick={handleStartTrial}
+                    disabled={isStartingTrial}
+                    data-testid="button-start-trial"
+                  >
+                    {isStartingTrial ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Clock className="w-4 h-4" />
+                    )}
+                    {isStartingTrial ? "Starting..." : "12-Hour Free Trial"}
+                  </Button>
+                  <p className="text-[10px] text-muted-foreground text-center max-w-[180px]">
+                    Viewer access only. No AI features. Data is masked.
+                  </p>
+                </div>
               </motion.div>
             </div>
           </section>
