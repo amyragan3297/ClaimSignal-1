@@ -19,6 +19,8 @@ import { useState } from "react";
 import { useUpload } from "@/hooks/use-upload";
 import type { Attachment } from "@shared/schema";
 import { AudioTranscribe } from "@/components/audio-transcribe";
+import { maskClaimNumber, maskName, maskAddress } from "@/lib/privacy";
+import { PrivacyText } from "@/components/privacy-text";
 
 export default function ClaimDetail() {
   const { id } = useParams();
@@ -236,7 +238,7 @@ export default function ClaimDetail() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="font-mono text-2xl" data-testid="text-claim-id">
-                    #{claim.maskedId}
+                    #<PrivacyText value={claim.maskedId} maskedValue={maskClaimNumber(claim.maskedId)} showToggle />
                   </CardTitle>
                   <Select value={claim.status} onValueChange={handleStatusChange}>
                     <SelectTrigger className={`w-auto ${getStatusColor(claim.status)}`} data-testid="select-status">
@@ -268,13 +270,17 @@ export default function ClaimDetail() {
                 {claim.homeownerName && (
                   <div className="flex items-center gap-3 text-sm">
                     <User className="w-4 h-4 text-muted-foreground" />
-                    <span data-testid="text-homeowner">{claim.homeownerName}</span>
+                    <span data-testid="text-homeowner">
+                      <PrivacyText value={claim.homeownerName} maskedValue={maskName(claim.homeownerName)} showToggle />
+                    </span>
                   </div>
                 )}
                 {claim.propertyAddress && (
                   <div className="flex items-center gap-3 text-sm">
                     <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <span data-testid="text-address">{claim.propertyAddress}</span>
+                    <span data-testid="text-address">
+                      <PrivacyText value={claim.propertyAddress} maskedValue={maskAddress(claim.propertyAddress)} showToggle />
+                    </span>
                   </div>
                 )}
               </CardContent>
