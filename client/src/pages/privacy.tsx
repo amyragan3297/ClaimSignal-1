@@ -10,9 +10,9 @@ export default function Privacy() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Privacy Policy</h1>
-          <p className="text-muted-foreground mb-8">ClaimSignal</p>
-          <div className="h-1 w-24 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full mb-8" />
+          <h1 className="text-2xl font-bold mb-2">Privacy Policy</h1>
+          <p className="text-sm text-muted-foreground mb-6">ClaimSignal</p>
+          <div className="h-1 w-24 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full mb-6" />
         </motion.div>
 
         <div className="prose prose-invert prose-amber max-w-none space-y-8">
@@ -81,8 +81,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       transition={{ duration: 0.4 }}
       className="border-b border-border/50 pb-8 last:border-0"
     >
-      <h2 className="text-xl font-bold mb-4">{title}</h2>
-      <div className="text-muted-foreground space-y-3 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:space-y-1">
+      <h2 className="text-base font-semibold mb-3">{title}</h2>
+      <div className="text-muted-foreground text-sm space-y-2 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:space-y-1">
         {children}
       </div>
     </motion.section>
