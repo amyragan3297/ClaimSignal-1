@@ -467,31 +467,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* CTA REPEAT */}
-          <section className="px-6 py-16">
-            <div className="max-w-2xl mx-auto text-center space-y-6">
-              <h2 className="text-2xl font-bold">Ready to level the field?</h2>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-8"
-                  onClick={() => setLocation('/adjusters')}
-                >
-                  <Search className="w-5 h-5 mr-2" />
-                  Search an Adjuster
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  onClick={() => setLocation('/tactical-advisor')}
-                >
-                  <Bot className="w-5 h-5 mr-2" />
-                  Try Tactical Advisor
-                </Button>
-              </div>
-            </div>
-          </section>
-
           {/* FOOTER */}
           <footer className="px-6 py-8 border-t border-border/50 bg-card/20">
             <div className="max-w-4xl mx-auto">
