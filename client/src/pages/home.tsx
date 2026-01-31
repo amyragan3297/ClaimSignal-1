@@ -1,10 +1,11 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles, BarChart3, Target, Users, Building2, BookOpen, LayoutDashboard, XCircle, ChevronRight, Shield, FileUp, AlertCircle } from "lucide-react";
+import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles, BarChart3, Target, Users, Building2, BookOpen, LayoutDashboard, XCircle, ChevronRight, Shield, FileUp, AlertCircle, Clock } from "lucide-react";
 import logoImage from '@assets/generated_images/modern_geometric_logo_for_claimsignal.png';
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -36,9 +37,33 @@ export default function Home() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<Array<{ name: string; status: 'pending' | 'analyzing' | 'done' | 'error'; message?: string }>>([]);
+  const [isStartingTrial, setIsStartingTrial] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { getUploadParameters } = useUpload();
+  const { startTrial } = useAuth();
+
+  const handleStartTrial = async () => {
+    setIsStartingTrial(true);
+    try {
+      const result = await startTrial();
+      if (result.success) {
+        toast({
+          title: "Trial Started",
+          description: "You have 12 hours of viewer access. Upgrade anytime for full features!",
+        });
+        setLocation('/dashboard');
+      } else {
+        toast({
+          title: "Trial Failed",
+          description: result.error || "Could not start trial. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsStartingTrial(false);
+    }
+  };
   
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
@@ -204,6 +229,20 @@ export default function Home() {
                 >
                   <Shield className="w-4 h-4" />
                   Individual Login
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  className="gap-2 bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+                  onClick={handleStartTrial}
+                  disabled={isStartingTrial}
+                  data-testid="button-start-trial"
+                >
+                  {isStartingTrial ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Clock className="w-4 h-4" />
+                  )}
+                  {isStartingTrial ? "Starting..." : "12-Hour Free Trial"}
                 </Button>
               </motion.div>
             </div>

@@ -1029,6 +1029,64 @@ export class DBStorage implements IStorage {
   async deleteTacticalNote(id: string): Promise<void> {
     await db.delete(tacticalNotes).where(eq(tacticalNotes.id, id));
   }
+
+  // Addon Purchases methods
+  async getAddonPurchases(status?: string): Promise<AddonPurchase[]> {
+    if (status) {
+      return db.select().from(addonPurchases)
+        .where(eq(addonPurchases.status, status))
+        .orderBy(desc(addonPurchases.createdAt));
+    }
+    return db.select().from(addonPurchases).orderBy(desc(addonPurchases.createdAt));
+  }
+
+  async getAddonPurchase(id: string): Promise<AddonPurchase | undefined> {
+    const result = await db.select().from(addonPurchases).where(eq(addonPurchases.id, id));
+    return result[0];
+  }
+
+  async createAddonPurchase(purchase: InsertAddonPurchase): Promise<AddonPurchase> {
+    const result = await db.insert(addonPurchases).values(purchase).returning();
+    return result[0];
+  }
+
+  async updateAddonPurchaseStatus(id: string, status: string, notes?: string): Promise<AddonPurchase | undefined> {
+    const updateData: any = { status };
+    if (status === 'fulfilled') {
+      updateData.fulfilledAt = new Date();
+    }
+    if (notes) {
+      updateData.notes = notes;
+    }
+    const result = await db
+      .update(addonPurchases)
+      .set(updateData)
+      .where(eq(addonPurchases.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async getPendingAddonCount(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(addonPurchases)
+      .where(eq(addonPurchases.status, 'pending'));
+    return Number(result[0]?.count) || 0;
+  }
+
+  // Free trial sessions (stored in sessions with special userType)
+  async createTrialSession(): Promise<Session> {
+    const token = randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000); // 12 hours
+    
+    const result = await db.insert(sessions).values({
+      token,
+      userType: 'trial',
+      accessLevel: 'viewer',
+      expiresAt,
+    }).returning();
+    
+    return result[0];
+  }
 }
 
 export const storage = new DBStorage();

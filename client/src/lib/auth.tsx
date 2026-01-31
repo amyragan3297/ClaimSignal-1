@@ -2,12 +2,13 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 interface AuthState {
   authenticated: boolean;
-  userType: 'team' | 'individual' | null;
+  userType: 'team' | 'individual' | 'trial' | null;
   userId?: string;
   email?: string;
   accessLevel?: 'admin' | 'editor' | 'viewer';
   subscriptionStatus?: string;
   needsSubscription?: boolean;
+  trialExpiresAt?: string;
   loading: boolean;
 }
 
@@ -16,6 +17,7 @@ interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
   register: (email: string, password: string) => Promise<{ success: boolean; error?: string; needsSubscription?: boolean }>;
   setupTeam: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  startTrial: () => Promise<{ success: boolean; error?: string; expiresAt?: string }>;
   refreshSession: () => Promise<void>;
 }
 
@@ -152,8 +154,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const startTrial = async () => {
+    try {
+      const res = await fetch('/api/auth/trial', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        setState({
+          authenticated: true,
+          userType: 'trial',
+          accessLevel: 'viewer',
+          trialExpiresAt: result.expiresAt,
+          loading: false,
+        });
+        return { success: true, expiresAt: result.expiresAt };
+      }
+
+      return { success: false, error: result.error || 'Failed to start trial' };
+    } catch (error) {
+      return { success: false, error: 'Failed to start trial' };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, register, setupTeam, refreshSession }}>
+    <AuthContext.Provider value={{ ...state, login, logout, register, setupTeam, startTrial, refreshSession }}>
       {children}
     </AuthContext.Provider>
   );

@@ -182,3 +182,37 @@ Quick action: When a claim is "Denied", a prominent button appears to mark it as
 - Auto-save AI advice as team notes
 - Tabbed interface: AI Advice | Team Notes
 - API: POST `/api/tactical-advice`, GET/POST/PUT/DELETE `/api/tactical-notes`
+
+## Addon Purchase System
+
+### One-Time Add-ons
+- Expert Claim Review ($299) - Professional review of complex claims
+- Carrier Intelligence Report ($99) - Detailed carrier behavior analysis
+- Training Session ($149) - Team training session booking
+
+### Admin Panel (/admin/addons)
+- View pending addon purchases with user email and product info
+- Fulfill or cancel purchases with status tracking
+- Notification badge shows count of pending purchases
+- Status values: pending, fulfilled, cancelled
+
+### Email Notifications
+- Currently using in-app admin panel for purchase alerts
+- No automated email integration (user declined SendGrid/Resend)
+- Admin checks /admin/addons panel for new purchases
+
+## Free Trial System
+
+### Trial Features
+- 12-hour duration from signup
+- Viewer-only access (read-only data)
+- No AI features (tactical advisor restricted)
+- Masked data (privacy protected view)
+- Stored in sessions table with userType='trial'
+
+### Trial Flow
+1. User clicks "12-Hour Free Trial" on home page
+2. Session created with 12-hour expiration
+3. User redirected to dashboard with limited access
+4. After expiration, session becomes invalid
+5. User can upgrade to paid plan anytime
