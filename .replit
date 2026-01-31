@@ -41,17 +41,12 @@ task = "workflow.run"
 args = "Claim supplement"
 
 [[workflows.workflow]]
-name = "Claim supplement"
+name = "Run"
 mode = "sequential"
 author = 52948775
 
 [[workflows.workflow.tasks]]
-task = "packager.installForLanguage"
-args = "nodejs"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Start application"
+task = "packager.installForAll"
 
 [agent]
 mockupState = "FULLSTACK"
