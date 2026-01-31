@@ -173,9 +173,9 @@ export default function Home() {
 
           {/* HERO SECTION */}
           <section className="px-6 py-8">
-            <div className="max-w-3xl mx-auto text-center space-y-4">
+            <div className="max-w-3xl mx-auto text-center space-y-5">
               <motion.h1 
-                className="text-2xl md:text-4xl font-black tracking-tight text-foreground leading-tight"
+                className="text-3xl md:text-5xl font-black tracking-tight text-foreground leading-tight"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
@@ -184,7 +184,7 @@ export default function Home() {
               </motion.h1>
               
               <motion.p 
-                className="text-sm md:text-base text-foreground/90 max-w-xl mx-auto leading-relaxed"
+                className="text-base md:text-lg text-foreground/90 max-w-xl mx-auto leading-relaxed"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.35, duration: 0.5 }}
@@ -192,11 +192,20 @@ export default function Home() {
                 Risk scores, denial patterns, and negotiation history built from real claim outcomes.
               </motion.p>
 
-              <motion.p
-                className="text-base font-semibold text-amber-500"
+              <motion.p 
+                className="text-sm text-muted-foreground max-w-xl mx-auto"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
+              >
+                Search by adjuster or carrier to anticipate resistance, escalate faster, and recover what is owed.
+              </motion.p>
+
+              <motion.p
+                className="text-lg font-semibold text-amber-500"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.45, duration: 0.5 }}
               >
                 Level the playing field.
               </motion.p>
