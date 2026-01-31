@@ -16,6 +16,25 @@ Preferred communication style: Simple, everyday language.
 - Link adjusters to claims via claim_adjusters junction table
 - Log interactions with dates and outcomes from document content
 
+### Duplicate Detection & Merge Rules (Updated 2026-01-31)
+
+**Adjuster Duplicates:**
+- Match by: name (case-insensitive) + carrier
+- If duplicate: Merge notes/interactions into existing adjuster, do not create new
+
+**Claim Duplicates:**
+- Match by: masked_id OR (property_address + homeowner_name)
+- If duplicate: Update existing claim, do not create new
+
+**Interaction Duplicates:**
+- Match by: adjuster_id + claim_id + date + type + similar description (>80% match)
+- If duplicate: Skip, do not add again
+
+**Known Cleaned Duplicates (2026-01-31):**
+- Removed duplicate claim `01-88W1-94C` (kept ID: 3bd88fb8-f1a7-45d1-bf24-ff0932242511)
+- Removed duplicate claim `H0001064902` (kept ID: 1e00d13b-f5ef-4b8c-8ed5-5527a3653bce)
+- Removed duplicate interaction for William Farris on 2025-10-01 (kept ID: 795af0ab-ace2-4c98-bfc1-618da36dce39)
+
 ## System Architecture
 
 ### Frontend Architecture
