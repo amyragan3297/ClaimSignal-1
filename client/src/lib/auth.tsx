@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           accessLevel: data.accessLevel,
           subscriptionStatus: data.subscriptionStatus,
           needsSubscription: data.needsSubscription,
+          trialExpiresAt: data.trialExpiresAt,
           loading: false,
         });
       } else {

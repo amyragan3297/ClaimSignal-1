@@ -77,7 +77,21 @@ export default function Legal() {
             <p className="mt-3">No system is completely secure. Users acknowledge inherent risks associated with digital platforms.</p>
           </Section>
 
-          <Section icon={<Shield className="w-5 h-5" />} title="6. Limitation of Liability">
+          <Section icon={<FileText className="w-5 h-5" />} title="6. Document Retention Policy">
+            <p className="font-medium text-foreground mb-3">All documents uploaded to ClaimSignal are retained for data and analytical purposes.</p>
+            <p className="mb-3">By uploading documents to ClaimSignal, users acknowledge and agree that:</p>
+            <ul>
+              <li>Uploaded documents become part of ClaimSignal's data repository</li>
+              <li>Documents may be retained indefinitely for platform improvement, analytics, and research purposes</li>
+              <li>Document data may be used to enhance risk scoring, behavioral analysis, and pattern recognition</li>
+              <li>Documents are stored securely but users retain no expectation of deletion upon account termination</li>
+              <li>Aggregated and de-identified insights derived from documents may be used across the platform</li>
+            </ul>
+            <p className="mt-3">Users are responsible for ensuring they have proper authorization to upload any documents and that uploads do not violate third-party rights or confidentiality obligations.</p>
+            <p className="mt-3 font-medium text-foreground">Do not upload documents you do not wish to be retained by ClaimSignal.</p>
+          </Section>
+
+          <Section icon={<Shield className="w-5 h-5" />} title="7. Limitation of Liability">
             <p className="mb-3">To the fullest extent permitted by law, ClaimSignal and its operators shall not be liable for:</p>
             <ul>
               <li>Claim denials or delays</li>
@@ -88,7 +102,7 @@ export default function Legal() {
             <p className="mt-3 font-medium text-foreground">Use of the platform is at the user's own risk.</p>
           </Section>
 
-          <Section icon={<Scale className="w-5 h-5" />} title="7. Ethical and Lawful Use">
+          <Section icon={<Scale className="w-5 h-5" />} title="8. Ethical and Lawful Use">
             <p className="mb-3">Users agree not to use ClaimSignal to:</p>
             <ul>
               <li>Misrepresent facts</li>
@@ -99,12 +113,12 @@ export default function Legal() {
             <p className="mt-3">ClaimSignal reserves the right to restrict or terminate access for misuse.</p>
           </Section>
 
-          <Section icon={<Building2 className="w-5 h-5" />} title="8. Non-Affiliation Statement">
+          <Section icon={<Building2 className="w-5 h-5" />} title="9. Non-Affiliation Statement">
             <p>ClaimSignal is not affiliated with, endorsed by, or sponsored by any insurance carrier, adjusting firm, regulator, or governmental entity.</p>
             <p className="mt-3">All names are used for identification purposes only.</p>
           </Section>
 
-          <Section title="9. Intellectual Property Protection">
+          <Section title="10. Intellectual Property Protection">
             <p className="mb-3">All content, methodologies, scoring frameworks, analytics, and platform elements are proprietary to ClaimSignal.</p>
             <p className="mb-3">Users may not:</p>
             <ul>
@@ -115,7 +129,7 @@ export default function Legal() {
             <p className="mt-3">Unauthorized use may result in legal action.</p>
           </Section>
 
-          <Section title="10. Non-Compete and Non-Circumvention Notice">
+          <Section title="11. Non-Compete and Non-Circumvention Notice">
             <p className="mb-3">By accessing ClaimSignal, users acknowledge that:</p>
             <ul>
               <li>Platform methodologies, scoring logic, and intelligence frameworks are proprietary</li>
@@ -125,7 +139,7 @@ export default function Legal() {
             <p className="mt-3">Nothing in this platform authorizes circumvention of ClaimSignal for competitive purposes.</p>
           </Section>
 
-          <Section title="11. Governing Law">
+          <Section title="12. Governing Law">
             <p>This agreement is governed by applicable state law, without regard to conflict-of-law principles.</p>
           </Section>
 
