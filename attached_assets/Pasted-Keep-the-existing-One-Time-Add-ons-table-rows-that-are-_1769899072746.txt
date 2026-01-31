@@ -1,0 +1,40 @@
+Keep the existing One-Time Add-ons table rows that are already showing:
+- Carrier Intelligence Report: $99
+- Adjuster Deep Dive: $99
+- Expert Claim Review: Starting at $159.99
+- Training: Varies
+
+Now add the following items and wording updates.
+
+1. Update these two rows to clarify one-time pricing:
+Carrier Intelligence Report
+Price: One-time $99
+What's Included: Deep-dive analysis of a specific carrier's behavior and patterns.
+
+Adjuster Deep Dive
+Price: One-time $99
+What's Included: Detailed behavioral analysis of a specific adjuster and recommended communication approach.
+
+2. Add these new One-Time Add-ons rows:
+Tier 1 Quick Denial Triage
+Price: One-time $99
+What's Included: Review of denial letter plus brief guidance on the most likely path forward. No deep claim file review. User must provide the denial letter and any supporting documents available.
+
+Tier 2 Denial Deep Dive
+Price: Starting at $199
+What's Included: Review of denial letter plus claim file review. Includes evidence gaps checklist, rebuttal outline, and escalation steps. Final price depends on documentation volume and complexity.
+
+Tier 3 Full Claim Support and Training
+Price: Starting at $399
+What's Included: Start-to-finish claim support plus documentation standards, supplement strategy, escalation cadence, and closeout checklist. Final price depends on scope, time, attendees, and claim file data reviewed.
+
+3. Keep Training as a separate row, but tighten the description:
+Training
+Price: Varies
+What's Included: Claims process, estimating and documentation workflows, supplements and escalation, sales and objection handling, customer communication, and field operations. Pricing varies based on scope, data reviewed, and time required.
+
+4. Add an Important Notes section at the bottom:
+Important Notes
+- Educational guidance only. Not legal advice and not public adjuster services.
+- User must provide complete documentation. Recommendations are based on information provided.
+- Pricing and scope may change if file volume or complexity changes.

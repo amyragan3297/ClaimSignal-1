@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Check, Loader2, ShieldAlert, Gift, Star } from "lucide-react";
+import { Check, Loader2, ShieldAlert, Gift, Star, AlertCircle } from "lucide-react";
 
 interface Price {
   id: string;
@@ -281,6 +281,82 @@ export default function Pricing() {
               })}
           </div>
         )}
+
+        {/* One-Time Add-ons Section */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-semibold text-white text-center mb-8">One-Time Add-ons</h2>
+          
+          <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-700">
+                  <th className="text-left text-slate-300 font-semibold p-4">Add-on</th>
+                  <th className="text-left text-slate-300 font-semibold p-4">Price</th>
+                  <th className="text-left text-slate-300 font-semibold p-4">What's Included</th>
+                </tr>
+              </thead>
+              <tbody className="text-slate-300 text-sm">
+                <tr className="border-b border-slate-700/50">
+                  <td className="p-4 font-medium">Carrier Intelligence Report</td>
+                  <td className="p-4 text-amber-400">One-time $99</td>
+                  <td className="p-4">Deep-dive analysis of a specific carrier's behavior and patterns.</td>
+                </tr>
+                <tr className="border-b border-slate-700/50">
+                  <td className="p-4 font-medium">Adjuster Deep Dive</td>
+                  <td className="p-4 text-amber-400">One-time $99</td>
+                  <td className="p-4">Detailed behavioral analysis of a specific adjuster and recommended communication approach.</td>
+                </tr>
+                <tr className="border-b border-slate-700/50">
+                  <td className="p-4 font-medium">Tier 1 Quick Denial Triage</td>
+                  <td className="p-4 text-amber-400">One-time $99</td>
+                  <td className="p-4">Review of denial letter plus brief guidance on the most likely path forward. No deep claim file review. User must provide the denial letter and any supporting documents available.</td>
+                </tr>
+                <tr className="border-b border-slate-700/50">
+                  <td className="p-4 font-medium">Tier 2 Denial Deep Dive</td>
+                  <td className="p-4 text-amber-400">Starting at $199</td>
+                  <td className="p-4">Review of denial letter plus claim file review. Includes evidence gaps checklist, rebuttal outline, and escalation steps. Final price depends on documentation volume and complexity.</td>
+                </tr>
+                <tr className="border-b border-slate-700/50">
+                  <td className="p-4 font-medium">Tier 3 Full Claim Support and Training</td>
+                  <td className="p-4 text-amber-400">Starting at $399</td>
+                  <td className="p-4">Start-to-finish claim support plus documentation standards, supplement strategy, escalation cadence, and closeout checklist. Final price depends on scope, time, attendees, and claim file data reviewed.</td>
+                </tr>
+                <tr className="border-b border-slate-700/50">
+                  <td className="p-4 font-medium">Expert Claim Review</td>
+                  <td className="p-4 text-amber-400">Starting at $159.99</td>
+                  <td className="p-4">Professional review of your claim. Final price depends on complexity. User must provide all documentation and be available for Google Meet/Zoom calls when requested.</td>
+                </tr>
+                <tr>
+                  <td className="p-4 font-medium">Training</td>
+                  <td className="p-4 text-amber-400">Varies</td>
+                  <td className="p-4">Claims process, estimating and documentation workflows, supplements and escalation, sales and objection handling, customer communication, and field operations. Pricing varies based on scope, data reviewed, and time required.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Important Notes */}
+          <div className="mt-8 bg-slate-800/30 border border-amber-500/30 rounded-lg p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <AlertCircle className="h-5 w-5 text-amber-500" />
+              <h3 className="text-lg font-semibold text-white">Important Notes</h3>
+            </div>
+            <ul className="space-y-2 text-slate-300 text-sm">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500 mt-1">•</span>
+                <span>Educational guidance only. Not legal advice and not public adjuster services.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500 mt-1">•</span>
+                <span>User must provide complete documentation. Recommendations are based on information provided.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500 mt-1">•</span>
+                <span>Pricing and scope may change if file volume or complexity changes.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
 
         <div className="text-center mt-8">
           <Button
