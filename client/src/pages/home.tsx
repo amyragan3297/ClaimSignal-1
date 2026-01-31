@@ -112,18 +112,84 @@ export default function Home() {
         </div>
 
         <div className="relative z-10">
-          {/* LOGIN OPTIONS - First */}
-          <section className="px-6 pt-10 pb-4">
-            <div className="max-w-md mx-auto">
+          {/* HERO - What is ClaimSignal */}
+          <section className="px-6 pt-10 pb-6">
+            <div className="max-w-lg mx-auto text-center space-y-4">
+              <motion.h1 
+                className="text-3xl md:text-4xl font-black tracking-tight text-foreground leading-tight"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                Insurance Adjuster Intelligence.
+              </motion.h1>
+              <motion.p 
+                className="text-base text-foreground/90"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.1, duration: 0.5 }}
+              >
+                Risk scores, denial patterns, and negotiation history built from real claim outcomes.
+              </motion.p>
+              <motion.p 
+                className="text-sm text-muted-foreground"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.15, duration: 0.5 }}
+              >
+                Search by adjuster or carrier to anticipate resistance, escalate faster, and recover what is owed.
+              </motion.p>
+              <motion.p
+                className="text-lg font-semibold text-amber-500"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                Level the playing field.
+              </motion.p>
+
+              {/* Action Buttons */}
               <motion.div 
-                className="flex flex-col sm:flex-row gap-3 justify-center"
+                className="flex flex-col gap-3 pt-2"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+              >
+                <Button 
+                  size="lg" 
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold"
+                  onClick={() => setLocation('/adjusters')}
+                  data-testid="button-search-adjuster"
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Search an Adjuster
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => document.getElementById('sample-profile')?.scrollIntoView({ behavior: 'smooth' })}
+                  data-testid="button-view-sample"
+                >
+                  View a Sample Risk Profile
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </motion.div>
+            </div>
+          </section>
+
+          {/* LOGIN OPTIONS - Side by Side */}
+          <section className="px-6 py-4">
+            <div className="max-w-sm mx-auto">
+              <motion.div 
+                className="grid grid-cols-2 gap-3"
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.4 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
               >
                 <Button 
                   variant="outline" 
-                  className="flex-1 gap-2"
+                  className="gap-2"
                   onClick={() => setLocation('/login?type=team')}
                   data-testid="button-team-login"
                 >
@@ -132,7 +198,7 @@ export default function Home() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="flex-1 gap-2"
+                  className="gap-2"
                   onClick={() => setLocation('/login?type=individual')}
                   data-testid="button-individual-login"
                 >
@@ -171,49 +237,8 @@ export default function Home() {
             </div>
           </section>
 
-          {/* HERO SECTION */}
-          <section className="px-6 py-8">
-            <div className="max-w-3xl mx-auto text-center space-y-5">
-              <motion.h1 
-                className="text-3xl md:text-5xl font-black tracking-tight text-foreground leading-tight"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-              >
-                Insurance Adjuster Intelligence.
-              </motion.h1>
-              
-              <motion.p 
-                className="text-base md:text-lg text-foreground/90 max-w-xl mx-auto leading-relaxed"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.35, duration: 0.5 }}
-              >
-                Risk scores, denial patterns, and negotiation history built from real claim outcomes.
-              </motion.p>
-
-              <motion.p 
-                className="text-sm text-muted-foreground max-w-xl mx-auto"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-              >
-                Search by adjuster or carrier to anticipate resistance, escalate faster, and recover what is owed.
-              </motion.p>
-
-              <motion.p
-                className="text-lg font-semibold text-amber-500"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.45, duration: 0.5 }}
-              >
-                Level the playing field.
-              </motion.p>
-            </div>
-          </section>
-
           {/* SAMPLE PREVIEW - Full App Showcase */}
-          <section className="px-6 py-8">
+          <section id="sample-profile" className="px-6 py-8">
             <div className="max-w-2xl mx-auto">
               <motion.div
                 className="text-center mb-6"
