@@ -112,42 +112,14 @@ export default function Home() {
         </div>
 
         <div className="relative z-10">
-          {/* ENTER CLAIMSIGNAL - Main CTA First */}
-          <section className="px-6 pt-10 pb-6">
-            <div className="max-w-md mx-auto">
-              <motion.div 
-                className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-card border border-amber-500/30 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-amber-500/50 transition-all"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                onClick={() => setLocation('/adjusters')}
-                data-testid="button-open-dashboard"
-              >
-                <div className="relative mb-4">
-                  <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 to-orange-500/30 blur-xl rounded-full" />
-                  <div className="relative bg-gradient-to-br from-amber-500/20 to-orange-500/20 p-4 rounded-2xl border border-amber-500/30">
-                    <img src={logoImage} alt="ClaimSignal" className="w-12 h-12 object-contain" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold mb-2">Enter ClaimSignal</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Access adjuster profiles, carrier behavior data, and escalation intelligence.
-                </p>
-                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
-                  Open Dashboard
-                </Button>
-              </motion.div>
-            </div>
-          </section>
-
-          {/* LOGIN OPTIONS */}
-          <section className="px-6 py-4">
+          {/* LOGIN OPTIONS - First */}
+          <section className="px-6 pt-10 pb-4">
             <div className="max-w-md mx-auto">
               <motion.div 
                 className="flex flex-col sm:flex-row gap-3 justify-center"
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.4 }}
+                transition={{ duration: 0.4 }}
               >
                 <Button 
                   variant="outline" 
@@ -166,6 +138,34 @@ export default function Home() {
                 >
                   <Shield className="w-4 h-4" />
                   Individual Login
+                </Button>
+              </motion.div>
+            </div>
+          </section>
+
+          {/* ENTER CLAIMSIGNAL - Gateway */}
+          <section className="px-6 py-6">
+            <div className="max-w-md mx-auto">
+              <motion.div 
+                className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-card border border-amber-500/30 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-amber-500/50 transition-all"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                onClick={() => setLocation('/adjusters')}
+                data-testid="button-open-dashboard"
+              >
+                <div className="relative mb-4">
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 to-orange-500/30 blur-xl rounded-full" />
+                  <div className="relative bg-gradient-to-br from-amber-500/20 to-orange-500/20 p-4 rounded-2xl border border-amber-500/30">
+                    <img src={logoImage} alt="ClaimSignal" className="w-12 h-12 object-contain" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Enter ClaimSignal</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Access adjuster profiles, carrier behavior data, and escalation intelligence.
+                </p>
+                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                  Open Dashboard
                 </Button>
               </motion.div>
             </div>
@@ -209,6 +209,53 @@ export default function Home() {
               >
                 Level the playing field.
               </motion.p>
+            </div>
+          </section>
+
+          {/* SAMPLE PREVIEW - What You Get */}
+          <section className="px-6 py-8">
+            <div className="max-w-md mx-auto">
+              <motion.div
+                className="text-center mb-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">Sample Profile</p>
+              </motion.div>
+              <motion.div 
+                className="bg-card/80 border border-border/50 rounded-xl p-5 space-y-4"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.55, duration: 0.5 }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="font-bold text-lg">Marcus Thompson</h4>
+                    <p className="text-sm text-muted-foreground">State Farm • Southeast Region</p>
+                  </div>
+                  <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-semibold">
+                    Risk: 72
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="bg-card/60 rounded-lg p-2">
+                    <p className="text-lg font-bold text-amber-500">34%</p>
+                    <p className="text-[10px] text-muted-foreground">Supplement Rate</p>
+                  </div>
+                  <div className="bg-card/60 rounded-lg p-2">
+                    <p className="text-lg font-bold text-orange-500">12</p>
+                    <p className="text-[10px] text-muted-foreground">Avg Days</p>
+                  </div>
+                  <div className="bg-card/60 rounded-lg p-2">
+                    <p className="text-lg font-bold text-red-400">High</p>
+                    <p className="text-[10px] text-muted-foreground">Friction</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground italic border-t border-border/50 pt-3">
+                  "Known to push back on supplemental requests. Responds better to documented re-inspections..."
+                </p>
+              </motion.div>
             </div>
           </section>
 
