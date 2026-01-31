@@ -67,6 +67,23 @@ Preferred communication style: Simple, everyday language.
 - **Users**: Individual user accounts with Stripe subscription info
 - **Sessions**: Active user sessions with tokens and expiry
 
+### Claim Status Workflow (Key Feature)
+Claim statuses show the lifecycle of fighting insurance denials:
+- **Open** (blue) - Active claim being worked
+- **Approved** (emerald green) - Straightforward approval
+- **Overturned** (amber/gold) - **KEY STATUS** - Won after initial denial, proves the fight was worth it
+- **Resolved** (green) - Claim fully closed/settled
+- **Denied** (red) - Currently denied by carrier
+- **In Litigation** (orange) - Legal action in progress
+
+Quick action: When a claim is "Denied", a prominent button appears to mark it as "Overturned (Won!)"
+
+### Privacy Protection
+- **Team users** (admin login): See all data clearly - full claim numbers, homeowner names, addresses
+- **Individual users** / non-authenticated: See masked data with toggle to reveal
+- Masking format: Claim "0001064902" → "***-4902", Name "John Smith" → "J*** S***"
+- Uses `PrivacyText` component in `client/src/components/privacy-text.tsx`
+
 ### Authentication System
 - **Team Login**: Shared credentials for team access - all team members use same username/password
 - **Individual Login**: Personal accounts with email/password requiring paid Stripe subscription

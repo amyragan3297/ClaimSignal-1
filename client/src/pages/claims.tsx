@@ -110,6 +110,7 @@ export default function Claims() {
     switch (status) {
       case 'open': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
       case 'approved': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      case 'overturned': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
       case 'resolved': return 'bg-green-500/10 text-green-500 border-green-500/20';
       case 'denied': return 'bg-red-500/10 text-red-500 border-red-500/20';
       case 'in_litigation': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
