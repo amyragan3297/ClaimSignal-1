@@ -32,7 +32,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshSession = async () => {
     try {
-      const res = await fetch('/api/auth/session', { credentials: 'include' });
+      const token = localStorage.getItem('session_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const res = await fetch('/api/auth/session', { 
+        credentials: 'include',
+        headers,
+      });
       const data = await res.json();
       
       if (data.authenticated) {
@@ -48,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           loading: false,
         });
       } else {
+        localStorage.removeItem('session_token');
         setState({
           authenticated: false,
           userType: null,
@@ -86,6 +96,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await res.json();
 
       if (result.success) {
+        // Store token in localStorage for mobile browser compatibility
+        if (result.token) {
+          localStorage.setItem('session_token', result.token);
+        }
         await refreshSession();
         return { success: true, needsSubscription: result.needsSubscription };
       }
@@ -142,11 +156,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
+      const token = localStorage.getItem('session_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
+        headers,
       });
     } finally {
+      localStorage.removeItem('session_token');
       setState({
         authenticated: false,
         userType: null,

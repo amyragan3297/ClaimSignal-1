@@ -155,7 +155,7 @@ export async function registerRoutes(
         sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-      res.json({ success: true, userType: 'team', accessLevel: teamCreds.accessLevel });
+      res.json({ success: true, userType: 'team', accessLevel: teamCreds.accessLevel, token: session.token });
     } catch (error) {
       console.error("Error in team login:", error);
       res.status(500).json({ error: "Login failed" });
@@ -289,7 +289,15 @@ export async function registerRoutes(
   // Get current session
   app.get("/api/auth/session", async (req, res) => {
     try {
-      const token = req.cookies?.session_token;
+      // Check cookie first, then Authorization header for mobile browser compatibility
+      let token = req.cookies?.session_token;
+      if (!token) {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          token = authHeader.substring(7);
+        }
+      }
+      
       if (!token) {
         return res.json({ authenticated: false });
       }
