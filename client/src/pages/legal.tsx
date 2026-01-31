@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout";
 import { motion } from "framer-motion";
-import { Shield, AlertTriangle, Scale, Lock, Ban, Building2, Brain, FileText } from "lucide-react";
+import { Shield, AlertTriangle, Scale, Lock, Ban, Building2, Brain, FileText, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Legal() {
   return (
@@ -131,6 +132,15 @@ export default function Legal() {
           <div className="bg-card/50 border border-amber-500/30 rounded-xl p-6 mt-10">
             <h3 className="text-lg font-bold mb-3">Acceptance</h3>
             <p className="text-muted-foreground">By continuing to use ClaimSignal, you acknowledge that you have read, understood, and agreed to these terms.</p>
+          </div>
+
+          <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-border/50">
+            <Link href="/terms" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Terms of Service <ArrowRight className="w-3 h-3" />
+            </Link>
+            <Link href="/privacy" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Privacy Policy <ArrowRight className="w-3 h-3" />
+            </Link>
           </div>
         </div>
       </div>

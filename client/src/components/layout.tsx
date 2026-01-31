@@ -161,7 +161,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 border-b border-border bg-background z-50 flex items-center px-4 justify-between">
          <div className="flex items-center gap-2">
             <img src={logoImage} alt="ClaimSignal Logo" className="w-6 h-6 object-contain" />
-            <span className="font-bold">CLAIM SIGNAL</span>
+            <span className="font-bold">CLAIM<span className="text-primary font-mono">SIGNAL</span></span>
          </div>
          <Sheet open={open} onOpenChange={setOpen}>
            <SheetTrigger asChild>
