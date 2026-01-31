@@ -151,8 +151,8 @@ export async function registerRoutes(
       const session = await storage.createSession('team', teamCreds.accessLevel);
       res.cookie('session_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       res.json({ success: true, userType: 'team', accessLevel: teamCreds.accessLevel });
@@ -181,8 +181,8 @@ export async function registerRoutes(
       const session = await storage.createSession('team', 'admin');
       res.cookie('session_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       res.json({ success: true, userType: 'team', accessLevel: 'admin' });
@@ -224,8 +224,8 @@ export async function registerRoutes(
       
       res.cookie('session_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       res.json({ success: true, userType: 'individual', userId: user.id, accessLevel: user.accessLevel, needsSubscription: true });
@@ -253,8 +253,8 @@ export async function registerRoutes(
       const session = await storage.createSession('individual', user.accessLevel, user.id);
       res.cookie('session_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       res.json({ 
@@ -1800,8 +1800,8 @@ Base your advice on insurance industry best practices, policy interpretation, an
       
       res.cookie('session_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 12 * 60 * 60 * 1000, // 12 hours
       });
       
