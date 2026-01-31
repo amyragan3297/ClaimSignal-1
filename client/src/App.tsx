@@ -31,6 +31,7 @@ import Methodology from "@/pages/methodology";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Legal from "@/pages/legal";
+import Demo from "@/pages/demo";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -60,14 +61,13 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/demo" component={Demo} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/subscription/success" component={SubscriptionSuccess} />
       <Route path="/billing">
         <ProtectedRoute component={Billing} />
       </Route>
-      <Route path="/">
-        <ProtectedRoute component={Home} />
-      </Route>
+      <Route path="/" component={Home} />
       <Route path="/chat">
         <ProtectedRoute component={Chat} />
       </Route>
