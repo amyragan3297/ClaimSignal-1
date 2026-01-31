@@ -33,7 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </Link>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         <p className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 py-2 font-medium">Primary</p>
         <Link href="/adjusters">
           <Button variant={location === "/adjusters" || location.startsWith("/adjuster/") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
