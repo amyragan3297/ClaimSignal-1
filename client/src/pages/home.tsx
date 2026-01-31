@@ -142,6 +142,15 @@ export default function Home() {
                 Search by adjuster or carrier to anticipate resistance, escalate faster, and recover what is owed.
               </motion.p>
 
+              <motion.p
+                className="text-lg font-semibold text-amber-500"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+              >
+                Level the playing field.
+              </motion.p>
+
               {/* CTAs */}
               <motion.div 
                 className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
