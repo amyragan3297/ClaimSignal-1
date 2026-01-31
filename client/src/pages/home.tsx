@@ -212,49 +212,109 @@ export default function Home() {
             </div>
           </section>
 
-          {/* SAMPLE PREVIEW - What You Get */}
+          {/* SAMPLE PREVIEW - Full Feature Showcase */}
           <section className="px-6 py-8">
-            <div className="max-w-md mx-auto">
+            <div className="max-w-lg mx-auto">
               <motion.div
                 className="text-center mb-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">Sample Profile</p>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">Sample Adjuster Profile</p>
               </motion.div>
               <motion.div 
-                className="bg-card/80 border border-border/50 rounded-xl p-5 space-y-4"
+                className="bg-card/80 border border-border/50 rounded-xl overflow-hidden"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.55, duration: 0.5 }}
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-bold text-lg">Marcus Thompson</h4>
-                    <p className="text-sm text-muted-foreground">State Farm • Southeast Region</p>
-                  </div>
-                  <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-semibold">
-                    Risk: 72
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="bg-card/60 rounded-lg p-2">
-                    <p className="text-lg font-bold text-amber-500">34%</p>
-                    <p className="text-[10px] text-muted-foreground">Supplement Rate</p>
-                  </div>
-                  <div className="bg-card/60 rounded-lg p-2">
-                    <p className="text-lg font-bold text-orange-500">12</p>
-                    <p className="text-[10px] text-muted-foreground">Avg Days</p>
-                  </div>
-                  <div className="bg-card/60 rounded-lg p-2">
-                    <p className="text-lg font-bold text-red-400">High</p>
-                    <p className="text-[10px] text-muted-foreground">Friction</p>
+                {/* Header */}
+                <div className="p-5 border-b border-border/50">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-bold text-lg">Marcus Thompson</h4>
+                      <p className="text-sm text-muted-foreground">State Farm • Southeast Region</p>
+                    </div>
+                    <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-semibold">
+                      Risk: 72
+                    </div>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground italic border-t border-border/50 pt-3">
-                  "Known to push back on supplemental requests. Responds better to documented re-inspections..."
-                </p>
+
+                {/* Key Metrics */}
+                <div className="p-4 bg-card/40 border-b border-border/50">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Performance Metrics</p>
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    <div className="bg-card/60 rounded-lg p-2">
+                      <p className="text-base font-bold text-amber-500">34%</p>
+                      <p className="text-[9px] text-muted-foreground">Supplement Approval</p>
+                    </div>
+                    <div className="bg-card/60 rounded-lg p-2">
+                      <p className="text-base font-bold text-orange-500">12</p>
+                      <p className="text-[9px] text-muted-foreground">Avg Days to Respond</p>
+                    </div>
+                    <div className="bg-card/60 rounded-lg p-2">
+                      <p className="text-base font-bold text-red-400">High</p>
+                      <p className="text-[9px] text-muted-foreground">Friction Level</p>
+                    </div>
+                    <div className="bg-card/60 rounded-lg p-2">
+                      <p className="text-base font-bold text-green-500">3</p>
+                      <p className="text-[9px] text-muted-foreground">Claims Overturned</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Behavioral Intel */}
+                <div className="p-4 border-b border-border/50">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Behavioral Intelligence</p>
+                  <p className="text-xs text-foreground/80 italic">
+                    "Known to push back on supplemental requests. Responds better to documented re-inspections. Escalates quickly when challenged directly."
+                  </p>
+                </div>
+
+                {/* Interaction History */}
+                <div className="p-4 border-b border-border/50">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Recent Interactions</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      <span className="text-muted-foreground">Jan 15</span>
+                      <span>Email - Supplement denied, requested re-inspection</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      <span className="text-muted-foreground">Jan 22</span>
+                      <span>Call - Re-inspection approved after escalation</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="text-muted-foreground">Jan 28</span>
+                      <span>Claim overturned - Full settlement approved</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Linked Claims */}
+                <div className="p-4 border-b border-border/50">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Linked Claims</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-card/60 border border-border/50 rounded px-2 py-1 text-xs">***-4902</span>
+                    <span className="bg-card/60 border border-border/50 rounded px-2 py-1 text-xs">***-1156</span>
+                    <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded px-2 py-1 text-xs">***-7834 (Overturned)</span>
+                  </div>
+                </div>
+
+                {/* AI Tactics */}
+                <div className="p-4 bg-amber-500/5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Bot className="w-4 h-4 text-amber-500" />
+                    <p className="text-[10px] uppercase tracking-widest text-amber-500">AI Tactical Advice</p>
+                  </div>
+                  <p className="text-xs text-foreground/80">
+                    "Based on this adjuster's pattern, recommend documenting all communications in writing. Request re-inspection within 48 hours of denial. Prepare escalation letter referencing policy Section 4.2."
+                  </p>
+                </div>
               </motion.div>
             </div>
           </section>
