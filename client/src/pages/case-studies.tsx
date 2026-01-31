@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, BookOpen, Loader2, AlertTriangle, CheckCircle, TrendingUp, Lightbulb, Trash2, Pencil, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { CaseStudy, Claim } from "@shared/schema";
+import { useAuth } from "@/lib/auth";
 
 function formatCurrency(cents: number | null | undefined): string {
   if (!cents) return "$0";
@@ -31,6 +32,8 @@ function getOutcomeBadge(outcome: string) {
 export default function CaseStudiesPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { userType, authenticated } = useAuth();
+  const isTeamUser = authenticated && userType === 'team';
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState<CaseStudy | null>(null);
   const [newStudy, setNewStudy] = useState({
@@ -407,17 +410,19 @@ export default function CaseStudiesPage() {
                       <Button variant="ghost" size="icon" onClick={() => setSelectedStudy(study)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => {
-                          if (confirm("Delete this case study?")) {
-                            deleteMutation.mutate(study.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      {isTeamUser && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => {
+                            if (confirm("Delete this case study?")) {
+                              deleteMutation.mutate(study.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardHeader>

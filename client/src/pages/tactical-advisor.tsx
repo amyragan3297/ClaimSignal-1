@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAdjusters, fetchClaims } from "@/lib/api";
 import { format } from "date-fns";
+import { useAuth } from "@/lib/auth";
 
 interface TacticalAdvice {
   strategy: string;
@@ -38,6 +39,8 @@ export default function TacticalAdvisor() {
   const [newNote, setNewNote] = useState("");
   const [activeTab, setActiveTab] = useState("ai-advice");
   const queryClient = useQueryClient();
+  const { userType, authenticated } = useAuth();
+  const isTeamUser = authenticated && userType === 'team';
 
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
@@ -436,15 +439,17 @@ export default function TacticalAdvisor() {
                                     </div>
                                     <p className="text-sm whitespace-pre-wrap">{note.content}</p>
                                   </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
-                                    onClick={() => deleteNoteMutation.mutate(note.id)}
-                                    data-testid={`delete-note-${note.id}`}
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </Button>
+                                  {isTeamUser && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                                      onClick={() => deleteNoteMutation.mutate(note.id)}
+                                      data-testid={`delete-note-${note.id}`}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
                             ))}
