@@ -199,6 +199,7 @@ export default function ClaimDetail() {
     switch (status) {
       case 'open': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
       case 'approved': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      case 'overturned': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
       case 'resolved': return 'bg-green-500/10 text-green-500 border-green-500/20';
       case 'denied': return 'bg-red-500/10 text-red-500 border-red-500/20';
       case 'in_litigation': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
@@ -248,6 +249,7 @@ export default function ClaimDetail() {
                     <SelectContent>
                       <SelectItem value="open">Open</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="overturned">Overturned (Won After Denial)</SelectItem>
                       <SelectItem value="resolved">Resolved</SelectItem>
                       <SelectItem value="denied">Denied</SelectItem>
                       <SelectItem value="in_litigation">In Litigation</SelectItem>
@@ -286,16 +288,16 @@ export default function ClaimDetail() {
                   </div>
                 )}
                 
-                {/* Quick action button: Denied → Approved */}
+                {/* Quick action button: Denied → Overturned */}
                 {claim.status === 'denied' && (
                   <Button 
-                    className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 gap-2"
-                    onClick={() => handleStatusChange('approved')}
+                    className="w-full mt-4 bg-amber-600 hover:bg-amber-700 gap-2"
+                    onClick={() => handleStatusChange('overturned')}
                     disabled={updateClaimMutation.isPending}
-                    data-testid="button-flip-to-approved"
+                    data-testid="button-flip-to-overturned"
                   >
                     <ThumbsUp className="w-4 h-4" />
-                    Mark as Approved
+                    Mark as Overturned (Won!)
                   </Button>
                 )}
               </CardContent>
