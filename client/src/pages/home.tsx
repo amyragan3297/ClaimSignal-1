@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles, BarChart3, Target, Users, Building2, BookOpen, LayoutDashboard, XCircle, ChevronRight, Shield, FileUp, AlertCircle } from "lucide-react";
+import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles, BarChart3, Target, Users, Building2, BookOpen, LayoutDashboard, XCircle, ChevronRight, Shield, FileUp, AlertCircle, User, MapPin, Phone, Mail } from "lucide-react";
 import logoImage from '@assets/generated_images/modern_geometric_logo_for_claimsignal.png';
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -212,85 +212,162 @@ export default function Home() {
             </div>
           </section>
 
-          {/* SAMPLE PREVIEW - Full Feature Showcase */}
+          {/* SAMPLE PREVIEW - Full App Showcase */}
           <section className="px-6 py-8">
-            <div className="max-w-lg mx-auto">
+            <div className="max-w-2xl mx-auto">
               <motion.div
-                className="text-center mb-4"
+                className="text-center mb-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">Sample Adjuster Profile</p>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">What You Get</p>
+                <p className="text-sm text-foreground/70">Real adjuster profile from the ClaimSignal database</p>
               </motion.div>
+              
               <motion.div 
                 className="bg-card/80 border border-border/50 rounded-xl overflow-hidden"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.55, duration: 0.5 }}
               >
-                {/* Header */}
-                <div className="p-5 border-b border-border/50">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-bold text-lg">Marcus Thompson</h4>
-                      <p className="text-sm text-muted-foreground">State Farm • Southeast Region</p>
-                    </div>
-                    <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-semibold">
-                      Risk: 72
+                {/* Profile Header - Like the real app */}
+                <div className="p-5 border-b border-border/50 flex items-start gap-4">
+                  <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center border-2 border-border">
+                    <User className="w-7 h-7 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-bold text-xl">Marcus Thompson</h4>
+                        <p className="text-sm text-primary">State Farm</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="bg-muted text-xs px-2 py-0.5 rounded flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> Southeast
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-sm font-bold">
+                          Risk Score: 72
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-1">HIGH FRICTION</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Key Metrics */}
-                <div className="p-4 bg-card/40 border-b border-border/50">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Performance Metrics</p>
-                  <div className="grid grid-cols-4 gap-2 text-center">
-                    <div className="bg-card/60 rounded-lg p-2">
-                      <p className="text-base font-bold text-amber-500">34%</p>
-                      <p className="text-[9px] text-muted-foreground">Supplement Approval</p>
-                    </div>
-                    <div className="bg-card/60 rounded-lg p-2">
-                      <p className="text-base font-bold text-orange-500">12</p>
-                      <p className="text-[9px] text-muted-foreground">Avg Days to Respond</p>
-                    </div>
-                    <div className="bg-card/60 rounded-lg p-2">
-                      <p className="text-base font-bold text-red-400">High</p>
-                      <p className="text-[9px] text-muted-foreground">Friction Level</p>
-                    </div>
-                    <div className="bg-card/60 rounded-lg p-2">
-                      <p className="text-base font-bold text-green-500">3</p>
-                      <p className="text-[9px] text-muted-foreground">Claims Overturned</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Behavioral Intel */}
-                <div className="p-4 border-b border-border/50">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Behavioral Intelligence</p>
-                  <p className="text-xs text-foreground/80 italic">
-                    "Known to push back on supplemental requests. Responds better to documented re-inspections. Escalates quickly when challenged directly."
+                {/* Internal Notes - Like the real app */}
+                <div className="p-4 bg-muted/20 border-b border-border/50">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-2">Internal Notes</p>
+                  <p className="text-sm text-foreground/80">
+                    Adjuster since 2019. Handles residential claims in FL, GA, AL. Known to lowball initial estimates. Works under Regional Manager Susan Chen. Best reached by email before 10am.
                   </p>
                 </div>
 
-                {/* Interaction History */}
+                {/* Stats Grid - Like the real app */}
                 <div className="p-4 border-b border-border/50">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Recent Interactions</p>
+                  <div className="grid grid-cols-4 gap-3">
+                    <div className="bg-card/60 border border-border/40 rounded-lg p-3 text-center">
+                      <p className="text-[10px] text-muted-foreground mb-1">First Contact</p>
+                      <p className="text-sm font-bold">Mar 2024</p>
+                    </div>
+                    <div className="bg-card/60 border border-border/40 rounded-lg p-3 text-center">
+                      <p className="text-[10px] text-muted-foreground mb-1">Interactions</p>
+                      <p className="text-sm font-bold">47</p>
+                    </div>
+                    <div className="bg-card/60 border border-border/40 rounded-lg p-3 text-center">
+                      <p className="text-[10px] text-muted-foreground mb-1">Claims</p>
+                      <p className="text-sm font-bold">12</p>
+                    </div>
+                    <div className="bg-card/60 border border-border/40 rounded-lg p-3 text-center">
+                      <p className="text-[10px] text-muted-foreground mb-1">Documents</p>
+                      <p className="text-sm font-bold">8</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Behavioral Intelligence Panel */}
+                <div className="p-4 border-b border-border/50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <BarChart3 className="w-4 h-4 text-primary" />
+                    <p className="text-sm font-semibold">Behavioral Intelligence</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Supplement Approval</span>
+                        <span className="font-semibold text-amber-500">34%</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Re-inspection Win Rate</span>
+                        <span className="font-semibold text-green-500">67%</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Avg Days to Respond</span>
+                        <span className="font-semibold text-orange-500">12 days</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Escalation Success</span>
+                        <span className="font-semibold text-green-500">78%</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Cooperation Level</span>
+                        <span className="font-semibold text-red-400">Low</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Claims Overturned</span>
+                        <span className="font-semibold text-emerald-500">3</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Risk Impression & What Worked */}
+                <div className="grid grid-cols-2 border-b border-border/50">
+                  <div className="p-4 border-r border-border/50">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Your Risk Impression</p>
+                    <p className="text-xs text-foreground/80 italic">
+                      "Difficult but predictable. Always denies first supplement. Push back firmly with documentation."
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">What Worked</p>
+                    <p className="text-xs text-foreground/80 italic">
+                      "Citing policy Section 4.2 got immediate response. CC his manager on third follow-up."
+                    </p>
+                  </div>
+                </div>
+
+                {/* Interaction Log Preview */}
+                <div className="p-4 border-b border-border/50">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Recent Interaction Log</p>
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                      <span className="text-muted-foreground">Jan 15</span>
-                      <span>Email - Supplement denied, requested re-inspection</span>
+                    <div className="flex items-center gap-3 bg-card/40 rounded-lg p-2">
+                      <Phone className="w-4 h-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium">Call - Re-inspection scheduled</p>
+                        <p className="text-[10px] text-muted-foreground">Claim #***-7834 • Jan 22, 2026</p>
+                      </div>
+                      <span className="bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded">Success</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                      <span className="text-muted-foreground">Jan 22</span>
-                      <span>Call - Re-inspection approved after escalation</span>
+                    <div className="flex items-center gap-3 bg-card/40 rounded-lg p-2">
+                      <Mail className="w-4 h-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium">Email - Supplement denied</p>
+                        <p className="text-[10px] text-muted-foreground">Claim #***-7834 • Jan 15, 2026</p>
+                      </div>
+                      <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded">Denied</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span className="text-muted-foreground">Jan 28</span>
-                      <span>Claim overturned - Full settlement approved</span>
+                    <div className="flex items-center gap-3 bg-card/40 rounded-lg p-2">
+                      <AlertCircle className="w-4 h-4 text-amber-500" />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium">Escalation - Manager contacted</p>
+                        <p className="text-[10px] text-muted-foreground">Claim #***-4902 • Jan 10, 2026</p>
+                      </div>
+                      <span className="bg-amber-500/20 text-amber-400 text-[10px] px-2 py-0.5 rounded">Escalated</span>
                     </div>
                   </div>
                 </div>
@@ -298,22 +375,87 @@ export default function Home() {
                 {/* Linked Claims */}
                 <div className="p-4 border-b border-border/50">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Linked Claims</p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="bg-card/60 border border-border/50 rounded px-2 py-1 text-xs">***-4902</span>
-                    <span className="bg-card/60 border border-border/50 rounded px-2 py-1 text-xs">***-1156</span>
-                    <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded px-2 py-1 text-xs">***-7834 (Overturned)</span>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between bg-card/40 rounded-lg p-2">
+                      <div>
+                        <p className="text-xs font-medium">Claim #***-7834</p>
+                        <p className="text-[10px] text-muted-foreground">Wind/Hail • $47,500</p>
+                      </div>
+                      <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded font-semibold">OVERTURNED</span>
+                    </div>
+                    <div className="flex items-center justify-between bg-card/40 rounded-lg p-2">
+                      <div>
+                        <p className="text-xs font-medium">Claim #***-4902</p>
+                        <p className="text-[10px] text-muted-foreground">Water Damage • $22,100</p>
+                      </div>
+                      <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded">Open</span>
+                    </div>
+                    <div className="flex items-center justify-between bg-card/40 rounded-lg p-2">
+                      <div>
+                        <p className="text-xs font-medium">Claim #***-1156</p>
+                        <p className="text-[10px] text-muted-foreground">Roof Replacement • $38,200</p>
+                      </div>
+                      <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">Resolved</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* AI Tactics */}
-                <div className="p-4 bg-amber-500/5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Bot className="w-4 h-4 text-amber-500" />
-                    <p className="text-[10px] uppercase tracking-widest text-amber-500">AI Tactical Advice</p>
+                {/* Case Study Highlight */}
+                <div className="p-4 border-b border-border/50 bg-emerald-500/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    <p className="text-sm font-semibold text-emerald-400">Case Study: Overturned Denial</p>
                   </div>
-                  <p className="text-xs text-foreground/80">
-                    "Based on this adjuster's pattern, recommend documenting all communications in writing. Request re-inspection within 48 hours of denial. Prepare escalation letter referencing policy Section 4.2."
-                  </p>
+                  <div className="bg-card/60 rounded-lg p-3 space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Initial Denial</span>
+                      <span>$0 approved of $47,500 claim</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Friction Signals</span>
+                      <div className="flex gap-1">
+                        <span className="bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded text-[10px]">Lowball</span>
+                        <span className="bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded text-[10px]">Delayed</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Actions Taken</span>
+                      <div className="flex gap-1">
+                        <span className="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-[10px]">Re-inspection</span>
+                        <span className="bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded text-[10px]">Escalation</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs pt-2 border-t border-border/50">
+                      <span className="text-muted-foreground">Final Outcome</span>
+                      <span className="text-emerald-400 font-semibold">$47,500 approved (100%)</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground italic pt-1">
+                      Turning Point: Re-inspection with detailed photo documentation triggered full reversal.
+                    </p>
+                  </div>
+                </div>
+
+                {/* AI Tactical Advice */}
+                <div className="p-4 bg-amber-500/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Bot className="w-4 h-4 text-amber-500" />
+                    <p className="text-sm font-semibold text-amber-500">AI Tactical Advisor</p>
+                  </div>
+                  <div className="bg-card/60 rounded-lg p-3 space-y-2">
+                    <p className="text-xs text-foreground/80">
+                      <strong>Recommended Strategy:</strong> Based on 47 interactions with this adjuster, the most effective approach is:
+                    </p>
+                    <ul className="text-xs text-foreground/80 space-y-1 ml-4">
+                      <li>• Document all communications in writing</li>
+                      <li>• Request re-inspection within 48 hours of any denial</li>
+                      <li>• Cite policy Section 4.2 for supplement disputes</li>
+                      <li>• CC Regional Manager Susan Chen on third follow-up</li>
+                      <li>• Prepare escalation letter if no response in 5 days</li>
+                    </ul>
+                    <p className="text-[10px] text-amber-400 pt-2 border-t border-border/50">
+                      Success probability with this strategy: 78% based on historical patterns
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             </div>
