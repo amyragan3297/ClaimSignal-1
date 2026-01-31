@@ -18,12 +18,15 @@ import { fetchAdjuster, createInteraction, updateAdjuster, fetchClaims, fetchAdj
 import { useUpload } from "@/hooks/use-upload";
 import { useToast } from "@/hooks/use-toast";
 import { AudioTranscribe } from "@/components/audio-transcribe";
+import { useAuth } from "@/lib/auth";
 
 export default function AdjusterProfile() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { userType, authenticated } = useAuth();
+  const isTeamUser = authenticated && userType === 'team';
   const [isLogOpen, setIsLogOpen] = useState(false);
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [isEditingRisk, setIsEditingRisk] = useState(false);
@@ -301,19 +304,21 @@ export default function AdjusterProfile() {
           </div>
           
           <div className="flex gap-3">
-             <Button 
-               variant="outline" 
-               size="icon" 
-               className="text-muted-foreground hover:text-destructive transition-colors"
-               onClick={() => {
-                 if (confirm('Are you sure you want to delete this adjuster profile? This cannot be undone.')) {
-                   deleteAdjusterMutation.mutate(adjuster.id);
-                 }
-               }}
-               data-testid="button-delete-adjuster"
-             >
-               <Trash2 className="w-4 h-4" />
-             </Button>
+             {isTeamUser && (
+               <Button 
+                 variant="outline" 
+                 size="icon" 
+                 className="text-muted-foreground hover:text-destructive transition-colors"
+                 onClick={() => {
+                   if (confirm('Are you sure you want to delete this adjuster profile? This cannot be undone.')) {
+                     deleteAdjusterMutation.mutate(adjuster.id);
+                   }
+                 }}
+                 data-testid="button-delete-adjuster"
+               >
+                 <Trash2 className="w-4 h-4" />
+               </Button>
+             )}
              <Dialog open={isLogOpen} onOpenChange={setIsLogOpen}>
                <DialogTrigger asChild>
                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" data-testid="button-log-interaction">
@@ -406,18 +411,18 @@ export default function AdjusterProfile() {
           </div>
         </div>
 
-        {/* Internal Notes */}
-        {(adjuster.internalNotes || isEditingNotes) && (
-          <Card className="bg-muted/30 border-border/50">
-            <CardContent className="pt-4">
-              {isEditingNotes ? (
-                <div className="space-y-3">
-                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">Internal Notes</Label>
-                  <Textarea 
-                    value={editNotes}
-                    onChange={(e) => setEditNotes(e.target.value)}
-                    className="min-h-[100px]"
-                    data-testid="textarea-internal-notes"
+        {/* Internal Notes - Always visible */}
+        <Card className="bg-muted/20 border-border/50">
+          <CardContent className="pt-5">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-3">Internal Notes</p>
+            {isEditingNotes ? (
+              <div className="space-y-3">
+                <Textarea 
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  className="min-h-[150px] bg-background"
+                  placeholder="Add internal notes about this adjuster... Email chains, behavior patterns, contact info, etc."
+                  data-testid="textarea-internal-notes"
                   />
                   <div className="flex gap-2">
                     <Button size="sm" onClick={handleSaveNotes} disabled={updateAdjusterMutation.isPending}>
@@ -428,18 +433,21 @@ export default function AdjusterProfile() {
                     </Button>
                   </div>
                 </div>
-              ) : (
-                <div 
-                  className="cursor-pointer hover:bg-muted/50 p-2 -m-2 rounded transition-colors"
-                  onClick={() => { setEditNotes(adjuster.internalNotes || ''); setIsEditingNotes(true); }}
-                >
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Internal Notes</p>
-                  <p className="text-sm text-foreground/80">{adjuster.internalNotes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div 
+                className="cursor-pointer hover:bg-muted/30 p-3 -m-2 rounded transition-colors min-h-[80px]"
+                onClick={() => { setEditNotes(adjuster.internalNotes || ''); setIsEditingNotes(true); }}
+                data-testid="notes-display"
+              >
+                {adjuster.internalNotes ? (
+                  <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{adjuster.internalNotes}</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">Click to add notes about this adjuster...</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
@@ -1036,19 +1044,21 @@ export default function AdjusterProfile() {
                                 'Analyze'
                               )}
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              className="text-muted-foreground hover:text-destructive"
-                              onClick={() => {
-                                if (confirm('Delete this document?')) {
-                                  deleteDocumentMutation.mutate(doc.id);
-                                }
-                              }}
-                              data-testid={`button-delete-doc-${doc.id}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {isTeamUser && (
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="text-muted-foreground hover:text-destructive"
+                                onClick={() => {
+                                  if (confirm('Delete this document?')) {
+                                    deleteDocumentMutation.mutate(doc.id);
+                                  }
+                                }}
+                                data-testid={`button-delete-doc-${doc.id}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ))
