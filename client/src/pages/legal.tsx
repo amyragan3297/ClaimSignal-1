@@ -11,9 +11,9 @@ export default function Legal() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Legal Disclosure</h1>
-          <p className="text-muted-foreground mb-2">Use Restrictions and Protective Notice</p>
-          <p className="text-sm text-muted-foreground mb-8">ClaimSignal</p>
+          <h1 className="text-2xl font-bold mb-2">Legal Disclosure</h1>
+          <p className="text-sm text-muted-foreground mb-2">Use Restrictions and Protective Notice</p>
+          <p className="text-xs text-muted-foreground mb-6">ClaimSignal</p>
           <div className="h-1 w-24 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full mb-8" />
         </motion.div>
 
@@ -153,9 +153,9 @@ function Section({ icon, title, children }: { icon?: React.ReactNode; title: str
             {icon}
           </div>
         )}
-        <h2 className="text-xl font-bold">{title}</h2>
+        <h2 className="text-base font-semibold">{title}</h2>
       </div>
-      <div className="text-muted-foreground space-y-2 pl-0 md:pl-12 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:space-y-1">
+      <div className="text-muted-foreground text-sm space-y-2 pl-0 md:pl-12 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:space-y-1">
         {children}
       </div>
     </motion.section>
