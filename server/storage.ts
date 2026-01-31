@@ -23,6 +23,8 @@ import {
   type InsertSupplementLineItem,
   type TacticalNote,
   type InsertTacticalNote,
+  type AddonPurchase,
+  type InsertAddonPurchase,
   adjusters,
   claims,
   claimAdjusters,
@@ -38,6 +40,7 @@ import {
   supplementLineItems,
   caseStudies,
   tacticalNotes,
+  addonPurchases,
   type CaseStudy,
   type InsertCaseStudy
 } from "@shared/schema";
