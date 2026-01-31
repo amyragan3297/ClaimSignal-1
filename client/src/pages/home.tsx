@@ -52,7 +52,7 @@ export default function Home() {
           title: "Trial Started",
           description: "You have 12 hours of viewer access. Upgrade anytime for full features!",
         });
-        setLocation('/dashboard');
+        setLocation('/adjusters');
       } else {
         toast({
           title: "Trial Failed",
