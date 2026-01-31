@@ -461,48 +461,48 @@ export default function Home() {
             </div>
           </section>
 
-          {/* FEATURE CARDS - Side by Side */}
+          {/* FEATURE CARDS - Always Side by Side */}
           <section className="px-6 py-8">
-            <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="max-w-lg mx-auto grid grid-cols-2 gap-3">
               {/* Risk Scores */}
               <motion.div 
-                className="bg-card/60 border border-border/50 rounded-xl p-5 hover:border-amber-500/40 cursor-pointer transition-all group"
+                className="bg-card/60 border border-border/50 rounded-xl p-4 hover:border-amber-500/40 cursor-pointer transition-all group"
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
                 onClick={() => setLocation('/risk-alerts')}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Live Intel</span>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Live Intel</span>
                 </div>
-                <div className="bg-amber-500/10 p-2.5 rounded-lg w-fit mb-3">
-                  <BarChart3 className="w-5 h-5 text-amber-500" />
+                <div className="bg-amber-500/10 p-2 rounded-lg w-fit mb-2">
+                  <BarChart3 className="w-4 h-4 text-amber-500" />
                 </div>
-                <h3 className="text-lg font-bold mb-1 group-hover:text-amber-500 transition-colors">Adjuster Risk Scores</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Composite scoring based on denial patterns and escalation outcomes.
+                <h3 className="text-sm font-bold mb-1 group-hover:text-amber-500 transition-colors">Adjuster Risk Scores</h3>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  Scoring based on denial patterns and outcomes.
                 </p>
               </motion.div>
 
               {/* AI Tactics */}
               <motion.div 
-                className="bg-card/60 border border-border/50 rounded-xl p-5 hover:border-amber-500/40 cursor-pointer transition-all group"
+                className="bg-card/60 border border-border/50 rounded-xl p-4 hover:border-amber-500/40 cursor-pointer transition-all group"
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
                 onClick={() => setLocation('/tactical-advisor')}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">AI-Powered</span>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">AI-Powered</span>
                 </div>
-                <div className="bg-amber-500/10 p-2.5 rounded-lg w-fit mb-3">
-                  <Bot className="w-5 h-5 text-amber-500" />
+                <div className="bg-amber-500/10 p-2 rounded-lg w-fit mb-2">
+                  <Bot className="w-4 h-4 text-amber-500" />
                 </div>
-                <h3 className="text-lg font-bold mb-1 group-hover:text-amber-500 transition-colors">Negotiation Intelligence</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  AI-generated strategies informed by adjuster behavior patterns.
+                <h3 className="text-sm font-bold mb-1 group-hover:text-amber-500 transition-colors">Negotiation Intelligence</h3>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  AI strategies from adjuster behavior patterns.
                 </p>
               </motion.div>
             </div>
