@@ -32,6 +32,7 @@ import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Legal from "@/pages/legal";
 import Demo from "@/pages/demo";
+import AdminAddons from "@/pages/admin-addons";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -103,6 +104,9 @@ function Router() {
       </Route>
       <Route path="/admin/requests">
         <ProtectedRoute component={AdminRequests} />
+      </Route>
+      <Route path="/admin/addons">
+        <ProtectedRoute component={AdminAddons} />
       </Route>
       <Route path="/settings">
         <ProtectedRoute component={SettingsPage} />

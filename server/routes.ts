@@ -43,6 +43,16 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
     return res.status(401).json({ error: 'Session expired' });
   }
 
+  // Trial users get limited access (viewer only, no AI features)
+  if (session.userType === 'trial') {
+    req.session = {
+      userType: 'trial' as any,
+      userId: undefined,
+      accessLevel: 'viewer',
+    };
+    return next();
+  }
+
   if (session.userType === 'individual' && session.userId) {
     const user = await storage.getUserById(session.userId);
     if (!user || user.subscriptionStatus !== 'active') {
@@ -287,6 +297,15 @@ export async function registerRoutes(
       const session = await storage.getSessionByToken(token);
       if (!session) {
         return res.json({ authenticated: false });
+      }
+
+      if (session.userType === 'trial') {
+        return res.json({ 
+          authenticated: true, 
+          userType: 'trial',
+          accessLevel: 'viewer',
+          trialExpiresAt: session.expiresAt
+        });
       }
 
       if (session.userType === 'individual' && session.userId) {
@@ -1714,6 +1733,87 @@ Base your advice on insurance industry best practices, policy interpretation, an
     } catch (error) {
       console.error("Error generating case study:", error);
       res.status(500).json({ error: "Failed to generate case study" });
+    }
+  });
+
+  // ==================== ADDON PURCHASES ROUTES ====================
+  
+  // Get all addon purchases (admin only)
+  app.get("/api/admin/addon-purchases", authMiddleware, async (req, res) => {
+    try {
+      if (req.session?.userType !== 'team' || req.session?.accessLevel !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      const status = req.query.status as string | undefined;
+      const purchases = await storage.getAddonPurchases(status);
+      res.json(purchases);
+    } catch (error) {
+      console.error("Error fetching addon purchases:", error);
+      res.status(500).json({ error: "Failed to fetch addon purchases" });
+    }
+  });
+
+  // Get pending addon count (for notification badge)
+  app.get("/api/admin/addon-purchases/pending-count", authMiddleware, async (req, res) => {
+    try {
+      if (req.session?.userType !== 'team' || req.session?.accessLevel !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      const count = await storage.getPendingAddonCount();
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching pending count:", error);
+      res.status(500).json({ error: "Failed to fetch pending count" });
+    }
+  });
+
+  // Update addon purchase status (mark as fulfilled)
+  app.patch("/api/admin/addon-purchases/:id", authMiddleware, async (req, res) => {
+    try {
+      if (req.session?.userType !== 'team' || req.session?.accessLevel !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      const id = req.params.id as string;
+      const { status, notes } = req.body as { status: string; notes?: string };
+      
+      if (!['pending', 'fulfilled', 'cancelled'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+      }
+      
+      const purchase = await storage.updateAddonPurchaseStatus(id, status, notes);
+      if (!purchase) {
+        return res.status(404).json({ error: 'Purchase not found' });
+      }
+      res.json(purchase);
+    } catch (error) {
+      console.error("Error updating addon purchase:", error);
+      res.status(500).json({ error: "Failed to update addon purchase" });
+    }
+  });
+
+  // ==================== FREE TRIAL ROUTES ====================
+  
+  // Start a 12-hour free trial
+  app.post("/api/auth/trial", async (req, res) => {
+    try {
+      const session = await storage.createTrialSession();
+      
+      res.cookie('session_token', session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 12 * 60 * 60 * 1000, // 12 hours
+      });
+      
+      res.json({ 
+        success: true, 
+        userType: 'trial',
+        expiresAt: session.expiresAt,
+        message: 'Your 12-hour free trial has started. Some features are limited.'
+      });
+    } catch (error) {
+      console.error("Error creating trial:", error);
+      res.status(500).json({ error: "Failed to start trial" });
     }
   });
 
