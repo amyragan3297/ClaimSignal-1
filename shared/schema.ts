@@ -383,5 +383,32 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type Task = typeof tasks.$inferSelect;
 
+// Add-on Purchases tracking
+export const addonPurchases = pgTable("addon_purchases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'set null' }),
+  customerEmail: text("customer_email").notNull(),
+  customerName: text("customer_name"),
+  addonType: text("addon_type").notNull(), // 'expert_review', 'carrier_report', 'training_session'
+  addonName: text("addon_name").notNull(),
+  amount: integer("amount").notNull(), // in cents
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  stripeSessionId: text("stripe_session_id"),
+  status: text("status").notNull().default('pending'), // 'pending', 'fulfilled', 'cancelled'
+  claimDetails: text("claim_details"), // optional details about which claim they need help with
+  notes: text("notes"), // admin notes about fulfillment
+  fulfilledAt: timestamp("fulfilled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertAddonPurchaseSchema = createInsertSchema(addonPurchases).omit({
+  id: true,
+  createdAt: true,
+  fulfilledAt: true,
+});
+
+export type InsertAddonPurchase = z.infer<typeof insertAddonPurchaseSchema>;
+export type AddonPurchase = typeof addonPurchases.$inferSelect;
+
 // Re-export chat models for AI integrations
 export * from "./models/chat";
