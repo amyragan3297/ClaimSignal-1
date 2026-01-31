@@ -18,6 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { differenceInDays, format } from "date-fns";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { useUpload } from "@/hooks/use-upload";
+import { maskClaimNumber, maskName, maskAddress } from "@/lib/privacy";
+import { PrivacyText } from "@/components/privacy-text";
 
 export default function Claims() {
   const [, setLocation] = useLocation();
@@ -420,7 +422,7 @@ export default function Claims() {
                           <div>
                             <div className="flex items-center gap-3">
                               <span className="font-mono font-semibold text-lg" data-testid={`text-claim-id-${claim.id}`}>
-                                #{claim.maskedId}
+                                #<PrivacyText value={claim.maskedId} maskedValue={maskClaimNumber(claim.maskedId)} />
                               </span>
                               <Badge variant="outline" className={getStatusColor(claim.status)}>
                                 {claim.status.replace('_', ' ')}
@@ -447,7 +449,10 @@ export default function Claims() {
                       </div>
                       {claim.homeownerName && (
                         <p className="text-sm text-muted-foreground mt-3 ml-14">
-                          {claim.homeownerName}{claim.propertyAddress && ` • ${claim.propertyAddress}`}
+                          <PrivacyText value={claim.homeownerName} maskedValue={maskName(claim.homeownerName)} />
+                          {claim.propertyAddress && (
+                            <> • <PrivacyText value={claim.propertyAddress} maskedValue={maskAddress(claim.propertyAddress)} /></>
+                          )}
                         </p>
                       )}
                     </CardContent>
