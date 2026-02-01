@@ -41,6 +41,7 @@ export default function TacticalAdvisor() {
   const queryClient = useQueryClient();
   const { userType, authenticated } = useAuth();
   const isTeamUser = authenticated && userType === 'team';
+  const isTrialUser = authenticated && userType === 'trial';
 
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
@@ -233,7 +234,7 @@ export default function TacticalAdvisor() {
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   onClick={handleGetAdvice} 
-                  disabled={!situation.trim() || getAdviceMutation.isPending}
+                  disabled={isTrialUser || !situation.trim() || getAdviceMutation.isPending}
                   className="w-full"
                   data-testid="button-get-advice"
                 >
@@ -251,7 +252,7 @@ export default function TacticalAdvisor() {
                 </Button>
                 <Button 
                   onClick={handleAutoGenerate}
-                  disabled={(!adjusterId && !claimId) || getAdviceMutation.isPending}
+                  disabled={isTrialUser || (!adjusterId && !claimId) || getAdviceMutation.isPending}
                   variant="secondary"
                   className="w-full"
                   data-testid="button-auto-generate"
@@ -293,7 +294,25 @@ export default function TacticalAdvisor() {
             <CardContent>
               {activeTab === "ai-advice" ? (
                 <>
-                  {advice ? (
+                  {isTrialUser ? (
+                    <div className="h-[380px] flex items-center justify-center text-muted-foreground">
+                      <div className="text-center max-w-md">
+                        <Bot className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <h4 className="font-semibold text-foreground mb-2">AI Advice Not Available</h4>
+                        <p className="text-sm mb-4">
+                          AI-powered tactical advice is a premium feature not included in the free trial.
+                          Upgrade to access personalized claim strategies and adjuster insights.
+                        </p>
+                        <Button 
+                          variant="default" 
+                          onClick={() => window.location.href = '/pricing'}
+                          data-testid="button-upgrade-trial"
+                        >
+                          View Pricing
+                        </Button>
+                      </div>
+                    </div>
+                  ) : advice ? (
                     <ScrollArea className="h-[380px] pr-4">
                       <div className="space-y-6">
                         <div className="flex items-center justify-between">

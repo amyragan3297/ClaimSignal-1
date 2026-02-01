@@ -13,7 +13,7 @@ declare global {
   namespace Express {
     interface Request {
       session?: {
-        userType: 'team' | 'individual';
+        userType: 'team' | 'individual' | 'trial';
         userId?: string;
         accessLevel?: 'admin' | 'editor' | 'viewer';
       };
@@ -46,7 +46,7 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   // Trial users get limited access (viewer only, no AI features)
   if (session.userType === 'trial') {
     req.session = {
-      userType: 'trial' as any,
+      userType: 'trial',
       userId: undefined,
       accessLevel: 'viewer',
     };
@@ -1138,6 +1138,13 @@ export async function registerRoutes(
   // Tactical Advisor endpoint
   app.post("/api/tactical-advice", async (req, res) => {
     try {
+      // Trial users cannot access AI features
+      if (req.session?.userType === 'trial') {
+        return res.status(403).json({ 
+          error: "AI tactical advice is not available during the free trial. Upgrade to access this feature." 
+        });
+      }
+      
       const { adjusterId, claimId, situation, autoGenerate } = req.body;
       
       let context = "";
