@@ -41,22 +41,38 @@ export default function Login() {
       const result = await setupTeam(teamUsername, teamPassword);
       if (result.success) {
         toast({ title: "Team account created", description: "You can now share these credentials with your team." });
-        setLocation("/");
+        window.location.href = '/';
       } else {
         toast({ title: "Setup failed", description: result.error, variant: "destructive" });
+        setLoading(false);
       }
     } else {
-      const result = await login('team', { username: teamUsername, password: teamPassword });
-      if (result.success) {
-        // Small delay then redirect with page reload for mobile compatibility
-        setTimeout(() => {
+      try {
+        // Make direct API call for maximum mobile compatibility
+        const res = await fetch('/api/auth/team/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: teamUsername, password: teamPassword }),
+          credentials: 'include',
+        });
+        
+        const result = await res.json();
+        
+        if (result.success && result.token) {
+          // Store token immediately
+          localStorage.setItem('session_token', result.token);
+          // Force full page reload to pick up new auth state
           window.location.href = '/';
-        }, 100);
-      } else {
-        toast({ title: "Login failed", description: result.error, variant: "destructive" });
+          return;
+        } else {
+          toast({ title: "Login failed", description: result.error || "Invalid credentials", variant: "destructive" });
+          setLoading(false);
+        }
+      } catch (error) {
+        toast({ title: "Login failed", description: "Network error. Please try again.", variant: "destructive" });
+        setLoading(false);
       }
     }
-    setLoading(false);
   };
 
   const handleIndividualAuth = async (e: React.FormEvent) => {
@@ -67,26 +83,46 @@ export default function Login() {
       const result = await register(email, password);
       if (result.success) {
         if (result.needsSubscription) {
-          setLocation("/pricing");
+          window.location.href = "/pricing";
         } else {
-          setLocation("/");
+          window.location.href = "/";
         }
+        return;
       } else {
         toast({ title: "Registration failed", description: result.error, variant: "destructive" });
+        setLoading(false);
       }
     } else {
-      const result = await login('individual', { email, password });
-      if (result.success) {
-        if (result.needsSubscription) {
-          window.location.href = '/pricing';
+      try {
+        // Make direct API call for maximum mobile compatibility
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include',
+        });
+        
+        const result = await res.json();
+        
+        if (result.success && result.token) {
+          // Store token immediately
+          localStorage.setItem('session_token', result.token);
+          // Force full page reload
+          if (result.needsSubscription) {
+            window.location.href = '/pricing';
+          } else {
+            window.location.href = '/';
+          }
+          return;
         } else {
-          window.location.href = '/';
+          toast({ title: "Login failed", description: result.error || "Invalid credentials", variant: "destructive" });
+          setLoading(false);
         }
-      } else {
-        toast({ title: "Login failed", description: result.error, variant: "destructive" });
+      } catch (error) {
+        toast({ title: "Login failed", description: "Network error. Please try again.", variant: "destructive" });
+        setLoading(false);
       }
     }
-    setLoading(false);
   };
 
   return (
