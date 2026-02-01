@@ -49,7 +49,8 @@ task = "workflow.run"
 args = "Start application"
 
 [[workflows.workflow.tasks]]
-task = "packager.installForAll"
+task = "shell.exec"
+args = "npm run dev"
 
 [agent]
 mockupState = "FULLSTACK"
