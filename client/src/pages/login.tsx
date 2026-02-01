@@ -48,7 +48,10 @@ export default function Login() {
     } else {
       const result = await login('team', { username: teamUsername, password: teamPassword });
       if (result.success) {
-        setLocation("/");
+        // Small delay then redirect with page reload for mobile compatibility
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
       } else {
         toast({ title: "Login failed", description: result.error, variant: "destructive" });
       }
@@ -75,9 +78,9 @@ export default function Login() {
       const result = await login('individual', { email, password });
       if (result.success) {
         if (result.needsSubscription) {
-          setLocation("/pricing");
+          window.location.href = '/pricing';
         } else {
-          setLocation("/");
+          window.location.href = '/';
         }
       } else {
         toast({ title: "Login failed", description: result.error, variant: "destructive" });
