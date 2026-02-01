@@ -271,10 +271,22 @@ export async function registerRoutes(
     }
   });
 
+  // Helper to get token from cookie or Authorization header (iOS Safari fix)
+  function getTokenFromRequest(req: Request): string | undefined {
+    let token = req.cookies?.session_token;
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
+    return token;
+  }
+
   // Logout
   app.post("/api/auth/logout", async (req, res) => {
     try {
-      const token = req.cookies?.session_token;
+      const token = getTokenFromRequest(req);
       if (token) {
         await storage.deleteSession(token);
       }
@@ -289,14 +301,7 @@ export async function registerRoutes(
   // Get current session
   app.get("/api/auth/session", async (req, res) => {
     try {
-      // Check cookie first, then Authorization header for mobile browser compatibility
-      let token = req.cookies?.session_token;
-      if (!token) {
-        const authHeader = req.headers.authorization;
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-          token = authHeader.substring(7);
-        }
-      }
+      const token = getTokenFromRequest(req);
       
       if (!token) {
         return res.json({ authenticated: false });
@@ -476,7 +481,7 @@ export async function registerRoutes(
   // Create checkout session
   app.post("/api/stripe/checkout", async (req, res) => {
     try {
-      const token = req.cookies?.session_token;
+      const token = getTokenFromRequest(req);
       if (!token) {
         return res.status(401).json({ error: 'Not authenticated' });
       }
@@ -529,7 +534,7 @@ export async function registerRoutes(
   // Verify subscription after checkout
   app.get("/api/stripe/verify-subscription", async (req, res) => {
     try {
-      const token = req.cookies?.session_token;
+      const token = getTokenFromRequest(req);
       if (!token) {
         return res.status(401).json({ error: 'Not authenticated' });
       }
@@ -565,7 +570,7 @@ export async function registerRoutes(
   // Customer portal
   app.post("/api/stripe/portal", async (req, res) => {
     try {
-      const token = req.cookies?.session_token;
+      const token = getTokenFromRequest(req);
       if (!token) {
         return res.status(401).json({ error: 'Not authenticated' });
       }
@@ -597,7 +602,7 @@ export async function registerRoutes(
   // One-time payment checkout (for add-on services)
   app.post("/api/stripe/one-time-checkout", async (req, res) => {
     try {
-      const token = req.cookies?.session_token;
+      const token = getTokenFromRequest(req);
       if (!token) {
         return res.status(401).json({ error: 'Not authenticated' });
       }
@@ -651,7 +656,7 @@ export async function registerRoutes(
   // Get user invoices
   app.get("/api/stripe/invoices", async (req, res) => {
     try {
-      const token = req.cookies?.session_token;
+      const token = getTokenFromRequest(req);
       if (!token) {
         return res.status(401).json({ error: 'Not authenticated' });
       }
@@ -695,7 +700,7 @@ export async function registerRoutes(
   // Get subscription details
   app.get("/api/stripe/subscription", async (req, res) => {
     try {
-      const token = req.cookies?.session_token;
+      const token = getTokenFromRequest(req);
       if (!token) {
         return res.status(401).json({ error: 'Not authenticated' });
       }
