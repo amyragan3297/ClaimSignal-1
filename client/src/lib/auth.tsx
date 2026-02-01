@@ -38,11 +38,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
+      console.log('Refreshing session, token exists:', !!token);
+      
       const res = await fetch('/api/auth/session', { 
         credentials: 'include',
         headers,
       });
+      
+      if (!res.ok) {
+        console.error('Session check failed with status:', res.status);
+        throw new Error(`HTTP ${res.status}`);
+      }
+      
       const data = await res.json();
+      console.log('Session response:', data);
       
       if (data.authenticated) {
         setState({
@@ -67,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error refreshing session:', error);
+      // Don't clear token on network error - might be temporary
       setState({
         authenticated: false,
         userType: null,
@@ -86,6 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ? { username: data.username, password: data.password }
         : { email: data.email, password: data.password };
 
+      console.log('Login attempt:', endpoint);
+      
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -94,18 +106,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       const result = await res.json();
+      console.log('Login response:', result);
 
       if (result.success) {
         // Store token in localStorage for mobile browser compatibility
         if (result.token) {
           localStorage.setItem('session_token', result.token);
+          console.log('Token stored in localStorage');
         }
-        await refreshSession();
+        
+        // Directly set authenticated state instead of relying on refreshSession
+        setState({
+          authenticated: true,
+          userType: result.userType,
+          accessLevel: result.accessLevel,
+          loading: false,
+        });
+        
         return { success: true, needsSubscription: result.needsSubscription };
       }
 
       return { success: false, error: result.error || 'Login failed' };
     } catch (error) {
+      console.error('Login error:', error);
       return { success: false, error: 'Login failed' };
     }
   };
