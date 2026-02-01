@@ -192,6 +192,7 @@ export async function speechToText(
   const response = await openai.audio.transcriptions.create({
     file,
     model: "gpt-4o-mini-transcribe",
+    response_format: "json",
   });
   return response.text;
 }
@@ -205,18 +206,16 @@ export async function speechToTextStream(
   format: "wav" | "mp3" | "webm" = "wav"
 ): Promise<AsyncIterable<string>> {
   const file = await toFile(audioBuffer, `audio.${format}`);
-  const stream = await openai.audio.transcriptions.create({
+  // Use gpt-4o-mini-transcribe with json response format
+  const response = await openai.audio.transcriptions.create({
     file,
     model: "gpt-4o-mini-transcribe",
-    stream: true,
+    response_format: "json",
   });
-
+  
+  // Return as async iterable for compatibility
   return (async function* () {
-    for await (const event of stream) {
-      if (event.type === "transcript.text.delta") {
-        yield event.delta;
-      }
-    }
+    yield response.text;
   })();
 }
 
