@@ -120,11 +120,13 @@ export async function registerRoutes(
       
       res.json({ success: true, transcript });
     } catch (error: any) {
-      console.error("Error transcribing audio:", error?.message || error);
+      console.error("Error transcribing audio:", error?.message || error, error?.response?.data || "");
       if (error?.status === 401 || error?.message?.includes("API key")) {
         res.status(500).json({ error: "Transcription service configuration issue. Please contact support." });
       } else if (error?.message?.includes("model")) {
         res.status(500).json({ error: "Transcription model unavailable. Please try again later." });
+      } else if (error?.message?.includes("Invalid file format") || error?.message?.includes("audio")) {
+        res.status(400).json({ error: "Invalid audio format. Please use MP3, M4A, or WAV files." });
       } else {
         res.status(500).json({ error: "Failed to transcribe audio. Please try a different file or format." });
       }
