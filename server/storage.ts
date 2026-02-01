@@ -307,12 +307,31 @@ export class DBStorage implements IStorage {
     const adjusterInteractions = await this.getInteractionsByAdjuster(id);
     const adjusterClaims = await this.getClaimsByAdjuster(id);
 
-    const escalationCount = adjusterInteractions.filter(i => i.type === 'Escalation').length;
-    const reinspectionCount = adjusterInteractions.filter(i => i.type === 'Reinspection').length;
+    // Case-insensitive interaction type matching
+    const escalationCount = adjusterInteractions.filter(i => 
+      i.type.toLowerCase().includes('escalat') || 
+      i.type.toLowerCase().includes('dispute') ||
+      i.type.toLowerCase().includes('appeal')
+    ).length;
+    const reinspectionCount = adjusterInteractions.filter(i => 
+      i.type.toLowerCase().includes('reinspect') || 
+      i.type.toLowerCase().includes('re-inspect') ||
+      i.type.toLowerCase().includes('inspection')
+    ).length;
+    const supplementCount = adjusterInteractions.filter(i =>
+      i.type.toLowerCase().includes('supplement')
+    ).length;
 
-    const resolvedClaims = adjusterClaims.filter(c => c.status === 'resolved' || c.status === 'closed');
-    const stalledClaims = adjusterClaims.filter(c => c.status === 'stalled' || c.status === 'denied');
-    const openClaims = adjusterClaims.filter(c => c.status === 'open' || c.status === 'in_progress');
+    // Case-insensitive status matching - 'overturned' and 'approved' are wins!
+    const resolvedClaims = adjusterClaims.filter(c => 
+      ['resolved', 'closed', 'overturned', 'approved'].includes(c.status?.toLowerCase() || '')
+    );
+    const stalledClaims = adjusterClaims.filter(c => 
+      ['stalled', 'denied', 'litigation'].includes(c.status?.toLowerCase() || '')
+    );
+    const openClaims = adjusterClaims.filter(c => 
+      ['open', 'in_progress', 'active', 'negotiating'].includes(c.status?.toLowerCase() || '')
+    );
 
     // Calculate average days to resolution for resolved claims
     let avgDaysToResolution: number | null = null;
@@ -463,9 +482,16 @@ export class DBStorage implements IStorage {
       }
     }
 
-    const resolvedClaims = carrierClaims.filter(c => c.status === 'resolved' || c.status === 'closed');
-    const stalledClaims = carrierClaims.filter(c => c.status === 'stalled' || c.status === 'denied');
-    const openClaims = carrierClaims.filter(c => c.status === 'open' || c.status === 'in_progress');
+    // Case-insensitive status matching - 'overturned' and 'approved' are wins!
+    const resolvedClaims = carrierClaims.filter(c => 
+      ['resolved', 'closed', 'overturned', 'approved'].includes(c.status?.toLowerCase() || '')
+    );
+    const stalledClaims = carrierClaims.filter(c => 
+      ['stalled', 'denied', 'litigation'].includes(c.status?.toLowerCase() || '')
+    );
+    const openClaims = carrierClaims.filter(c => 
+      ['open', 'in_progress', 'active', 'negotiating'].includes(c.status?.toLowerCase() || '')
+    );
 
     // Avg interactions per claim - count directly from claim's interactions
     const claimInteractionCounts = carrierClaims.map(claim => 
@@ -498,7 +524,11 @@ export class DBStorage implements IStorage {
     }
 
     // Escalation effectiveness: % of claims with escalations that resolved
-    const escalations = allInteractions.filter(i => i.type === 'Escalation');
+    const escalations = allInteractions.filter(i => 
+      i.type.toLowerCase().includes('escalat') || 
+      i.type.toLowerCase().includes('dispute') ||
+      i.type.toLowerCase().includes('appeal')
+    );
     const claimsWithEscalations = new Set(escalations.map(e => e.claimId).filter(Boolean));
     let escalationEffectiveness: number | null = null;
     if (claimsWithEscalations.size > 0) {
@@ -542,15 +572,34 @@ export class DBStorage implements IStorage {
       riskScore = Math.round(totalScore / carrierAdjusters.length);
     }
 
-    // Supplement success rate (based on claims that had supplements)
-    const allSupplements = await db.select().from(supplements).where(
-      inArray(supplements.claimId, carrierClaims.map(c => c.id))
-    );
+    // Supplement success rate (based on claims that had supplements or overturned status)
     let supplementSuccessRate: number | null = null;
-    const completedSupplements = allSupplements.filter(s => s.status === 'approved' || s.status === 'denied');
-    if (completedSupplements.length > 0) {
-      const approvedSupplements = completedSupplements.filter(s => s.status === 'approved').length;
-      supplementSuccessRate = Math.round((approvedSupplements / completedSupplements.length) * 100);
+    const carrierClaimIds = carrierClaims.map(c => c.id);
+    
+    if (carrierClaimIds.length > 0) {
+      const allSupplements = await db.select().from(supplements).where(
+        inArray(supplements.claimId, carrierClaimIds)
+      );
+      
+      // Count from supplements table
+      const completedSupplements = allSupplements.filter(s => 
+        s.status?.toLowerCase() === 'approved' || s.status?.toLowerCase() === 'denied'
+      );
+      
+      // Also count 'overturned' claims as supplement wins
+      const overturnedClaims = carrierClaims.filter(c => c.status?.toLowerCase() === 'overturned').length;
+      const deniedClaims = stalledClaims.length;
+      
+      if (completedSupplements.length > 0) {
+        const approvedSupplements = completedSupplements.filter(s => s.status?.toLowerCase() === 'approved').length;
+        supplementSuccessRate = Math.round((approvedSupplements / completedSupplements.length) * 100);
+      } else if (overturnedClaims + deniedClaims > 0) {
+        // Fallback: use claim statuses - overturned = win, denied = loss
+        supplementSuccessRate = Math.round((overturnedClaims / (overturnedClaims + deniedClaims)) * 100);
+      } else if (resolvedClaims.length > 0) {
+        // Second fallback: if claims resolved, assume supplements were successful
+        supplementSuccessRate = Math.round((resolvedClaims.length / carrierClaims.length) * 100);
+      }
     }
 
     // Reinspection win rate (based on interactions with type containing "reinspection" or "re-inspection")
