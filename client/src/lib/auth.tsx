@@ -32,10 +32,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshSession = async () => {
     try {
-      const token = localStorage.getItem('session_token');
+      // Check for token in URL (for iOS Safari compatibility)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('auth_token');
+      if (urlToken) {
+        // Store token and clean URL
+        localStorage.setItem('session_token', urlToken);
+        sessionStorage.setItem('session_token', urlToken);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+      
+      // Try multiple storage locations for iOS compatibility
+      const token = localStorage.getItem('session_token') || sessionStorage.getItem('session_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        // Ensure it's in both storages
+        localStorage.setItem('session_token', token);
+        sessionStorage.setItem('session_token', token);
       }
       
       console.log('Refreshing session, token exists:', !!token);
@@ -179,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      const token = localStorage.getItem('session_token');
+      const token = localStorage.getItem('session_token') || sessionStorage.getItem('session_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -191,6 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } finally {
       localStorage.removeItem('session_token');
+      sessionStorage.removeItem('session_token');
       setState({
         authenticated: false,
         userType: null,

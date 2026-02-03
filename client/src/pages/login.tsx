@@ -59,10 +59,11 @@ export default function Login() {
         const result = await res.json();
         
         if (result.success && result.token) {
-          // Store token immediately
+          // Store token in multiple places for iOS Safari compatibility
           localStorage.setItem('session_token', result.token);
-          // Force full page reload to pick up new auth state
-          window.location.href = '/';
+          sessionStorage.setItem('session_token', result.token);
+          // Also pass token in URL for Safari which may lose localStorage on redirect
+          window.location.href = '/?auth_token=' + result.token;
           return;
         } else {
           toast({ title: "Login failed", description: result.error || "Invalid credentials", variant: "destructive" });
@@ -105,13 +106,14 @@ export default function Login() {
         const result = await res.json();
         
         if (result.success && result.token) {
-          // Store token immediately
+          // Store token in multiple places for iOS Safari compatibility
           localStorage.setItem('session_token', result.token);
-          // Force full page reload
+          sessionStorage.setItem('session_token', result.token);
+          // Pass token in URL for Safari which may lose localStorage on redirect
           if (result.needsSubscription) {
-            window.location.href = '/pricing';
+            window.location.href = '/pricing?auth_token=' + result.token;
           } else {
-            window.location.href = '/';
+            window.location.href = '/?auth_token=' + result.token;
           }
           return;
         } else {
@@ -161,11 +163,24 @@ export default function Login() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleTeamLogin} className="space-y-4">
+                {/* Use native form action for maximum mobile compatibility */}
+                <form 
+                  action="/auth/team/login" 
+                  method="POST" 
+                  className="space-y-4"
+                  onSubmit={(e) => {
+                    // Only intercept if JS login is needed (setup mode)
+                    if (!teamStatus?.isSetup) {
+                      handleTeamLogin(e);
+                    }
+                    // Otherwise let native form submission handle it
+                  }}
+                >
                   <div className="space-y-2">
                     <Label htmlFor="team-username" className="text-slate-300">Username</Label>
                     <Input
                       id="team-username"
+                      name="username"
                       data-testid="input-team-username"
                       value={teamUsername}
                       onChange={(e) => setTeamUsername(e.target.value)}
@@ -178,6 +193,7 @@ export default function Login() {
                     <Label htmlFor="team-password" className="text-slate-300">Password</Label>
                     <Input
                       id="team-password"
+                      name="password"
                       data-testid="input-team-password"
                       type="password"
                       value={teamPassword}
