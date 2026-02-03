@@ -39,19 +39,6 @@ mode = "parallel"
 [[workflows.workflow.tasks]]
 task = "packager.installForAll"
 
-[[workflows.workflow]]
-name = "Run"
-mode = "sequential"
-author = 52948775
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Start application"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-
 [agent]
 mockupState = "FULLSTACK"
 integrations = ["javascript_object_storage:2.0.0", "javascript_openai_ai_integrations:2.0.0", "stripe:2.0.0"]
