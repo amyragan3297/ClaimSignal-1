@@ -151,16 +151,47 @@ export async function registerRoutes(
       }
 
       const session = await storage.createSession('team', teamCreds.accessLevel);
+      // Use lax sameSite for better mobile compatibility
       res.cookie('session_token', session.token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        httpOnly: false, // Allow JS access for mobile compatibility
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
       });
       res.json({ success: true, userType: 'team', accessLevel: teamCreds.accessLevel, token: session.token });
     } catch (error) {
       console.error("Error in team login:", error);
       res.status(500).json({ error: "Login failed" });
+    }
+  });
+  
+  // Mobile-friendly form-based login (redirects after success)
+  app.post("/auth/team/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) {
+        return res.redirect('/login?error=missing');
+      }
+
+      const teamCreds = await storage.verifyTeamLogin(username, password);
+      if (!teamCreds) {
+        return res.redirect('/login?error=invalid');
+      }
+
+      const session = await storage.createSession('team', teamCreds.accessLevel);
+      res.cookie('session_token', session.token, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
+      });
+      // Redirect with token in URL as backup
+      res.redirect('/?auth_token=' + session.token);
+    } catch (error) {
+      console.error("Error in team login:", error);
+      res.redirect('/login?error=server');
     }
   });
 
