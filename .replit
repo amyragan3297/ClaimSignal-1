@@ -43,8 +43,12 @@ author = "agent"
 mode = "parallel"
 
 [[workflows.workflow.tasks]]
-task = "packager.installForLanguage"
-args = "nodejs"
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
 
 [[workflows.workflow]]
 name = "Run "
@@ -52,8 +56,8 @@ mode = "sequential"
 author = 52948775
 
 [[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Start application"
+task = "shell.exec"
+args = ""
 
 [[workflows.workflow]]
 name = "Run again "
