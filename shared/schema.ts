@@ -412,3 +412,6 @@ export type AddonPurchase = typeof addonPurchases.$inferSelect;
 
 // Re-export chat models for AI integrations
 export * from "./models/chat";
+
+// Re-export auth models for Replit Auth integration
+export * from "./models/auth";

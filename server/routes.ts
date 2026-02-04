@@ -13,7 +13,7 @@ import { z } from "zod";
 declare global {
   namespace Express {
     interface Request {
-      session?: {
+      authContext?: {
         userType: 'team' | 'individual' | 'trial';
         userId?: string;
         accessLevel?: 'admin' | 'editor' | 'viewer';
@@ -46,7 +46,7 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
 
   // Trial users get limited access (viewer only, no AI features)
   if (session.userType === 'trial') {
-    req.session = {
+    req.authContext = {
       userType: 'trial',
       userId: undefined,
       accessLevel: 'viewer',
@@ -61,7 +61,7 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
     }
   }
 
-  req.session = {
+  req.authContext = {
     userType: session.userType as 'team' | 'individual',
     userId: session.userId || undefined,
     accessLevel: session.accessLevel as 'admin' | 'editor' | 'viewer',
@@ -70,14 +70,14 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
 }
 
 function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  if (!req.session || req.session.accessLevel !== 'admin') {
+  if (!req.authContext || req.authContext.accessLevel !== 'admin') {
     return res.status(403).json({ error: 'Admin access required' });
   }
   next();
 }
 
 function requireEditor(req: Request, res: Response, next: NextFunction) {
-  if (!req.session || !['admin', 'editor'].includes(req.session.accessLevel || '')) {
+  if (!req.authContext || !['admin', 'editor'].includes(req.authContext.accessLevel || '')) {
     return res.status(403).json({ error: 'Editor access required' });
   }
   next();
@@ -1182,7 +1182,7 @@ export async function registerRoutes(
   app.post("/api/tactical-advice", async (req, res) => {
     try {
       // Trial users cannot access AI features
-      if (req.session?.userType === 'trial') {
+      if (req.authContext?.userType === 'trial') {
         return res.status(403).json({ 
           error: "AI tactical advice is not available during the free trial. Upgrade to access this feature." 
         });
@@ -1799,7 +1799,7 @@ Base your advice on insurance industry best practices, policy interpretation, an
   // Get all addon purchases (admin only)
   app.get("/api/admin/addon-purchases", authMiddleware, async (req, res) => {
     try {
-      if (req.session?.userType !== 'team' || req.session?.accessLevel !== 'admin') {
+      if (req.authContext?.userType !== 'team' || req.authContext?.accessLevel !== 'admin') {
         return res.status(403).json({ error: 'Admin access required' });
       }
       const status = req.query.status as string | undefined;
@@ -1814,7 +1814,7 @@ Base your advice on insurance industry best practices, policy interpretation, an
   // Get pending addon count (for notification badge)
   app.get("/api/admin/addon-purchases/pending-count", authMiddleware, async (req, res) => {
     try {
-      if (req.session?.userType !== 'team' || req.session?.accessLevel !== 'admin') {
+      if (req.authContext?.userType !== 'team' || req.authContext?.accessLevel !== 'admin') {
         return res.status(403).json({ error: 'Admin access required' });
       }
       const count = await storage.getPendingAddonCount();
@@ -1828,7 +1828,7 @@ Base your advice on insurance industry best practices, policy interpretation, an
   // Update addon purchase status (mark as fulfilled)
   app.patch("/api/admin/addon-purchases/:id", authMiddleware, async (req, res) => {
     try {
-      if (req.session?.userType !== 'team' || req.session?.accessLevel !== 'admin') {
+      if (req.authContext?.userType !== 'team' || req.authContext?.accessLevel !== 'admin') {
         return res.status(403).json({ error: 'Admin access required' });
       }
       const id = req.params.id as string;
