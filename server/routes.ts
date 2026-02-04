@@ -261,7 +261,7 @@ export async function registerRoutes(
         sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-      res.json({ success: true, userType: 'individual', userId: user.id, accessLevel: user.accessLevel, needsSubscription: true });
+      res.json({ success: true, userType: 'individual', userId: user.id, accessLevel: user.accessLevel, needsSubscription: true, token: session.token });
     } catch (error) {
       console.error("Error in registration:", error);
       res.status(500).json({ error: "Registration failed" });
@@ -296,7 +296,8 @@ export async function registerRoutes(
         userId: user.id,
         accessLevel: user.accessLevel,
         subscriptionStatus: user.subscriptionStatus,
-        needsSubscription: user.subscriptionStatus !== 'active'
+        needsSubscription: user.subscriptionStatus !== 'active',
+        token: session.token
       });
     } catch (error) {
       console.error("Error in login:", error);

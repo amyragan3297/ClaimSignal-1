@@ -4,11 +4,17 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["graphicsmagick", "ghostscript", "unzip", "poppler_utils", "tesseract", "imagemagick"]
+packages = [
+  "graphicsmagick",
+  "ghostscript",
+  "unzip",
+  "poppler_utils",
+  "tesseract",
+  "imagemagick",
+]
 
 [[ports]]
 localPort = 5000
-externalPort = 80
 
 [env]
 PORT = "5000"
@@ -37,7 +43,8 @@ author = "agent"
 mode = "parallel"
 
 [[workflows.workflow.tasks]]
-task = "packager.installForAll"
+task = "packager.installForLanguage"
+args = "nodejs"
 
 [[workflows.workflow]]
 name = "Run "
@@ -46,18 +53,23 @@ author = 52948775
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Run "
+args = "Run again "
+
+[[workflows.workflow]]
+name = "Run again "
+mode = "sequential"
+author = 52948775
 
 [[workflows.workflow.tasks]]
 task = "packager.installForAll"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "Npm run dev"
-
 [agent]
 mockupState = "FULLSTACK"
-integrations = ["javascript_object_storage:2.0.0", "javascript_openai_ai_integrations:2.0.0", "stripe:2.0.0"]
+integrations = [
+  "javascript_object_storage:2.0.0",
+  "javascript_openai_ai_integrations:2.0.0",
+  "stripe:2.0.0",
+]
 
 [objectStorage]
 defaultBucketID = "replit-objstore-337677f3-f2cd-41e7-a083-f7b283ad52ce"
