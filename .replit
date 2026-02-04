@@ -53,7 +53,7 @@ author = 52948775
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Run again "
+args = "Start application"
 
 [[workflows.workflow]]
 name = "Run again "
