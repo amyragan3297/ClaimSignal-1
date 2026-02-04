@@ -56,8 +56,8 @@ mode = "sequential"
 author = 52948775
 
 [[workflows.workflow.tasks]]
-task = "shell.exec"
-args = ""
+task = "workflow.run"
+args = "Start application"
 
 [[workflows.workflow]]
 name = "Run again "
