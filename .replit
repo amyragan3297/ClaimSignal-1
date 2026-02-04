@@ -46,14 +46,6 @@ mode = "sequential"
 task = "workflow.run"
 args = "Start application"
 
-[[workflows.workflow.tasks]]
-task = "packager.installForLanguage"
-args = "nodejs"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "Run"
-
 [agent]
 mockupState = "FULLSTACK"
 integrations = [
