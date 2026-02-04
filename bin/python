@@ -1,0 +1,4 @@
+#!/bin/bash
+# This script wraps npm dev command for workflow compatibility
+cd "$(dirname "$0")/.."
+exec npm run dev
