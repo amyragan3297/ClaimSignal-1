@@ -1,114 +1,75 @@
-import subprocess
-import os
-import sys
-import fcntl
-import time
-import signal
-
-LOCK_FILE = "/tmp/app_server.lock"
-SERVER_PID_FILE = "/tmp/app_server.pid"
-MAX_PYTHON_PROCS = 3
+import subprocess, os, sys, socket, time
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)) or ".")
 
-def is_pid_alive(pid):
+def port_in_use(port=5000):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        os.kill(pid, 0)
+        s.settimeout(1)
+        s.connect(("127.0.0.1", port))
+        s.close()
         return True
-    except (OSError, ProcessLookupError):
+    except:
+        s.close()
         return False
 
-def server_already_running():
-    if os.path.exists(SERVER_PID_FILE):
-        try:
-            with open(SERVER_PID_FILE, "r") as f:
-                pid = int(f.read().strip())
-            if is_pid_alive(pid):
-                try:
-                    import urllib.request
-                    resp = urllib.request.urlopen("http://localhost:5000/api/auth/team/status", timeout=2)
-                    if resp.status == 200:
-                        return True
-                except Exception:
-                    pass
-        except (ValueError, OSError):
-            pass
-    return False
+if port_in_use():
+    sys.exit(0)
 
+LOCK = "/tmp/app_server.lock"
 try:
-    result = subprocess.run(
-        ["pgrep", "-f", "python.*main.py"],
-        capture_output=True, text=True, timeout=2
-    )
-    pids = [p.strip() for p in result.stdout.strip().split('\n') if p.strip()]
-    if len(pids) > MAX_PYTHON_PROCS:
+    fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    os.write(fd, str(os.getpid()).encode())
+    os.close(fd)
+except FileExistsError:
+    try:
+        with open(LOCK) as f:
+            pid = int(f.read().strip())
+        os.kill(pid, 0)
         sys.exit(0)
-except Exception:
-    pass
-
-if server_already_running():
+    except:
+        try:
+            os.unlink(LOCK)
+        except:
+            pass
+        try:
+            fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, str(os.getpid()).encode())
+            os.close(fd)
+        except:
+            sys.exit(0)
+except:
     sys.exit(0)
 
-lock_fd = None
-try:
-    lock_fd = open(LOCK_FILE, "w")
-    fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    lock_fd.write(str(os.getpid()))
-    lock_fd.flush()
-except (IOError, OSError):
-    sys.exit(0)
-
-try:
-    port_check = subprocess.run(
-        ["fuser", "5000/tcp"],
-        capture_output=True, text=True, timeout=2
-    )
-    if port_check.returncode == 0 and port_check.stdout.strip():
-        subprocess.run(["fuser", "-k", "5000/tcp"], capture_output=True, timeout=3)
-        time.sleep(1)
-except Exception:
-    pass
-
-try:
-    proc = subprocess.Popen(
-        ["npx", "tsx", "server/index.ts"],
-        env={**os.environ, "NODE_ENV": "development"},
-        start_new_session=True
-    )
-    with open(SERVER_PID_FILE, "w") as f:
-        f.write(str(proc.pid))
-
+child_pid = os.fork()
+if child_pid > 0:
     for _ in range(30):
         time.sleep(1)
-        if proc.poll() is not None:
-            sys.exit(proc.returncode)
-        try:
-            import urllib.request
-            resp = urllib.request.urlopen("http://localhost:5000/api/auth/team/status", timeout=2)
-            if resp.status == 200:
-                break
-        except Exception:
-            continue
+        if port_in_use():
+            sys.exit(0)
+    sys.exit(1)
 
-    if lock_fd:
-        try:
-            fcntl.flock(lock_fd, fcntl.LOCK_UN)
-            lock_fd.close()
-        except Exception:
-            pass
-        lock_fd = None
+os.setsid()
 
+try:
+    os.unlink(LOCK)
+except:
+    pass
+
+with open(LOCK, "w") as f:
+    f.write(str(os.getpid()))
+
+devnull = open(os.devnull, "r")
+proc = subprocess.Popen(
+    ["npx", "tsx", "server/index.ts"],
+    env={**os.environ, "NODE_ENV": "development"},
+    stdin=devnull,
+)
+
+try:
     proc.wait()
-    sys.exit(proc.returncode)
 finally:
-    if lock_fd:
-        try:
-            fcntl.flock(lock_fd, fcntl.LOCK_UN)
-            lock_fd.close()
-            os.unlink(LOCK_FILE)
-        except Exception:
-            pass
     try:
-        os.unlink(SERVER_PID_FILE)
-    except Exception:
+        os.unlink(LOCK)
+    except:
         pass

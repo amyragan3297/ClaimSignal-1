@@ -2,28 +2,9 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
-import { createConnection } from "net";
-import { execSync } from "child_process";
 import { runMigrations } from "stripe-replit-sync";
 import { getStripeSync } from "./stripeClient";
 import { WebhookHandlers } from "./webhookHandlers";
-
-async function killPortProcess(port: number): Promise<void> {
-  return new Promise((resolve) => {
-    const socket = createConnection({ port, host: "0.0.0.0" });
-    socket.once("connect", () => {
-      socket.destroy();
-      try {
-        execSync(`fuser -k ${port}/tcp 2>/dev/null || true`);
-      } catch {}
-      setTimeout(resolve, 1000);
-    });
-    socket.once("error", () => {
-      socket.destroy();
-      resolve();
-    });
-  });
-}
 
 const app = express();
 const httpServer = createServer(app);
@@ -177,13 +158,10 @@ app.use((req, res, next) => {
 
   const port = parseInt(process.env.PORT || "5000", 10);
 
-  await killPortProcess(port);
-
   httpServer.listen(
     {
       port,
       host: "0.0.0.0",
-      reusePort: true,
     },
     () => {
       log(`serving on port ${port}`);
