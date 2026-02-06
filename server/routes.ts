@@ -6,6 +6,7 @@ import { fromError } from "zod-validation-error";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { registerDocumentAnalysisRoutes } from "./replit_integrations/document_analysis";
 import { registerChatRoutes } from "./replit_integrations/chat";
+import { registerAuthRoutes } from "./replit_integrations/auth";
 import { speechToText, convertWebmToWav } from "./replit_integrations/audio/client";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { z } from "zod";
@@ -96,6 +97,9 @@ export async function registerRoutes(
   
   // Register AI chat routes
   registerChatRoutes(app);
+  
+  // Register Replit Auth routes
+  registerAuthRoutes(app);
 
   // ========== AUDIO TRANSCRIPTION ROUTE ==========
   app.post("/api/transcribe", authMiddleware, async (req, res) => {
