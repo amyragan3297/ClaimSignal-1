@@ -38,15 +38,6 @@ mode = "sequential"
 task = "workflow.run"
 args = "Project"
 
-[[workflows.workflow]]
-name = "Replace "
-mode = "sequential"
-author = 52948775
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Project"
-
 
 [agent]
 mockupState = "FULLSTACK"
