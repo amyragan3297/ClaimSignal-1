@@ -131,7 +131,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await initStripe();
+  initStripe().catch(() => {});
   await setupAuth(app);
   await registerRoutes(httpServer, app);
 
