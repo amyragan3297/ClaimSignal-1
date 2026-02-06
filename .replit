@@ -36,7 +36,7 @@ author = "agent"
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
-task = "workflow.run"
+task = "shell.exec"
 args = "Start application"
 
 [[workflows.workflow.tasks]]

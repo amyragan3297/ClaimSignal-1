@@ -159,9 +159,8 @@ export async function registerRoutes(
       }
 
       const session = await storage.createSession('team', teamCreds.accessLevel);
-      // Use lax sameSite for better mobile compatibility
       res.cookie('session_token', session.token, {
-        httpOnly: false, // Allow JS access for mobile compatibility
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -189,13 +188,12 @@ export async function registerRoutes(
 
       const session = await storage.createSession('team', teamCreds.accessLevel);
       res.cookie('session_token', session.token, {
-        httpOnly: false,
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/',
       });
-      // Redirect with token in URL as backup
       res.redirect('/?auth_token=' + session.token);
     } catch (error) {
       console.error("Error in team login:", error);
@@ -222,11 +220,12 @@ export async function registerRoutes(
       const session = await storage.createSession('team', 'admin');
       res.cookie('session_token', session.token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
       });
-      res.json({ success: true, userType: 'team', accessLevel: 'admin' });
+      res.json({ success: true, userType: 'team', accessLevel: 'admin', token: session.token });
     } catch (error) {
       console.error("Error in team setup:", error);
       res.status(500).json({ error: "Setup failed" });
@@ -265,9 +264,10 @@ export async function registerRoutes(
       
       res.cookie('session_token', session.token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
       });
       res.json({ success: true, userType: 'individual', userId: user.id, accessLevel: user.accessLevel, needsSubscription: true, token: session.token });
     } catch (error) {
@@ -294,9 +294,10 @@ export async function registerRoutes(
       const session = await storage.createSession('individual', user.accessLevel, user.id);
       res.cookie('session_token', session.token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
       });
       res.json({ 
         success: true, 
@@ -1862,15 +1863,17 @@ Base your advice on insurance industry best practices, policy interpretation, an
       
       res.cookie('session_token', session.token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         maxAge: 12 * 60 * 60 * 1000, // 12 hours
+        path: '/',
       });
       
       res.json({ 
         success: true, 
         userType: 'trial',
         expiresAt: session.expiresAt,
+        token: session.token,
         message: 'Your 12-hour free trial has started. Some features are limited.'
       });
     } catch (error) {

@@ -47,7 +47,7 @@ export type ClaimWithRelations = Claim & {
 };
 
 export async function fetchAdjusters(): Promise<Adjuster[]> {
-  const response = await fetch('/api/adjusters');
+  const response = await fetch('/api/adjusters', { credentials: 'include' });
   if (!response.ok) {
     throw new Error('Failed to fetch adjusters');
   }
@@ -55,7 +55,7 @@ export async function fetchAdjusters(): Promise<Adjuster[]> {
 }
 
 export async function fetchAdjuster(id: string): Promise<AdjusterWithRelations> {
-  const response = await fetch(`/api/adjusters/${id}`);
+  const response = await fetch(`/api/adjusters/${id}`, { credentials: 'include' });
   if (!response.ok) {
     throw new Error('Failed to fetch adjuster');
   }
@@ -78,6 +78,7 @@ export async function createInteraction(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(interaction),
+    credentials: 'include',
   });
   
   if (!response.ok) {
@@ -94,6 +95,7 @@ export async function createAdjuster(adjuster: InsertAdjuster): Promise<Adjuster
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(adjuster),
+    credentials: 'include',
   });
   
   if (!response.ok) {
@@ -113,6 +115,7 @@ export async function updateAdjuster(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
+    credentials: 'include',
   });
   
   if (!response.ok) {
@@ -123,7 +126,7 @@ export async function updateAdjuster(
 }
 
 export async function fetchAdjusterIntelligence(id: string): Promise<AdjusterIntelligence> {
-  const response = await fetch(`/api/adjusters/${id}/intelligence`);
+  const response = await fetch(`/api/adjusters/${id}/intelligence`, { credentials: 'include' });
   if (!response.ok) {
     throw new Error('Failed to fetch adjuster intelligence');
   }
@@ -132,7 +135,7 @@ export async function fetchAdjusterIntelligence(id: string): Promise<AdjusterInt
 
 // Carriers API
 export async function fetchCarriers(): Promise<string[]> {
-  const response = await fetch('/api/carriers');
+  const response = await fetch('/api/carriers', { credentials: 'include' });
   if (!response.ok) {
     throw new Error('Failed to fetch carriers');
   }
@@ -140,7 +143,7 @@ export async function fetchCarriers(): Promise<string[]> {
 }
 
 export async function fetchCarrierIntelligence(name: string): Promise<CarrierIntelligence> {
-  const response = await fetch(`/api/carriers/${encodeURIComponent(name)}/intelligence`);
+  const response = await fetch(`/api/carriers/${encodeURIComponent(name)}/intelligence`, { credentials: 'include' });
   if (!response.ok) {
     throw new Error('Failed to fetch carrier intelligence');
   }
@@ -149,7 +152,7 @@ export async function fetchCarrierIntelligence(name: string): Promise<CarrierInt
 
 // Claims API
 export async function fetchClaims(): Promise<Claim[]> {
-  const response = await fetch('/api/claims');
+  const response = await fetch('/api/claims', { credentials: 'include' });
   if (!response.ok) {
     throw new Error('Failed to fetch claims');
   }
@@ -157,7 +160,7 @@ export async function fetchClaims(): Promise<Claim[]> {
 }
 
 export async function fetchClaim(id: string): Promise<ClaimWithRelations> {
-  const response = await fetch(`/api/claims/${id}`);
+  const response = await fetch(`/api/claims/${id}`, { credentials: 'include' });
   if (!response.ok) {
     throw new Error('Failed to fetch claim');
   }
@@ -171,6 +174,7 @@ export async function createClaim(claim: InsertClaim): Promise<Claim> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(claim),
+    credentials: 'include',
   });
   
   if (!response.ok) {
@@ -190,6 +194,7 @@ export async function updateClaim(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
+    credentials: 'include',
   });
   
   if (!response.ok) {
@@ -209,6 +214,7 @@ export async function linkAdjusterToClaim(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ adjusterId }),
+    credentials: 'include',
   });
   
   if (!response.ok) {
@@ -218,7 +224,7 @@ export async function linkAdjusterToClaim(
 
 // Attachments API
 export async function fetchAttachments(claimId: string): Promise<Attachment[]> {
-  const response = await fetch(`/api/claims/${claimId}/attachments`);
+  const response = await fetch(`/api/claims/${claimId}/attachments`, { credentials: 'include' });
   if (!response.ok) {
     throw new Error('Failed to fetch attachments');
   }
@@ -235,6 +241,7 @@ export async function createAttachment(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(attachment),
+    credentials: 'include',
   });
   
   if (!response.ok) {
@@ -247,6 +254,7 @@ export async function createAttachment(
 export async function deleteAttachment(attachmentId: string): Promise<void> {
   const response = await fetch(`/api/attachments/${attachmentId}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
   
   if (!response.ok) {
