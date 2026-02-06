@@ -1,4 +1,5 @@
 modules = ["nodejs-20", "web", "postgresql-16"]
+run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
@@ -31,9 +32,8 @@ args = "Start application"
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
-wait_for_port = 5000
 
-[[workflows.workflow.tasks]]
+[workflows.workflow.tasks]
 task = "shell.exec"
 args = "NODE_ENV=development npx tsx server/index.ts"
 
