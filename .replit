@@ -30,13 +30,16 @@ task = "workflow.run"
 args = "Start application"
 
 [[workflows.workflow]]
-name = "Start application"
+name = "Start "
 author = "agent"
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Start application"
+args = "Start "
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
 
 
 [agent]
