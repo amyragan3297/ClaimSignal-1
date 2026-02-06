@@ -163,18 +163,9 @@ export default function Login() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Use native form action for maximum mobile compatibility */}
                 <form 
-                  action="/auth/team/login" 
-                  method="POST" 
                   className="space-y-4"
-                  onSubmit={(e) => {
-                    // Only intercept if JS login is needed (setup mode)
-                    if (!teamStatus?.isSetup) {
-                      handleTeamLogin(e);
-                    }
-                    // Otherwise let native form submission handle it
-                  }}
+                  onSubmit={handleTeamLogin}
                 >
                   <div className="space-y-2">
                     <Label htmlFor="team-username" className="text-slate-300">Username</Label>
