@@ -159,7 +159,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await res.json();
 
       if (result.success) {
-        await refreshSession();
+        if (result.token) {
+          localStorage.setItem('session_token', result.token);
+          sessionStorage.setItem('session_token', result.token);
+        }
+        setState({
+          authenticated: true,
+          userType: 'individual',
+          userId: result.userId,
+          accessLevel: result.accessLevel,
+          needsSubscription: result.needsSubscription,
+          loading: false,
+        });
         return { success: true, needsSubscription: result.needsSubscription };
       }
 
@@ -181,7 +192,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await res.json();
 
       if (result.success) {
-        await refreshSession();
+        if (result.token) {
+          localStorage.setItem('session_token', result.token);
+          sessionStorage.setItem('session_token', result.token);
+        }
+        setState({
+          authenticated: true,
+          userType: 'team',
+          accessLevel: result.accessLevel || 'admin',
+          loading: false,
+        });
         return { success: true };
       }
 
@@ -224,6 +244,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await res.json();
 
       if (result.success) {
+        if (result.token) {
+          localStorage.setItem('session_token', result.token);
+          sessionStorage.setItem('session_token', result.token);
+        }
         setState({
           authenticated: true,
           userType: 'trial',

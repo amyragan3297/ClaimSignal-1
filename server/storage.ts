@@ -1016,14 +1016,19 @@ export class DBStorage implements IStorage {
 
     // Avg days to approval (from resolved claims)
     const allClaims = await this.getAllClaims();
-    const resolvedClaims = allClaims.filter(c => c.status === 'resolved' || c.status === 'closed');
+    const resolvedClaims = allClaims.filter(c => 
+      c.status === 'resolved' || c.status === 'closed' || 
+      c.status === 'overturned' || c.status === 'approved'
+    );
     let avgDaysToApproval: number | null = null;
     if (resolvedClaims.length > 0) {
       const approvalDays = resolvedClaims.map(claim => {
         if (!claim.dateOfLoss) return null;
         const startDate = new Date(claim.dateOfLoss).getTime();
-        // Use createdAt or last update as end date
-        const endDate = claim.createdAt ? new Date(claim.createdAt).getTime() : Date.now();
+        const claimInteractions = allInteractions.filter(i => i.claimId === claim.id);
+        if (claimInteractions.length === 0) return null;
+        const dates = claimInteractions.map(i => new Date(i.date || i.createdAt).getTime());
+        const endDate = Math.max(...dates);
         const days = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
         return days >= 0 ? days : null;
       }).filter((d): d is number => d !== null);
