@@ -7,6 +7,25 @@ LOCK_FILE = "/tmp/app_server.lock"
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)) or ".")
 
+def is_pid_alive(pid):
+    try:
+        os.kill(pid, 0)
+        return True
+    except (OSError, ProcessLookupError):
+        return False
+
+if os.path.exists(LOCK_FILE):
+    try:
+        with open(LOCK_FILE, "r") as f:
+            old_pid = int(f.read().strip())
+        if not is_pid_alive(old_pid):
+            os.unlink(LOCK_FILE)
+    except (ValueError, OSError):
+        try:
+            os.unlink(LOCK_FILE)
+        except OSError:
+            pass
+
 lock_fd = None
 try:
     lock_fd = open(LOCK_FILE, "w")
