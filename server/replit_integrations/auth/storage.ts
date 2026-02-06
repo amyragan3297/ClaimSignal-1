@@ -1,5 +1,5 @@
 import { replitUsers, type ReplitUser, type UpsertReplitUser } from "@shared/models/auth";
-import { db } from "../../../db";
+import { db } from "../../db";
 import { eq } from "drizzle-orm";
 
 // Interface for auth storage operations
