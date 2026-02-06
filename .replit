@@ -30,7 +30,7 @@ task = "workflow.run"
 args = "Start application"
 
 [[workflows.workflow]]
-name = "Start_"
+name = "Start"
 author = "agent"
 mode = "sequential"
 
