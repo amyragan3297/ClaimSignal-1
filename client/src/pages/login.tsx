@@ -41,7 +41,7 @@ export default function Login() {
       const result = await setupTeam(teamUsername, teamPassword);
       if (result.success) {
         toast({ title: "Team account created", description: "You can now share these credentials with your team." });
-        window.location.href = '/';
+        window.location.href = '/adjusters';
       } else {
         toast({ title: "Setup failed", description: result.error, variant: "destructive" });
         setLoading(false);
@@ -59,11 +59,9 @@ export default function Login() {
         const result = await res.json();
         
         if (result.success && result.token) {
-          // Store token in multiple places for iOS Safari compatibility
           localStorage.setItem('session_token', result.token);
           sessionStorage.setItem('session_token', result.token);
-          // Also pass token in URL for Safari which may lose localStorage on redirect
-          window.location.href = '/?auth_token=' + result.token;
+          window.location.href = '/adjusters?auth_token=' + result.token;
           return;
         } else {
           toast({ title: "Login failed", description: result.error || "Invalid credentials", variant: "destructive" });
@@ -86,7 +84,7 @@ export default function Login() {
         if (result.needsSubscription) {
           window.location.href = "/pricing";
         } else {
-          window.location.href = "/";
+          window.location.href = "/adjusters";
         }
         return;
       } else {
@@ -95,7 +93,6 @@ export default function Login() {
       }
     } else {
       try {
-        // Make direct API call for maximum mobile compatibility
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -106,14 +103,12 @@ export default function Login() {
         const result = await res.json();
         
         if (result.success && result.token) {
-          // Store token in multiple places for iOS Safari compatibility
           localStorage.setItem('session_token', result.token);
           sessionStorage.setItem('session_token', result.token);
-          // Pass token in URL for Safari which may lose localStorage on redirect
           if (result.needsSubscription) {
             window.location.href = '/pricing?auth_token=' + result.token;
           } else {
-            window.location.href = '/?auth_token=' + result.token;
+            window.location.href = '/adjusters?auth_token=' + result.token;
           }
           return;
         } else {

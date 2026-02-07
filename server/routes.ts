@@ -194,7 +194,7 @@ export async function registerRoutes(
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/',
       });
-      res.redirect('/?auth_token=' + session.token);
+      res.redirect('/adjusters?auth_token=' + session.token);
     } catch (error) {
       console.error("Error in team login:", error);
       res.redirect('/login?error=server');

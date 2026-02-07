@@ -1,40 +1,10 @@
 import type { Express } from "express";
-import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { ObjectStorageService, ObjectNotFoundError, objectStorageClient } from "./objectStorage";
+import { randomUUID } from "crypto";
 
-/**
- * Register object storage routes for file uploads.
- *
- * This provides example routes for the presigned URL upload flow:
- * 1. POST /api/uploads/request-url - Get a presigned URL for uploading
- * 2. The client then uploads directly to the presigned URL
- *
- * IMPORTANT: These are example routes. Customize based on your use case:
- * - Add authentication middleware for protected uploads
- * - Add file metadata storage (save to database after upload)
- * - Add ACL policies for access control
- */
 export function registerObjectStorageRoutes(app: Express): void {
   const objectStorageService = new ObjectStorageService();
 
-  /**
-   * Request a presigned URL for file upload.
-   *
-   * Request body (JSON):
-   * {
-   *   "name": "filename.jpg",
-   *   "size": 12345,
-   *   "contentType": "image/jpeg"
-   * }
-   *
-   * Response:
-   * {
-   *   "uploadURL": "https://storage.googleapis.com/...",
-   *   "objectPath": "/objects/uploads/uuid"
-   * }
-   *
-   * IMPORTANT: The client should NOT send the file to this endpoint.
-   * Send JSON metadata only, then upload the file directly to uploadURL.
-   */
   app.post("/api/uploads/request-url", async (req, res) => {
     try {
       const { name, size, contentType } = req.body;
@@ -45,20 +15,63 @@ export function registerObjectStorageRoutes(app: Express): void {
         });
       }
 
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-
-      // Extract object path from the presigned URL for later reference
-      const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
-
-      res.json({
-        uploadURL,
-        objectPath,
-        // Echo back the metadata for client convenience
-        metadata: { name, size, contentType },
-      });
+      try {
+        const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+        const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+        res.json({
+          uploadURL,
+          objectPath,
+          metadata: { name, size, contentType },
+        });
+      } catch (signError) {
+        const objectId = randomUUID();
+        const uploadPath = `/api/uploads/proxy/${objectId}`;
+        res.json({
+          uploadURL: uploadPath,
+          objectPath: `/objects/uploads/${objectId}`,
+          useProxy: true,
+          metadata: { name, size, contentType },
+        });
+      }
     } catch (error) {
       console.error("Error generating upload URL:", error);
       res.status(500).json({ error: "Failed to generate upload URL" });
+    }
+  });
+
+  app.put("/api/uploads/proxy/:objectId", async (req, res) => {
+    try {
+      const { objectId } = req.params;
+      const privateDir = process.env.PRIVATE_OBJECT_DIR || "";
+      if (!privateDir) {
+        return res.status(500).json({ error: "Storage not configured" });
+      }
+
+      const parts = privateDir.replace(/^\//, '').split('/');
+      const bucketName = parts[0];
+      const dirPath = parts.slice(1).join('/');
+      const objectName = `${dirPath}/uploads/${objectId}`;
+
+      const bucket = objectStorageClient.bucket(bucketName);
+      const file = bucket.file(objectName);
+
+      const chunks: Buffer[] = [];
+      req.on('data', (chunk: Buffer) => chunks.push(chunk));
+      req.on('end', async () => {
+        try {
+          const buffer = Buffer.concat(chunks);
+          await file.save(buffer, {
+            contentType: req.headers['content-type'] || 'application/octet-stream',
+          });
+          res.status(200).json({ success: true, objectPath: `/objects/uploads/${objectId}` });
+        } catch (saveError) {
+          console.error("Error saving to object storage:", saveError);
+          res.status(500).json({ error: "Failed to save file" });
+        }
+      });
+    } catch (error) {
+      console.error("Error in proxy upload:", error);
+      res.status(500).json({ error: "Upload failed" });
     }
   });
 

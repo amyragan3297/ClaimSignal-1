@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Search, ArrowRight, FileSearch, Bot, Plus, Upload, Loader2, CheckCircle, Sparkles, BarChart3, Target, Users, Building2, BookOpen, LayoutDashboard, XCircle, ChevronRight, Shield, FileUp, AlertCircle, Clock } from "lucide-react";
 import logoImage from '@assets/generated_images/modern_geometric_logo_for_claimsignal.png';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { motion } from "framer-motion";
@@ -41,7 +41,13 @@ export default function Home() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { getUploadParameters } = useUpload();
-  const { startTrial } = useAuth();
+  const { startTrial, authenticated, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && authenticated) {
+      setLocation('/adjusters');
+    }
+  }, [authLoading, authenticated, setLocation]);
 
   const handleStartTrial = async () => {
     setIsStartingTrial(true);
@@ -68,6 +74,7 @@ export default function Home() {
   const { data: adjusters = [] } = useQuery({
     queryKey: ['adjusters'],
     queryFn: fetchAdjusters,
+    enabled: authenticated,
   });
 
   const [newAdjuster, setNewAdjuster] = useState({
