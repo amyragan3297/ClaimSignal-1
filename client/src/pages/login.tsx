@@ -24,7 +24,7 @@ export default function Login() {
   const [statusLoading, setStatusLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/auth/team/status')
+    fetch('/api/auth/team/status', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setTeamStatus(data);

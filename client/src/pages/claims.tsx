@@ -305,6 +305,7 @@ export default function Claims() {
                                 const response = await fetch('/api/analyze-and-save', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
+                                  credentials: 'include',
                                   body: JSON.stringify({
                                     documentUrl: objectPath,
                                     documentName: file.name,

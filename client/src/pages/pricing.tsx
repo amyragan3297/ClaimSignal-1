@@ -30,7 +30,7 @@ export default function Pricing() {
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/stripe/products')
+    fetch('/api/stripe/products', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setProducts(data.products || []);
