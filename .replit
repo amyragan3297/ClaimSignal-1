@@ -29,13 +29,22 @@ task = "workflow.run"
 args = "Start application"
 
 [[workflows.workflow]]
-name = "Start application"
+name = "Startup App"
 author = "agent"
 wait_for_port = 5000
+mode = "sequential"
 
 [[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "NODE_ENV=development npx tsx server/index.ts"
+task = "workflow.run"
+args = "Project"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Project"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Project"
 
 
 [agent]
