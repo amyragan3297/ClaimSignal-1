@@ -29,22 +29,23 @@ task = "workflow.run"
 args = "Start application"
 
 [[workflows.workflow]]
-name = "Startup App "
+name = "Start Application "
 author = "agent"
 wait_for_port = 5000
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Project"
+task = "shell.exec"
+args = " npm run dev"
+
+[[workflows.workflow]]
+name = "Project "
+mode = "parallel"
+author = 52948775
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Project"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Project"
+args = "Start Application "
 
 
 [agent]
