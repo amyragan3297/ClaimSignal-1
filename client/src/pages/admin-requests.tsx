@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Layout } from "@/components/layout";
 import { FileText, Mail, Phone, Clock, User, Building, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
-import { getAuthHeaders } from '@/lib/auth-headers';
+
 
 interface ServiceRequest {
   id: string;
@@ -39,7 +39,7 @@ export default function AdminRequests() {
 
   const fetchRequests = async () => {
     try {
-      const res = await fetch('/api/service-requests', { credentials: 'include', headers: getAuthHeaders() });
+      const res = await fetch('/api/service-requests', { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setRequests(data.requests || []);
@@ -69,7 +69,7 @@ export default function AdminRequests() {
     try {
       const res = await fetch(`/api/service-requests/${selectedRequest.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, adminNotes }),
         credentials: 'include',
       });

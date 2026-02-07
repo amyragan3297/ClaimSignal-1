@@ -12,7 +12,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAdjusters, fetchClaims } from "@/lib/api";
 import { format } from "date-fns";
 import { useAuth } from "@/lib/auth";
-import { getAuthHeaders } from "@/lib/auth-headers";
+
 
 interface TacticalAdvice {
   strategy: string;
@@ -63,7 +63,7 @@ export default function TacticalAdvisor() {
       const params = new URLSearchParams();
       if (claimId) params.append('claimId', claimId);
       if (adjusterId) params.append('adjusterId', adjusterId);
-      const res = await fetch(`/api/tactical-notes?${params.toString()}`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/tactical-notes?${params.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch notes');
       return res.json();
     },
@@ -74,7 +74,8 @@ export default function TacticalAdvisor() {
     mutationFn: async ({ adjusterId, claimId, situation, autoGenerate }: { adjusterId?: string; claimId?: string; situation?: string; autoGenerate?: boolean }) => {
       const res = await fetch('/api/tactical-advice', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ adjusterId, claimId, situation, autoGenerate }),
       });
       if (!res.ok) {
@@ -92,7 +93,8 @@ export default function TacticalAdvisor() {
     mutationFn: async (noteData: { claimId?: string; adjusterId?: string; content: string; author?: string; isAiGenerated?: boolean }) => {
       const res = await fetch('/api/tactical-notes', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(noteData),
       });
       if (!res.ok) throw new Error('Failed to create note');
@@ -106,7 +108,7 @@ export default function TacticalAdvisor() {
 
   const deleteNoteMutation = useMutation({
     mutationFn: async (noteId: string) => {
-      const res = await fetch(`/api/tactical-notes/${noteId}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`/api/tactical-notes/${noteId}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) throw new Error('Failed to delete note');
       return res.json();
     },

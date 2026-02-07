@@ -32,40 +32,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshSession = async () => {
     try {
-      // Check for token in URL (for iOS Safari compatibility)
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlToken = urlParams.get('auth_token');
-      if (urlToken) {
-        // Store token and clean URL
-        localStorage.setItem('session_token', urlToken);
-        sessionStorage.setItem('session_token', urlToken);
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-      
-      // Try multiple storage locations for iOS compatibility
-      const token = localStorage.getItem('session_token') || sessionStorage.getItem('session_token');
-      const headers: HeadersInit = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-        // Ensure it's in both storages
-        localStorage.setItem('session_token', token);
-        sessionStorage.setItem('session_token', token);
-      }
-      
-      console.log('Refreshing session, token exists:', !!token);
-      
       const res = await fetch('/api/auth/session', { 
         credentials: 'include',
-        headers,
       });
       
       if (!res.ok) {
-        console.error('Session check failed with status:', res.status);
         throw new Error(`HTTP ${res.status}`);
       }
       
       const data = await res.json();
-      console.log('Session response:', data);
       
       if (data.authenticated) {
         setState({
@@ -80,7 +55,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           loading: false,
         });
       } else {
-        localStorage.removeItem('session_token');
         setState({
           authenticated: false,
           userType: null,
@@ -89,8 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
     } catch (error) {
-      console.error('Error refreshing session:', error);
-      // Don't clear token on network error - might be temporary
       setState({
         authenticated: false,
         userType: null,
@@ -123,14 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Login response:', result);
 
       if (result.success) {
-        // Store token in localStorage for mobile browser compatibility
-        if (result.token) {
-          localStorage.setItem('session_token', result.token);
-          sessionStorage.setItem('session_token', result.token);
-          console.log('Token stored in localStorage');
-        }
-        
-        // Directly set authenticated state instead of relying on refreshSession
         setState({
           authenticated: true,
           userType: result.userType,
@@ -160,10 +124,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await res.json();
 
       if (result.success) {
-        if (result.token) {
-          localStorage.setItem('session_token', result.token);
-          sessionStorage.setItem('session_token', result.token);
-        }
         setState({
           authenticated: true,
           userType: 'individual',
@@ -193,10 +153,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await res.json();
 
       if (result.success) {
-        if (result.token) {
-          localStorage.setItem('session_token', result.token);
-          sessionStorage.setItem('session_token', result.token);
-        }
         setState({
           authenticated: true,
           userType: 'team',
@@ -214,19 +170,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      const token = localStorage.getItem('session_token') || sessionStorage.getItem('session_token');
-      const headers: HeadersInit = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
-        headers,
       });
     } finally {
-      localStorage.removeItem('session_token');
-      sessionStorage.removeItem('session_token');
       setState({
         authenticated: false,
         userType: null,
@@ -245,10 +193,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await res.json();
 
       if (result.success) {
-        if (result.token) {
-          localStorage.setItem('session_token', result.token);
-          sessionStorage.setItem('session_token', result.token);
-        }
         setState({
           authenticated: true,
           userType: 'trial',

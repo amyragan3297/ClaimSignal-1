@@ -34,7 +34,7 @@ const registerSchema = z.object({
 });
 
 async function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const token = req.cookies?.session_token || req.headers.authorization?.replace('Bearer ', '');
+  const token = req.cookies?.auth_token;
   
   if (!token) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -159,14 +159,14 @@ export async function registerRoutes(
       }
 
       const session = await storage.createSession('team', teamCreds.accessLevel);
-      res.cookie('session_token', session.token, {
+      res.cookie('auth_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/',
       });
-      res.json({ success: true, userType: 'team', accessLevel: teamCreds.accessLevel, token: session.token });
+      res.json({ success: true, userType: 'team', accessLevel: teamCreds.accessLevel });
     } catch (error) {
       console.error("Error in team login:", error);
       res.status(500).json({ error: "Login failed" });
@@ -187,14 +187,14 @@ export async function registerRoutes(
       }
 
       const session = await storage.createSession('team', teamCreds.accessLevel);
-      res.cookie('session_token', session.token, {
+      res.cookie('auth_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/',
       });
-      res.redirect('/adjusters?auth_token=' + session.token);
+      res.redirect('/adjusters');
     } catch (error) {
       console.error("Error in team login:", error);
       res.redirect('/login?error=server');
@@ -218,14 +218,14 @@ export async function registerRoutes(
       const teamCreds = await storage.createTeamCredentials(username, password, 'admin');
       
       const session = await storage.createSession('team', 'admin');
-      res.cookie('session_token', session.token, {
+      res.cookie('auth_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/',
       });
-      res.json({ success: true, userType: 'team', accessLevel: 'admin', token: session.token });
+      res.json({ success: true, userType: 'team', accessLevel: 'admin' });
     } catch (error) {
       console.error("Error in team setup:", error);
       res.status(500).json({ error: "Setup failed" });
@@ -262,14 +262,14 @@ export async function registerRoutes(
       const user = await storage.createUser(email, password, 'admin');
       const session = await storage.createSession('individual', user.accessLevel, user.id);
       
-      res.cookie('session_token', session.token, {
+      res.cookie('auth_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/',
       });
-      res.json({ success: true, userType: 'individual', userId: user.id, accessLevel: user.accessLevel, needsSubscription: true, token: session.token });
+      res.json({ success: true, userType: 'individual', userId: user.id, accessLevel: user.accessLevel, needsSubscription: true });
     } catch (error) {
       console.error("Error in registration:", error);
       res.status(500).json({ error: "Registration failed" });
@@ -292,9 +292,9 @@ export async function registerRoutes(
       }
 
       const session = await storage.createSession('individual', user.accessLevel, user.id);
-      res.cookie('session_token', session.token, {
+      res.cookie('auth_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/',
@@ -305,8 +305,7 @@ export async function registerRoutes(
         userId: user.id,
         accessLevel: user.accessLevel,
         subscriptionStatus: user.subscriptionStatus,
-        needsSubscription: user.subscriptionStatus !== 'active',
-        token: session.token
+        needsSubscription: user.subscriptionStatus !== 'active'
       });
     } catch (error) {
       console.error("Error in login:", error);
@@ -314,16 +313,8 @@ export async function registerRoutes(
     }
   });
 
-  // Helper to get token from cookie or Authorization header (iOS Safari fix)
   function getTokenFromRequest(req: Request): string | undefined {
-    let token = req.cookies?.session_token;
-    if (!token) {
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        token = authHeader.substring(7);
-      }
-    }
-    return token;
+    return req.cookies?.auth_token;
   }
 
   // Logout
@@ -333,7 +324,7 @@ export async function registerRoutes(
       if (token) {
         await storage.deleteSession(token);
       }
-      res.clearCookie('session_token');
+      res.clearCookie('auth_token', { path: '/' });
       res.json({ success: true });
     } catch (error) {
       console.error("Error in logout:", error);
@@ -1861,11 +1852,11 @@ Base your advice on insurance industry best practices, policy interpretation, an
     try {
       const session = await storage.createTrialSession();
       
-      res.cookie('session_token', session.token, {
+      res.cookie('auth_token', session.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         sameSite: 'lax',
-        maxAge: 12 * 60 * 60 * 1000, // 12 hours
+        maxAge: 12 * 60 * 60 * 1000,
         path: '/',
       });
       
@@ -1873,7 +1864,6 @@ Base your advice on insurance industry best practices, policy interpretation, an
         success: true, 
         userType: 'trial',
         expiresAt: session.expiresAt,
-        token: session.token,
         message: 'Your 12-hour free trial has started. Some features are limited.'
       });
     } catch (error) {

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Building2, Loader2, Users } from "lucide-react";
 import { Link } from "wouter";
 import type { Adjuster, Claim, ClaimAdjuster } from "@shared/schema";
-import { getAuthHeaders } from '@/lib/auth-headers';
+
 
 interface AdjusterWithScore extends Adjuster {
   riskScore: number;
@@ -45,7 +45,7 @@ export default function RiskAlertsPage() {
   const { data: adjustersData, isLoading: loadingAdjusters } = useQuery({
     queryKey: ["/api/adjusters"],
     queryFn: async () => {
-      const res = await fetch("/api/adjusters", { credentials: "include", headers: getAuthHeaders() });
+      const res = await fetch("/api/adjusters", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to load adjusters");
       return res.json();
     },
@@ -54,7 +54,7 @@ export default function RiskAlertsPage() {
   const { data: claimsData, isLoading: loadingClaims } = useQuery({
     queryKey: ["/api/claims"],
     queryFn: async () => {
-      const res = await fetch("/api/claims", { credentials: "include", headers: getAuthHeaders() });
+      const res = await fetch("/api/claims", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to load claims");
       return res.json();
     },
@@ -63,7 +63,7 @@ export default function RiskAlertsPage() {
   const { data: claimAdjustersData, isLoading: loadingClaimAdjusters } = useQuery({
     queryKey: ["/api/claim-adjusters"],
     queryFn: async () => {
-      const res = await fetch("/api/claim-adjusters", { credentials: "include", headers: getAuthHeaders() });
+      const res = await fetch("/api/claim-adjusters", { credentials: "include" });
       if (!res.ok) return [];
       return res.json();
     },

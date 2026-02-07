@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, Loader2, ArrowRight, ShieldAlert } from "lucide-react";
-import { getAuthHeaders } from '@/lib/auth-headers';
+
 
 export default function SubscriptionSuccess() {
   const [, setLocation] = useLocation();
@@ -25,7 +25,6 @@ export default function SubscriptionSuccess() {
 
     fetch(`/api/stripe/verify-subscription?session_id=${sessionId}`, { 
       credentials: 'include',
-      headers: getAuthHeaders(),
     })
       .then(res => res.json())
       .then(data => {

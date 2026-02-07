@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ShieldAlert, Send, Mail, Phone, FileText, CheckCircle } from "lucide-react";
-import { getAuthHeaders } from "@/lib/auth-headers";
+
 
 export default function SubmitRequest() {
   const [, setLocation] = useLocation();
@@ -28,7 +28,7 @@ export default function SubmitRequest() {
   });
 
   useEffect(() => {
-    fetch('/api/contact-info', { headers: getAuthHeaders() })
+    fetch('/api/contact-info', { credentials: 'include' })
       .then(res => res.json())
       .then(data => setContactEmail(data.email))
       .catch(() => {});
@@ -47,7 +47,8 @@ export default function SubmitRequest() {
     try {
       const res = await fetch('/api/service-requests', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 

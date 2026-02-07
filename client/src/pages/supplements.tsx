@@ -14,7 +14,7 @@ import { Plus, DollarSign, FileText, Loader2, AlertCircle, TrendingUp, Clock, Pe
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { Supplement, Claim } from "@shared/schema";
-import { getAuthHeaders } from '@/lib/auth-headers';
+
 
 const SCOPE_DRIVERS = [
   "Shingle quantity",
@@ -115,7 +115,7 @@ export default function SupplementsPage() {
   const { data: supplementsData, isLoading } = useQuery({
     queryKey: ["/api/supplements"],
     queryFn: async () => {
-      const res = await fetch("/api/supplements", { credentials: "include", headers: getAuthHeaders() });
+      const res = await fetch("/api/supplements", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to load supplements");
       return res.json();
     },
@@ -124,7 +124,7 @@ export default function SupplementsPage() {
   const { data: claimsData } = useQuery({
     queryKey: ["/api/claims"],
     queryFn: async () => {
-      const res = await fetch("/api/claims", { credentials: "include", headers: getAuthHeaders() });
+      const res = await fetch("/api/claims", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to load claims");
       return res.json();
     },
@@ -134,7 +134,7 @@ export default function SupplementsPage() {
     mutationFn: async (data: SupplementFormData) => {
       const res = await fetch("/api/supplements", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(data),
       });
@@ -156,7 +156,7 @@ export default function SupplementsPage() {
     mutationFn: async ({ id, data }: { id: string; data: Partial<Supplement> }) => {
       const res = await fetch(`/api/supplements/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(data),
       });
@@ -178,7 +178,6 @@ export default function SupplementsPage() {
       const res = await fetch(`/api/supplements/${id}`, {
         method: "DELETE",
         credentials: "include",
-        headers: getAuthHeaders(),
       });
       if (!res.ok) throw new Error("Failed to delete supplement");
       return res.json();

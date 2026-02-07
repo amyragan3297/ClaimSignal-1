@@ -47,28 +47,12 @@ export default function Login() {
         setLoading(false);
       }
     } else {
-      try {
-        // Make direct API call for maximum mobile compatibility
-        const res = await fetch('/api/auth/team/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: teamUsername, password: teamPassword }),
-          credentials: 'include',
-        });
-        
-        const result = await res.json();
-        
-        if (result.success && result.token) {
-          localStorage.setItem('session_token', result.token);
-          sessionStorage.setItem('session_token', result.token);
-          window.location.href = '/adjusters?auth_token=' + result.token;
-          return;
-        } else {
-          toast({ title: "Login failed", description: result.error || "Invalid credentials", variant: "destructive" });
-          setLoading(false);
-        }
-      } catch (error) {
-        toast({ title: "Login failed", description: "Network error. Please try again.", variant: "destructive" });
+      const result = await login('team', { username: teamUsername, password: teamPassword });
+      if (result.success) {
+        window.location.href = '/adjusters';
+        return;
+      } else {
+        toast({ title: "Login failed", description: result.error || "Invalid credentials", variant: "destructive" });
         setLoading(false);
       }
     }
@@ -92,31 +76,16 @@ export default function Login() {
         setLoading(false);
       }
     } else {
-      try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-          credentials: 'include',
-        });
-        
-        const result = await res.json();
-        
-        if (result.success && result.token) {
-          localStorage.setItem('session_token', result.token);
-          sessionStorage.setItem('session_token', result.token);
-          if (result.needsSubscription) {
-            window.location.href = '/pricing?auth_token=' + result.token;
-          } else {
-            window.location.href = '/adjusters?auth_token=' + result.token;
-          }
-          return;
+      const result = await login('individual', { email, password });
+      if (result.success) {
+        if (result.needsSubscription) {
+          window.location.href = '/pricing';
         } else {
-          toast({ title: "Login failed", description: result.error || "Invalid credentials", variant: "destructive" });
-          setLoading(false);
+          window.location.href = '/adjusters';
         }
-      } catch (error) {
-        toast({ title: "Login failed", description: "Network error. Please try again.", variant: "destructive" });
+        return;
+      } else {
+        toast({ title: "Login failed", description: result.error || "Invalid credentials", variant: "destructive" });
         setLoading(false);
       }
     }
