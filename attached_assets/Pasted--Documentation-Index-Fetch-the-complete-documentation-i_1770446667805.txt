@@ -1,0 +1,131 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.replit.com/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Workflows
+
+> A Workflow is a easily configurable 'Run' button that can run any command(s) you'd like.
+
+export const YouTubeEmbed = ({videoId, title = "YouTube video", startAt}) => {
+  if (!videoId) {
+    return null;
+  }
+  let url = "https://www.youtube.com/embed/" + videoId;
+  if (startAt) {
+    url = url + "?start=" + startAt;
+  }
+  return <Frame>
+      <iframe src={url} title={title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+    </Frame>;
+};
+
+It is a reusable, customizable sequence of steps that can be executed within your replit app. They can be as simple as running `python main.py` or as complex as executing a multi-step procedure.
+
+<Frame>
+  <img src="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/workflows-pane.png?fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=a4464dfb08cede3df14c1eb43d33b284" alt="image" data-og-width="525" width="525" data-og-height="622" height="622" data-path="images/workflows/workflows-pane.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/workflows-pane.png?w=280&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=7a2134460414de8f3e5ce1118794dbcb 280w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/workflows-pane.png?w=560&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=7768a037832d666683eecf18c5d30965 560w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/workflows-pane.png?w=840&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=961435b7427dbdfdb710772bc6c9133f 840w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/workflows-pane.png?w=1100&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=7cd057ffff84e5b65dc682b33d608206 1100w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/workflows-pane.png?w=1650&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=b0ff49d8fe074941e26958809ce1a577 1650w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/workflows-pane.png?w=2500&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=4d41514d877d1ee06cd2c52a66db211a 2500w" />
+</Frame>
+
+Example Use Cases:
+
+* Run multiple services in parallel (e.g., frontend + backend)
+* Execute files or commands sequentially (e.g., run linter → run tests, compile → execute code)
+
+To start [creating workflows](#creating-workflows), go to the Workflows pane by using the tools sidebar menu, or search for the Workflows pane using `Command + K`.
+
+<YouTubeEmbed videoId="I5wePXNdPwg" />
+
+## Available Task Types
+
+There are current 3 type of tasks available, `Execute Shell Command`, `Install Packages`, and `Run Workflow`.
+
+### Execute Shell Command
+
+`Execute Shell Command` stores a shell command and executes it using the same environment as the Shell pane. This task type offers a wide range of use-cases, from running individual files:
+
+```text  theme={null}
+python main.py
+```
+
+to executing complex stored database query commands:
+
+```text  theme={null}
+psql -h 0.0.0.0 -U your_username -d your_database -c "SELECT * FROM your_table;"
+```
+
+Example use case:
+
+<Frame>
+  <img src="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/shellExec-task-example.gif?s=f4853df72f16df0c4101788413504893" alt="image" data-og-width="908" width="908" data-og-height="602" height="602" data-path="images/workflows/shellExec-task-example.gif" data-optimize="true" data-opv="3" />
+</Frame>
+
+### Install Packages
+
+`Install Packages` utilizes Replit's built-in dependency management system, automatically detecting your project dependencies and installing the necessary packages for your project. See [Dependency Management](../replit-workspace/dependency-management.md#the-universal-package-manager) for more details on how UPM guesses packages to install for your project under the hood.
+
+Example use case:
+
+<Frame>
+  <img src="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/packager-task-example.webp?fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=713ff279fccebb7e2b2f6538eac208a8" alt="image" data-og-width="720" width="720" data-og-height="429" height="429" data-path="images/workflows/packager-task-example.webp" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/packager-task-example.webp?w=280&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=44659b4c6dd1bc7a36f50807e93957a4 280w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/packager-task-example.webp?w=560&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=194c9bc7e091ecad3a20962a5d3e4c0b 560w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/packager-task-example.webp?w=840&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=a623314032a728d01f0e2bb062a94703 840w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/packager-task-example.webp?w=1100&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=4dfffd039c10304d0d4042b302e38f7d 1100w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/packager-task-example.webp?w=1650&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=5d9089017868f352efb0a8f2fc4b45ff 1650w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/packager-task-example.webp?w=2500&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=8b0bb0ddb7a8ecefc1f8f6eb6796b600 2500w" />
+</Frame>
+
+### Run Workflow
+
+`Run Workflow` allows you to run another workflow from the current workflow. This allows for reusing workflows and combining them to create more complex workflows.
+
+Example use case:
+
+<Frame>
+  <img src="https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-run-workflow.webp?fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=2425c11902b5801a65517c3fb221ac0b" alt="image" data-og-width="720" width="720" data-og-height="678" height="678" data-path="images/workflows/example-run-workflow.webp" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-run-workflow.webp?w=280&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=404c87fa52e6aa6f54e6f2e7cd4aa6fe 280w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-run-workflow.webp?w=560&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=fb06bbaa737f30f0b4c972639c36e36f 560w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-run-workflow.webp?w=840&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=b25f71e90a38e84a2c8bd72f5631062b 840w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-run-workflow.webp?w=1100&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=4425c79b5c38bc9c3e1cfae2347f79e2 1100w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-run-workflow.webp?w=1650&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=7169540a99cd17fd523b68389c80231d 1650w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-run-workflow.webp?w=2500&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=9bf0829802bff793089d83db4c474284 2500w" />
+</Frame>
+
+By using this task type for creating dependencies between workflows, you can edit one workflow and have other workflows referencing it automatically use the latest changes. Note that there is a depth limit placed on deeply nested workflow calls.
+
+## Workflow Execution Mode
+
+Workflows offer two different modes of execution: sequential and parallel.
+
+### Sequential
+
+Sequential execution will run each task in the defined order, waiting for each task to finish before moving on to the next step, and stopping execution of the sequence if a task within the workflow failed.
+
+An example of using this mode is for defining commands that are logically connected, such as git commands for fetching the latest changes from your main branch, then rebasing your current branch on the main branch:
+
+<Frame>
+  <img src="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-sequential-workflow.png?fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=718be1d1e659dff1dc04f15ec24deb52" alt="image" data-og-width="721" width="721" data-og-height="654" height="654" data-path="images/workflows/example-sequential-workflow.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-sequential-workflow.png?w=280&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=c2d799fe3c32a4d7a4bb90d285dc8afc 280w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-sequential-workflow.png?w=560&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=63bde8812b4872bbaaaa48af8a4e8aa4 560w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-sequential-workflow.png?w=840&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=31edf5b516d238c923a2210adc316e3a 840w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-sequential-workflow.png?w=1100&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=69ee017dec3d062fbcd8a100c6609e01 1100w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-sequential-workflow.png?w=1650&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=1e3ca710fdd7e1cf2a708518a6d95e86 1650w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-sequential-workflow.png?w=2500&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=a18ba285fa140b6f7e6333fe77b99611 2500w" />
+</Frame>
+
+### Parallel
+
+Parallel execution will run each task in parallel, such that each task is started and runs independently of other tasks within the workflow. One task failing does not stop the execution of other tasks.
+
+An example of using this mode is running a fullstack project that needs to start both the frontend and the backend server:
+
+<Frame>
+  <img src="https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-parallel-workflow.png?fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=a1067b806b25e3f8722e5368fd87b48a" alt="image" data-og-width="721" width="721" data-og-height="654" height="654" data-path="images/workflows/example-parallel-workflow.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-parallel-workflow.png?w=280&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=59969e96992d51f5e18a452e58577670 280w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-parallel-workflow.png?w=560&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=e2fbca5b78c296a1c8de8fbd10c24e8d 560w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-parallel-workflow.png?w=840&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=c1e6514bd9d00cbb7eb429c6c7da241d 840w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-parallel-workflow.png?w=1100&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=585d13f5c141e7e55719298f2914d5e6 1100w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-parallel-workflow.png?w=1650&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=19cd752bd836d0163032eca1af83a297 1650w, https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/example-parallel-workflow.png?w=2500&fit=max&auto=format&n=0ixNWaRF232g0Gwn&q=85&s=245031181d4bd18ea876c4448fe0aee0 2500w" />
+</Frame>
+
+## Creating Workflows
+
+Workflows can be created using the workflows pane by clicking on the `+ New Workflow` button. Start by giving your workflow a descriptive name, chose a suitable mode of execution, and start adding tasks. Tasks can be re-ordered by dragging and dropping them into the desired order.
+
+<Frame>
+  <img src="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-workflow-setup.webp?fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=deadd852b9ac26042147e7b8d597521d" alt="image" data-og-width="720" width="720" data-og-height="414" height="414" data-path="images/workflows/example-workflow-setup.webp" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-workflow-setup.webp?w=280&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=43402f888e20a00464545891ea0a9fc2 280w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-workflow-setup.webp?w=560&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=130efa467ec4d02c3a619404bd710bb7 560w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-workflow-setup.webp?w=840&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=752d967b742348885e1389e7ec92e81a 840w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-workflow-setup.webp?w=1100&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=a383f95249be17eb17737f8ca8ec65ea 1100w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-workflow-setup.webp?w=1650&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=c0f8b74b902e3cf07d6d41a845f0188c 1650w, https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/example-workflow-setup.webp?w=2500&fit=max&auto=format&n=9NKf1XREDj9JhKJb&q=85&s=e7cdb1c8c430ff431541ca7fb0229d6c 2500w" />
+</Frame>
+
+## Assign Workflow to Run Button
+
+A workflow can also be assigned to the run button to replace the default run button behavior (see [Configure a Replit App](/replit-app/configuration)). To keep the default run command configured within `.replit`, select the default "Run Replit App" option within the dropdown.
+
+The selected workflow within the dropdown menu next to the run button will be run when the run button is clicked. Click on your desired workflow within the dropdown menu to change which workflow should be run by the run button.
+
+<Frame>
+  <img src="https://mintcdn.com/replit/0ixNWaRF232g0Gwn/images/workflows/configure-run-button-workflow.gif?s=b93762a559fcb83f0b3560def5e965ef" alt="image" data-og-width="588" width="588" data-og-height="254" height="254" data-path="images/workflows/configure-run-button-workflow.gif" data-optimize="true" data-opv="3" />
+</Frame>
+
+## Viewing Workflow Outputs
+
+Workflow outputs will be displayed in the `Console` pane. You can toggle the display to only display latest outputs and clear the console altogether.
+
+<Frame>
+  <img src="https://mintcdn.com/replit/9NKf1XREDj9JhKJb/images/workflows/workflow-output-view.gif?s=3b33df7f4f6e0f43e7ae2c83532c4f96" alt="image" data-og-width="706" width="706" data-og-height="434" height="434" data-path="images/workflows/workflow-output-view.gif" data-optimize="true" data-opv="3" />
+</Frame>
