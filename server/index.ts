@@ -133,13 +133,6 @@ app.use((req, res, next) => {
 (async () => {
   const port = parseInt(process.env.PORT || "5000", 10);
 
-  await new Promise<void>((resolve) => {
-    httpServer.listen({ port, host: "0.0.0.0" }, () => {
-      log(`serving on port ${port}`);
-      resolve();
-    });
-  });
-
   initStripe().catch(() => {});
   await setupAuth(app);
   await registerRoutes(httpServer, app);
@@ -163,6 +156,13 @@ app.use((req, res, next) => {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
+
+  await new Promise<void>((resolve) => {
+    httpServer.listen({ port, host: "0.0.0.0" }, () => {
+      log(`serving on port ${port}`);
+      resolve();
+    });
+  });
 
   log("all services initialized");
 })();
