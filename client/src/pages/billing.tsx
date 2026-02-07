@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { getAuthHeaders } from '@/lib/auth-headers';
 
 interface Invoice {
   id: string;
@@ -73,9 +74,9 @@ export default function Billing() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/stripe/subscription', { credentials: 'include' }).then(r => r.json()),
-      fetch('/api/stripe/invoices', { credentials: 'include' }).then(r => r.json()),
-      fetch('/api/stripe/addons', { credentials: 'include' }).then(r => r.json()),
+      fetch('/api/stripe/subscription', { credentials: 'include', headers: getAuthHeaders() }).then(r => r.json()),
+      fetch('/api/stripe/invoices', { credentials: 'include', headers: getAuthHeaders() }).then(r => r.json()),
+      fetch('/api/stripe/addons', { credentials: 'include', headers: getAuthHeaders() }).then(r => r.json()),
     ]).then(([subData, invData, addonData]) => {
       setSubscription(subData.subscription);
       setInvoices(invData.invoices || []);
@@ -93,6 +94,7 @@ export default function Billing() {
       const res = await fetch('/api/stripe/portal', {
         method: 'POST',
         credentials: 'include',
+        headers: getAuthHeaders(),
       });
       const data = await res.json();
       if (data.url) {
@@ -111,7 +113,7 @@ export default function Billing() {
     try {
       const res = await fetch('/api/stripe/one-time-checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ priceId }),
         credentials: 'include',
       });

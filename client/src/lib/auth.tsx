@@ -126,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Store token in localStorage for mobile browser compatibility
         if (result.token) {
           localStorage.setItem('session_token', result.token);
+          sessionStorage.setItem('session_token', result.token);
           console.log('Token stored in localStorage');
         }
         

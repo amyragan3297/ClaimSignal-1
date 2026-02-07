@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAdjusters, fetchClaims } from "@/lib/api";
 import { format } from "date-fns";
+import { getAuthHeaders } from "@/lib/auth-headers";
 
 type ReportType = 'claims-summary' | 'adjuster-profiles' | 'carrier-analysis' | 'interaction-history';
 
@@ -121,7 +122,7 @@ export default function Reports() {
         case 'interaction-history':
           const interactions: any[] = [];
           for (const adj of adjusters) {
-            const res = await fetch(`/api/adjusters/${adj.id}`);
+            const res = await fetch(`/api/adjusters/${adj.id}`, { headers: getAuthHeaders() });
             const fullAdj = await res.json();
             if (fullAdj.interactions) {
               for (const int of fullAdj.interactions) {

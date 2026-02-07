@@ -5,6 +5,7 @@ import { LayoutDashboard, TrendingUp, TrendingDown, Users, FileText, Building2, 
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { fetchAdjusters, fetchClaims } from "@/lib/api";
+import { getAuthHeaders } from '@/lib/auth-headers';
 
 interface PerformanceSummary {
   supplementSuccessRate: number | null;
@@ -32,7 +33,7 @@ export default function Analytics() {
   const { data: performanceSummary, isLoading: loadingPerformance } = useQuery<PerformanceSummary>({
     queryKey: ['performance-summary'],
     queryFn: async () => {
-      const res = await fetch('/api/analytics/performance-summary', { credentials: 'include' });
+      const res = await fetch('/api/analytics/performance-summary', { credentials: 'include', headers: getAuthHeaders() });
       if (!res.ok) throw new Error('Failed to fetch performance summary');
       return res.json();
     },

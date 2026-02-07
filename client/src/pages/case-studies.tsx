@@ -13,6 +13,7 @@ import { Plus, BookOpen, Loader2, AlertTriangle, CheckCircle, TrendingUp, Lightb
 import { useToast } from "@/hooks/use-toast";
 import type { CaseStudy, Claim } from "@shared/schema";
 import { useAuth } from "@/lib/auth";
+import { getAuthHeaders } from '@/lib/auth-headers';
 
 function formatCurrency(cents: number | null | undefined): string {
   if (!cents) return "$0";
@@ -55,7 +56,7 @@ export default function CaseStudiesPage() {
   const { data: studiesData, isLoading } = useQuery({
     queryKey: ["/api/case-studies"],
     queryFn: async () => {
-      const res = await fetch("/api/case-studies", { credentials: "include" });
+      const res = await fetch("/api/case-studies", { credentials: "include", headers: getAuthHeaders() });
       if (!res.ok) throw new Error("Failed to load case studies");
       return res.json();
     },
@@ -64,7 +65,7 @@ export default function CaseStudiesPage() {
   const { data: claimsData } = useQuery({
     queryKey: ["/api/claims"],
     queryFn: async () => {
-      const res = await fetch("/api/claims", { credentials: "include" });
+      const res = await fetch("/api/claims", { credentials: "include", headers: getAuthHeaders() });
       if (!res.ok) throw new Error("Failed to load claims");
       return res.json();
     },
@@ -74,7 +75,7 @@ export default function CaseStudiesPage() {
     mutationFn: async (data: typeof newStudy) => {
       const res = await fetch("/api/case-studies", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         credentials: "include",
         body: JSON.stringify(data),
       });
@@ -99,6 +100,7 @@ export default function CaseStudiesPage() {
       const res = await fetch(`/api/case-studies/generate-from-claim/${claimId}`, {
         method: "POST",
         credentials: "include",
+        headers: getAuthHeaders(),
       });
       if (!res.ok) throw new Error("Failed to generate case study");
       return res.json();
@@ -117,6 +119,7 @@ export default function CaseStudiesPage() {
       const res = await fetch(`/api/case-studies/${id}`, {
         method: "DELETE",
         credentials: "include",
+        headers: getAuthHeaders(),
       });
       if (!res.ok) throw new Error("Failed to delete");
       return res.json();

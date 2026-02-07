@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import type { UppyFile } from "@uppy/core";
+import { getAuthHeaders } from "@/lib/auth-headers";
 
 interface UploadMetadata {
   name: string;
@@ -66,6 +67,7 @@ export function useUpload(options: UseUploadOptions = {}) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           name: file.name,
@@ -166,6 +168,7 @@ export function useUpload(options: UseUploadOptions = {}) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           name: file.name,

@@ -19,6 +19,7 @@ import { useUpload } from "@/hooks/use-upload";
 import { useToast } from "@/hooks/use-toast";
 import { AudioTranscribe } from "@/components/audio-transcribe";
 import { useAuth } from "@/lib/auth";
+import { getAuthHeaders } from "@/lib/auth-headers";
 
 export default function AdjusterProfile() {
   const { id } = useParams();
@@ -105,7 +106,7 @@ export default function AdjusterProfile() {
 
   const deleteAdjusterMutation = useMutation({
     mutationFn: (adjusterId: string) =>
-      fetch(`/api/adjusters/${adjusterId}`, { method: 'DELETE' }).then(res => {
+      fetch(`/api/adjusters/${adjusterId}`, { method: 'DELETE', headers: getAuthHeaders() }).then(res => {
         if (!res.ok) throw new Error('Failed to delete');
         return res.json();
       }),
@@ -124,7 +125,7 @@ export default function AdjusterProfile() {
       if (adjuster) {
         await fetch(`/api/adjusters/${adjuster.id}/documents`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
           body: JSON.stringify({
             name: response.metadata.name,
             objectPath: response.objectPath,
@@ -143,7 +144,7 @@ export default function AdjusterProfile() {
 
   const deleteDocumentMutation = useMutation({
     mutationFn: (docId: string) =>
-      fetch(`/api/documents/${docId}`, { method: 'DELETE' }).then(res => res.json()),
+      fetch(`/api/documents/${docId}`, { method: 'DELETE', headers: getAuthHeaders() }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adjuster', id] });
       toast({ title: "Deleted", description: "Document removed" });
@@ -156,7 +157,7 @@ export default function AdjusterProfile() {
     mutationFn: async ({ documentUrl, documentName, adjusterId }: { documentUrl: string; documentName: string; adjusterId: string }) => {
       const res = await fetch('/api/analyze-and-save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ documentUrl, documentName, adjusterId }),
       });
       if (!res.ok) throw new Error('Analysis failed');
