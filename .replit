@@ -35,16 +35,12 @@ wait_for_port = 5000
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Project"
+task = "shell.exec"
+args = "npm run dev"
 
 [[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Project"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Project"
+task = "shell.exec"
+args = "tsx server/index.ts"
 
 
 [agent]
